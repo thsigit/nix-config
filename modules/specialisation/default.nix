@@ -1,4 +1,4 @@
-# /etc/nixos/modules/specialisation/default.nix
+# modules/specialisation/default.nix
 
 { config, lib, pkgs, ... }:
 

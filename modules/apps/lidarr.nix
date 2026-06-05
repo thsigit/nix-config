@@ -20,7 +20,6 @@ in
     };
   };
 
-  # Tetap pertahankan tmpfiles rules untuk izin direktori media dan download
   systemd.tmpfiles.rules = [
     "d ${defaults.dataDir}/downloads 0755 ${defaults.user} ${defaults.group} -"
     "d ${defaults.dataDir}/music 0775 ${defaults.user} ${defaults.group} -"

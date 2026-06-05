@@ -5,14 +5,12 @@
   services.openssh = {
     enable = true;
     settings = {
-      PasswordAuthentication = false; # Wajib pakai SSH Key, matikan password
-      PermitRootLogin = "no";         # Larang root masuk langsung
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
     };
   };
 
-  # ==========================================
-  # REGISTRASI SSH KEY USER (DEKLARATIF)
-  # ==========================================
+  # Register user SSH keys
   users.users.sigit = {
     openssh.authorizedKeys.keys = [
       (builtins.readFile ../../secrets/ssh_key_V2333.txt)

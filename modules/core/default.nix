@@ -77,10 +77,8 @@
     packages = with pkgs; [];
   };
 
-  # Otomatis login ke TTY
   services.getty.autologinUser = "sigit";
 
-  # Nixpkgs Settings
   nixpkgs.config.allowUnfree = true;
 
   # System Packages

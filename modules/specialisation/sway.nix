@@ -1,4 +1,4 @@
-# /etc/nixos/modules/specialisation/sway.nix
+# modules/specialisation/sway.nix
 
 { config, pkgs, lib, ... }:
 

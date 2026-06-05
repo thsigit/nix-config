@@ -32,12 +32,7 @@ in
     "d ${sslDir} 0750 root caddy -"
   ];
 
-  # HAPUS opsi security.pki.certificateFiles agar tidak memicu sirkular eror.
-  # Kita ganti perannya secara dinamis di dalam skrip di bawah ini.
-
-  ########################################
-  # 1. Generator CA & Otomatis Trust
-  ########################################
+  # Generate and Trust Homelab Internal CA
   systemd.services.homelab-ca = {
     description = "Generate and Trust Homelab Internal CA";
     wantedBy = [ "multi-user.target" ];
@@ -78,9 +73,7 @@ in
     '';
   };
 
-  ########################################
-  # 2. Generator Wildcard Certificate
-  ########################################
+  # Generate Homelab Wildcard Certificate
   systemd.services.homelab-cert = {
     description = "Generate Homelab Wildcard Certificate";
     wantedBy = [ "multi-user.target" ];

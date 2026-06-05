@@ -3,7 +3,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Firewall global
+  # Global firewall
   networking.firewall = {
     enable = true;
     allowPing = true;

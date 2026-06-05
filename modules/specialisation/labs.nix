@@ -1,14 +1,10 @@
-# /etc/nixos/modules/specialisation/labs.nix
+# modules/specialisation/labs.nix
 
 { config, pkgs, lib, ... }:
 
 {
   imports = [
-    ../../hardware-configuration.nix
-	../core/users.nix
-	../security/ssh.nix 
-	../storage # import seluruh rsync.nix, samba.nix, vsftpd.nix, filemount.nix
-	
+  	
   ];
 
   networking.hostName = "labs";
