@@ -1,0 +1,13 @@
+# NixOS secrets
+secrets/**
+
+# Keep directory
+!secrets/.gitkeep
+
+# Editor files
+*.swp
+*~
+
+# Windows
+Thumbs.db
+Desktop.ini
