@@ -4,7 +4,7 @@
 
 {  
   imports = [
-    ./rsync.nix
+    # ./rsync.nix
     ./samba.nix
     ./vsftpd.nix
     ./filemount.nix
