@@ -96,14 +96,14 @@
     # Security
     openssl mkcert
 
-	# Media
-    mpc mpv alsa-utils pulsemixer ncmpcpp
+	#eo Media
+    rmpc mpc mpv alsa-utils pulsemixer ncmpcpp beets
 
     # Programming
 	go git
 	
 	# Misc
-	fzf file dmidecode tree binutils tmuxai  zensical neofetch quickemu apache-answer coreutils fetchutils usbutils bottom qemu quickemu tlp neofetch bc rink yt-dlp
+	ollama-cpu neovim sqlite exiftool fzf file dmidecode tree binutils tmuxai zensical apache-answer coreutils fetchutils usbutils bottom qemu quickemu tlp neofetch bc rink yt-dlp
   ];
 
   # CLI tool

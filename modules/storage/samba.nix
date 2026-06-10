@@ -3,13 +3,9 @@
 { config, pkgs, lib, ... }:
 
 let
-  cfg = {
-    user = "sigit";
-    group = "users";
-    dataDir = "/srv/data";
-	repoDir = "/srv/repo";
-  };
+  defaults = import ../../lib;
 in
+
 {
   services.samba = {
     enable = true;
@@ -36,32 +32,75 @@ in
       };
 
       # Private (read-only)
-      repo = {
-        "path" = cfg.repoDir;
+      home = {
+        "path" = "/home/${defaults.user}";
         "writable" = "yes";
-        "read only" = "no";
-        "valid users" = cfg.user;		
-        "force user" = cfg.user;
+        "valid users" = defaults.user;		
+        "force user" = defaults.user;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+	    };
+		
+      repo = {
+        "path" = defaults.repoDir;
+        "writable" = "yes";
+        "valid users" = defaults.user;		
+        "force user" = defaults.user;
         "create mask" = "0600";
         "directory mask" = "0700";
 	    };
+		
+      apps = {
+        "path" = defaults.appDir;
+        "writable" = "yes";
+        "read only" = "no";
+        "guest ok" = "yes";
+        "force user" = defaults.user;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+	    };		
 	  
       # Public (read-only)
-      shared = {
-        "path" = cfg.dataDir;
+      books = {
+        "path" = "${defaults.dataDir}/books";
         "read only" = "yes";
         "guest ok" = "yes";
-        "valid users" = cfg.user;
-        "write list" = cfg.user;
+        "valid users" = defaults.user;
+        "write list" = defaults.user;
       };
 
-      datadisk = {
-        "path" = "/mnt/datadisk";
-        "read only" = "no";
-        "guest ok" = "no";
-        "force user" = cfg.user;
-        "force group" = cfg.group;
+      music = {
+        "path" = "${defaults.dataDir}/music";
+        "read only" = "yes";
+        "guest ok" = "yes";
+        "valid users" = defaults.user;
+        "write list" = defaults.user;
       };
+
+      lyrics = {
+        "path" = "${defaults.dataDir}/lyrics";
+        "read only" = "yes";
+        "guest ok" = "yes";
+        "valid users" = defaults.user;
+        "write list" = defaults.user;
+      };
+
+#      music_store = {
+#        "path" = "${defaults.dataDir}/music_store";
+#        "read only" = "yes";
+#        "guest ok" = "yes";
+#        "valid users" = defaults.user;
+#        "write list" = defaults.user;
+#      };
+	  
+      new_music = {
+        "path" = "${defaults.dataDir}/new_music";
+        "read only" = "yes";
+        "guest ok" = "yes";
+        "valid users" = defaults.user;
+        "write list" = defaults.user;
+      };
+	  
     };
   };
 
@@ -73,9 +112,15 @@ in
 
   # Pastikan direktori ada (infra responsibility)
   systemd.tmpfiles.rules = [
-    "d ${cfg.dataDir} 0755 ${cfg.user} ${cfg.group} -"
-    "d ${cfg.dataDir}/uploads 0755 ${cfg.user} ${cfg.group} -"
-    "d ${cfg.dataDir}/downloads 0755 ${cfg.user} ${cfg.group} -"
+    "d ${defaults.dataDir} 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/uploads 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/downloads 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/app 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/books 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/music 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/new_music 0755 ${defaults.user} ${defaults.group} -"
+ #   "d ${defaults.dataDir}/music_store 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.dataDir}/lyrics 0755 ${defaults.user} ${defaults.group} -"
   ];
 
   environment.systemPackages = with pkgs; [

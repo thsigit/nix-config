@@ -16,28 +16,23 @@ in
   gid   = mainGid;
   
   # Directories
-  dataDir   = "/srv/data";
+  dataDir   = "/srv/media";
   appDir    = "/srv/app";
-  dataStore = "/mnt/datadisk";
+  repoDir   = "/srv/repo";
 
   # Timezone
   timezone = mainTz;
   
-  # 2. Base environment utama (menggantikan env.nix lama)
   baseEnv = {
     PUID = mainUid;
     PGID = mainGid;
     TZ   = mainTz;
   };
   
-  # 3. Custom environment (menggunakan operator // untuk menggabungkan baseEnv dengan data baru)
   transmissionEnv = {
     PUID = mainUid;
     PGID = mainGid;
     TZ   = mainTz;
-    # Anda bisa menggunakan rahasia/secret di sini nanti
-    USERNAME = "admin";
-    PASSWORD = "admin";
   };
 
   qbittorrentEnv = {

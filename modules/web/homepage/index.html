@@ -2,27 +2,118 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Homelab Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homelab</title>
+
   <style>
-    body { font-family: sans-serif; margin: 2em; background: #f9f9f9; }
-    h1 { color: #333; }
-    ul { list-style: none; padding: 0; }
-    li { margin: 0.7em 0; font-size: 1.2em; }
-    a { text-decoration: none; color: #0066cc; font-weight: bold; }
-    a:hover { text-decoration: underline; }
+    :root {
+      --bg: #0f1115;
+      --card: #1a1f29;
+      --text: #e6e6e6;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --border: #2d3748;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 2.5rem;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .url {
+      color: var(--accent);
+      font-size: 0.95rem;
+      word-break: break-all;
+    }
   </style>
 </head>
+
 <body>
-  <h1>🏠 Homelab Dashboard</h1>
-  <ul>
-    <li>🏠 <a href="/">Homepage</a></li>
-    <li>📈 <a href="/mrtg">MRTG</a></li>
-    <li>🔖 <a href="/linkding">Linkding</a></li>
-    <li>🎵 <a href="/lidarr">Lidarr</a></li>
-    <li>🎶 <a href="/navidrome">Navidrome</a></li>
-    <li>📚 <a href="/calibre">Calibre</a></li>
-    <li>📝 <a href="https://wallabag.home.arpa">Wallabag</a></li>
-    <li>📊 <a href="https://darkstat.home.arpa">Darkstat</a></li>
-  </ul>
+  <h1>Homelab</h1>
+  <p>Internal services dashboard</p>
+
+  <div class="grid">
+
+    <a class="card" href="/mrtg">
+      <div class="title">MRTG</div>
+      <div class="url">/mrtg</div>
+    </a>
+
+    <a class="card" href="/linkding">
+      <div class="title">Linkding</div>
+      <div class="url">/linkding</div>
+    </a>
+
+    <a class="card" href="/lidarr">
+      <div class="title">Lidarr</div>
+      <div class="url">/lidarr</div>
+    </a>
+
+    <a class="card" href="/navidrome">
+      <div class="title">Navidrome</div>
+      <div class="url">/navidrome</div>
+    </a>
+
+    <a class="card" href="/calibre">
+      <div class="title">Calibre</div>
+      <div class="url">/calibre</div>
+    </a>
+
+    <a class="card" href="https://wallabag.home.arpa">
+      <div class="title">Wallabag</div>
+      <div class="url">wallabag.home.arpa</div>
+    </a>
+
+    <a class="card" href="https://darkstat.home.arpa">
+      <div class="title">Darkstat</div>
+      <div class="url">darkstat.home.arpa</div>
+    </a>
+
+  </div>
 </body>
 </html>

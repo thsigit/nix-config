@@ -1,11 +1,15 @@
 # services/mpd.nix
 { config, pkgs, lib, ... }:
 
+let
+  defaults = import ../../lib;
+in
+
 {
   services.mpd = {
     enable = true;
-    user = "sigit";
-    musicDirectory = "/srv/data/music";
+    user = defaults.user;
+    musicDirectory = "${defaults.dataDir}/music";
     extraConfig = ''
       audio_buffer_size "16384"
       buffer_before_play "20%"

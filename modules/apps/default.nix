@@ -10,7 +10,7 @@
   };
   
   imports = [
-    ./lidarr.nix
+    # ./lidarr.nix
     ./linkding.nix	  
     ./wallabag.nix
 	./navidrome.nix

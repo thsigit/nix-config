@@ -3,14 +3,10 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Mount secondary SSD
-  fileSystems."/mnt/datadisk" = {
-    device = "/dev/disk/by-uuid/CE16B4C516B4AFB7";
-    fsType = "ntfs";
-    options = [ 
-      "users" "noauto" "nofail" "rw" "nodev" "nosuid" "exec" "noatime"
-      "x-systemd.automount"
-      "x-systemd.idle-timeout=300"
-    ];
+  # mount /dev/sda1 as srv
+  fileSystems."/srv" = {
+    device = "/dev/disk/by-uuid/6369bfa1-6c53-4a13-8afc-e873a00ddf33";
+    fsType = "ext4";
+    options = [ "defaults" "noatime" ];
   };
 }

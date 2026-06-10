@@ -31,9 +31,8 @@ let
     handle /calibre* {
       uri strip_prefix /calibre
       reverse_proxy 127.0.0.1:8083 {
-        header_up Host {host}
-        header_up X-Forwarded-For {remote}
-        header_up X-Scheme {scheme}
+        #header_up Host {host}
+        #header_up X-Scheme {scheme}
         header_up X-Script-Name /calibre
       }
     }    
@@ -63,12 +62,12 @@ in
       tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key
     '';
 
-    # virtualHosts."homelab.basa-komodo.ts.net".extraConfig = ''
-    #  tls /var/lib/caddy/certs/homelab.basa-komodo.ts.net.crt \
-    #      /var/lib/caddy/certs/homelab.basa-komodo.ts.net.key
-    #  ${homepageConfig}
-    # '';
-	
+    virtualHosts."homelab.basa-komodo.ts.net".extraConfig = ''
+      tls {
+        get_certificate tailscale
+      }
+      ${homepageConfig}
+     '';
   };
   
   systemd.tmpfiles.rules = [

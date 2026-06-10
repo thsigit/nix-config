@@ -6,7 +6,7 @@
   imports = [
     ./tailscale.nix
     ./zerotier.nix
-    ./dnsmasq.nix
+    # ./dnsmasq.nix
   ];
   networking.networkmanager.dns = "systemd-resolved";
   services.resolved.enable = true;
