@@ -48,7 +48,7 @@ in
     script = ''
       set -euxo pipefail
 
-      # A. Buat CA jika belum ada
+      # Buat CA jika belum ada
       if [ ! -f ${sslDir}/homelab-ca.key ]; then
         openssl genrsa -out ${sslDir}/homelab-ca.key 4096
       fi
@@ -60,8 +60,9 @@ in
           -out ${sslDir}/homelab-ca.crt \
           -subj "/CN=Homelab Internal CA"
           
-        # B. Trik Inti: Suntikkan langsung ke sistem jangkar sertifikat Linux
-        # Ini menggantikan fungsi security.pki.certificateFiles secara instan
+        # inject langsung ke sistem sertifikat Linux
+        # menggantikan option security.pki.certificateFiles 
+        # expire pada tahun 2036, hapus .crt untuk membuat baru
         cp ${sslDir}/homelab-ca.crt /etc/ssl/certs/homelab-ca.pem
         update-ca-certificates
       fi

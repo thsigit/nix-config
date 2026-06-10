@@ -14,8 +14,8 @@ in
       "${defaults.appDir}/linkding/data:/etc/linkding/data"
     ];
     environment = {
-      LD_SUPERUSER_NAME = "admin";
-      LD_SUPERUSER_PASSWORD = "admin";
+      # LD_SUPERUSER_NAME = "admin";
+      # LD_SUPERUSER_PASSWORD = "password";
       LD_CONTEXT_PATH="linkding/";
     };
   };
