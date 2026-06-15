@@ -5,8 +5,8 @@
 {  
   imports = [
     ./pki.nix
-	./ssh.nix
-	./firewall.nix
+    ./ssh.nix
+    ./firewall.nix
   ];
   
 }

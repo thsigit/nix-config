@@ -4,7 +4,7 @@
 
 {
   imports = [
-  	
+
   ];
 
   networking.hostName = "labs";

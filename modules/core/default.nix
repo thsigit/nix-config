@@ -3,18 +3,24 @@
 { config, lib, pkgs, ... }:
 
 {
-  boot.uki.name = "nixos";
+  # boot.uki.name = "nixos";
   boot.loader = {
-    systemd-boot.enable = false;
-
+    systemd-boot = {
+      enable = false;
+      configurationLimit = 10;
+    };
+	
     grub = {
       enable = true;
       efiSupport = true;
       device = "nodev";
-	  gfxmodeEfi = "text";
-      #configurationLimit = 5;
+      gfxmodeEfi = "text";
+      configurationLimit = 5;
       useOSProber = false;
-	  splashImage = null;
+      splashImage = null;
+      extraGrubInstallArgs = [
+        "--bootloader-id=GRUB"
+      ];
     };
 
     efi = {
@@ -36,7 +42,7 @@
   boot.kernelParams = [
     "quiet" "loglevel=3" "consoleblank=60" "acpi_osi=Linux"
     "initcall_blacklist=atkbd_init" # DAN MATIKAN KEYBOARD
-	"ahci.mobile_lpm_policy=0" # DAN MATIKAN LPM
+    "ahci.mobile_lpm_policy=0" # DAN MATIKAN LPM
     "libata.force=1.00:disable" # dan bypass ATA 1
   ];
 
@@ -96,14 +102,14 @@
     # Security
     openssl mkcert
 
-	#eo Media
+    # Media
     rmpc mpc mpv alsa-utils pulsemixer ncmpcpp beets
 
     # Programming
-	go git
-	
-	# Misc
-	ollama-cpu neovim sqlite exiftool fzf file dmidecode tree binutils tmuxai zensical apache-answer coreutils fetchutils usbutils bottom qemu quickemu tlp neofetch bc rink yt-dlp
+    go git
+
+    # Misc
+    ollama-cpu neovim sqlite exiftool fzf file dmidecode tree binutils tmuxai zensical apache-answer coreutils fetchutils usbutils bottom qemu quickemu tlp neofetch bc rink yt-dlp
   ];
 
   # CLI tool
@@ -111,9 +117,9 @@
 
   programs.tmux = {
     enable = true;
-	aggressiveResize = true;
+    aggressiveResize = true;
     # terminal = "screen-256color";
-	historyLimit = 10000;
+    historyLimit = 10000;
     clock24 = true;
     extraConfig = ''
       set -g @continuum-restore 'on'
@@ -125,8 +131,8 @@
       set -g @thumbs-key 't'
       set -g @thumbs-unique 'enabled'
       set -g @tmux_power_theme 'gold'
-	  set -g default-terminal "screen-256color"
-	  set -as terminal-features ",xterm-256color:RGB"
+      set -g default-terminal "screen-256color"
+      set -as terminal-features ",xterm-256color:RGB"
     '';
     newSession = true;
     plugins = with pkgs.tmuxPlugins; [
@@ -138,7 +144,7 @@
       session-wizard
       yank
       tmux-thumbs
-	  
+  
       cpu
       power-theme
 

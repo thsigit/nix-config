@@ -25,8 +25,8 @@ in
 
         "guest account" = "nobody";
         "map to guest" = "bad user";
-		
-		"browseable" = "yes";
+
+        "browseable" = "yes";
         "create mask" = "0644";
         "directory mask" = "0755";
       };
@@ -35,21 +35,21 @@ in
       home = {
         "path" = "/home/${defaults.user}";
         "writable" = "yes";
-        "valid users" = defaults.user;		
+        "valid users" = defaults.user;
         "force user" = defaults.user;
         "create mask" = "0644";
         "directory mask" = "0755";
-	    };
-		
+      };
+
       repo = {
         "path" = defaults.repoDir;
         "writable" = "yes";
-        "valid users" = defaults.user;		
+        "valid users" = defaults.user;
         "force user" = defaults.user;
         "create mask" = "0600";
         "directory mask" = "0700";
-	    };
-		
+      };
+
       apps = {
         "path" = defaults.appDir;
         "writable" = "yes";
@@ -58,8 +58,8 @@ in
         "force user" = defaults.user;
         "create mask" = "0644";
         "directory mask" = "0755";
-	    };		
-	  
+      };
+  
       # Public (read-only)
       books = {
         "path" = "${defaults.dataDir}/books";
@@ -92,7 +92,7 @@ in
 #        "valid users" = defaults.user;
 #        "write list" = defaults.user;
 #      };
-	  
+
       new_music = {
         "path" = "${defaults.dataDir}/new_music";
         "read only" = "yes";
@@ -100,14 +100,14 @@ in
         "valid users" = defaults.user;
         "write list" = defaults.user;
       };
-	  
+
     };
   };
 
   services.samba-wsdd = {
     enable = true;
     openFirewall = true;
-	hostname = "homelab";
+    hostname = "homelab";
   };
 
   # Pastikan direktori ada (infra responsibility)

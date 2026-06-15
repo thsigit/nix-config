@@ -5,7 +5,7 @@
 {
   services.tailscale = {
     enable = true;
-	permitCertUid = "caddy";
+    permitCertUid = "caddy";
     useRoutingFeatures = "server";
   };
 

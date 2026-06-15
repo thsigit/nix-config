@@ -11,10 +11,10 @@
   
   imports = [
     # ./lidarr.nix
-    ./linkding.nix	  
+    ./linkding.nix  
     ./wallabag.nix
-	./navidrome.nix
-	./calibre-web.nix
+    ./navidrome.nix
+    ./calibre-web.nix
     ./mpd.nix
   ];
 }

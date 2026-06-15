@@ -12,7 +12,7 @@
     };
 
     #labs.configuration = {
-	#  inheritParentConfig = false;
+    #  inheritParentConfig = false;
     #  imports = [
     #    ./labs.nix
     #  ];

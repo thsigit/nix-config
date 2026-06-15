@@ -14,8 +14,8 @@ in
     dataDir = "${defaults.appDir}/lidarr/config";
     settings = {
       server = {
-	    port = 8686;
-	    urlbase = "/lidarr";
+      port = 8686;
+      urlbase = "/lidarr";
       };
     };
   };

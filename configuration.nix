@@ -9,7 +9,7 @@
 
     # Core System Settings (Hasil Ekstraksi)
     ./modules/core
-	# ./modules/specialisation
+    # ./modules/specialisation
 
     # TAMBAHKAN MODUL-MODUL BARU ANDA DI SINI:
     ./modules/network      # tailscale, zerotier, dnsmasq
@@ -18,6 +18,6 @@
     ./modules/monitoring   # cockpit, darkstat, mrtg
     ./modules/web          # caddy server
     ./modules/apps         # podman and containers
-	./modules/media        # pipewire and alsa
+    ./modules/media        # pipewire and alsa
   ];
 }
