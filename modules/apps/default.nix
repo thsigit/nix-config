@@ -15,6 +15,6 @@
     ./wallabag.nix
     ./navidrome.nix
     ./calibre-web.nix
-    ./mpd.nix
+    # ./mpd.nix
   ];
 }

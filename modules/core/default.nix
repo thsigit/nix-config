@@ -47,13 +47,22 @@
   ];
 
   services.logind.settings.Login.HandleLidSwitch = "ignore";
-  systemd.targets.sleep.enable = false;
-  systemd.targets.suspend.enable = false;
-  systemd.targets.hibernate.enable = false;
-  systemd.targets.hybrid-sleep.enable = false;
-
+  systemd.targets = {
+    sleep.enable = false;
+    suspend.enable = false;
+    hibernate.enable = false;
+    hybrid-sleep.enable = false;
+  };
+  
   # Networking (Core)
-  networking.hostName = "homelab";
+  networking = {
+    hostName = "homelab";
+    domain = "home.arpa";
+    extraHosts = ''
+      192.168.1.3 homelab.home.arpa homelab
+    '';
+  };  
+  
   networking.networkmanager.enable = true;
 
   # Regional & Locale
@@ -86,6 +95,9 @@
   services.getty.autologinUser = "sigit";
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "openclaw-2026.5.7"
+  ];
 
   # System Packages
   environment.systemPackages = with pkgs; [
@@ -103,15 +115,18 @@
     openssl mkcert
 
     # Media
-    rmpc mpc mpv alsa-utils pulsemixer ncmpcpp beets
+    rmpc mpc mpv alsa-utils pulsemixer ncmpcpp yewtube musikcube 
 
     # Programming
     go git
 
     # Misc
-    ollama-cpu neovim sqlite exiftool fzf file dmidecode tree binutils tmuxai zensical apache-answer coreutils fetchutils usbutils bottom qemu quickemu tlp neofetch bc rink yt-dlp
-  ];
+    sqlite exiftool fzf file dmidecode tree binutils tmuxai zensical apache-answer coreutils fetchutils usbutils bottom tlp bc rink yt-dlp nix-tree
 
+    # LLM
+    ollama-cpu claude-code qwen-code codex github-copilot-cli opencode openclaw
+  ];
+  
   # CLI tool
   programs.ydotool.enable = true;
 

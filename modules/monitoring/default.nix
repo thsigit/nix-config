@@ -4,7 +4,7 @@
 
 {
   imports = [
-    ./mrtg.nix
+    #./mrtg.nix
     ./darkstat.nix
     ./cockpit.nix
   ];
