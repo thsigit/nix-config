@@ -1,7 +1,8 @@
+# modules/network/adguard.nix
 { config, pkgs, lib, ... }:
 
 let
-  defaults = import ../lib;
+  defaults = import ../../lib;
 in
 
 {

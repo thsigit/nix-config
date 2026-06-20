@@ -3,24 +3,21 @@
 { config, lib, pkgs, ... }:
 
 {
-  # boot.uki.name = "nixos";
+  #boot.uki.name = "UKI";
   boot.loader = {
     systemd-boot = {
-      enable = false;
-      configurationLimit = 10;
+      enable = true;
+      configurationLimit = 3;
     };
 	
     grub = {
-      enable = true;
+      enable = false;
       efiSupport = true;
       device = "nodev";
       gfxmodeEfi = "text";
-      configurationLimit = 5;
+      configurationLimit = 3;
       useOSProber = false;
-      splashImage = null;
-      extraGrubInstallArgs = [
-        "--bootloader-id=GRUB"
-      ];
+      # splashImage = null;
     };
 
     efi = {
@@ -28,12 +25,7 @@
       efiSysMountPoint = "/boot";
     };
 
-    timeout = 0;
-  };
-
-  zramSwap = {
-    enable = true;
-    memoryPercent = 50;
+    timeout = 3;
   };
 
   # Kernel Parameters & Powermanagement
@@ -43,7 +35,6 @@
     "quiet" "loglevel=3" "consoleblank=60" "acpi_osi=Linux"
     "initcall_blacklist=atkbd_init" # DAN MATIKAN KEYBOARD
     "ahci.mobile_lpm_policy=0" # DAN MATIKAN LPM
-    "libata.force=1.00:disable" # dan bypass ATA 1
   ];
 
   services.logind.settings.Login.HandleLidSwitch = "ignore";
@@ -129,6 +120,11 @@
   
   # CLI tool
   programs.ydotool.enable = true;
+
+  # Terminal theme for the homelab
+  programs.bash.promptInit = ''
+    export PS1="\[\e[1;36m\]🏠 HOMELAB\[\e[0m\]\w (\u) $ "
+  '';
 
   programs.tmux = {
     enable = true;

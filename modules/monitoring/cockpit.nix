@@ -22,5 +22,8 @@
         Origins = lib.mkForce "https://homelab.home.arpa:9090";
       };
     };
+    plugins = [
+      pkgs.cockpit-files pkgs.cockpit-podman 
+    ];
   };
 }

@@ -3,6 +3,17 @@
 { config, lib, pkgs, ... }:
 
 {  
+  imports = [
+    ./calibre-web.nix
+    # ./lidarr.nix
+    ./linkding.nix
+    ./mpd.nix
+    ./navidrome.nix
+    # ./qbittorrent.nix
+    # ./transmission.nix
+    ./wallabag.nix
+  ];
+
   # PipeWire audio control
   security.rtkit.enable = true; 
   services.pipewire = {

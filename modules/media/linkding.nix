@@ -1,4 +1,4 @@
-# modules/apps/linkding.nix
+# modules/media/linkding.nix
 
 { config, pkgs, lib, ... }:
 

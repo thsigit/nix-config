@@ -1,4 +1,4 @@
-# modules/apps/lidarr.nix
+# modules/media/lidarr.nix
 
 { config, pkgs, lib, ... }:
 

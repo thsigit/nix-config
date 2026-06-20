@@ -6,7 +6,7 @@
   imports = [
     ./samba.nix
     ./vsftpd.nix
-    ./filemount.nix
+    # ./filemount.nix
     # ./rsync.nix
   ];
 

@@ -1,4 +1,4 @@
-# modules/apps/wallabag.nix
+# modules/media/wallabag.nix
 
 { config, pkgs, lib, ... }:
 

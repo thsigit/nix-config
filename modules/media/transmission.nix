@@ -1,8 +1,8 @@
-# modules/apps/transmission.nix
+# modules/media/transmission.nix
 { config, pkgs, lib, ... }:
 
 let
-  defaults = import ../lib
+  defaults = import ../../lib;
 in
 
 {

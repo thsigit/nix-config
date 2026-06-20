@@ -20,7 +20,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    foot
+    zed-editor
+	foot
     fuzzel
     wl-clipboard
     deskflow

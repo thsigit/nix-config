@@ -1,4 +1,4 @@
-# modules/apps/navidrome.nix
+# modules/media/navidrome.nix
 
 { config, pkgs, lib, ... }:
 

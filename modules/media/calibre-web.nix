@@ -1,4 +1,4 @@
-# modules/apps/calibre-web.nix
+# modules/media/calibre-web.nix
 # TO DO: migrasi ke https://search.nixos.org/options?channel=25.11&query=services.calibre-web
 
 { config, pkgs, lib, ... }:

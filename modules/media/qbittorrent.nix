@@ -1,9 +1,9 @@
-# modules/apps/qbittorrent.nix
+# modules/media/qbittorrent.nix
 
 { config, pkgs, lib, ... }:
 
 let
-  defaults = import ../lib;
+  defaults = import ../../lib;
 in
 
 {
