@@ -6,8 +6,13 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core
-    ../../modules/security
-    ../../modules/media
+    ../../modules/network      # tailscale, zerotier, dnsmasq
+    ../../modules/storage      # mount SSD, rsync, samba, vsftpd
+    ../../modules/security     # pki.nix, sertifikat CA
+    ../../modules/monitoring   # cockpit, darkstat, mrtg
+    ../../modules/web          # caddy server
+    ../../modules/media        # pipewire and alsa
+    ../../modules/ai           # ollama etc
   ];
 
   # Enable Plasma
