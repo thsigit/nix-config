@@ -11,7 +11,7 @@ in
     user = defaults.user;
     startWhenNeeded = true; 
     settings = {
-      music_directory = "${defaults.dataDir}/music";
+      music_directory = "${defaults.mediaDir}/music";
       audio_output = [
         {
           type = "pipewire";

@@ -30,15 +30,15 @@ in
       "51411:51411/udp"         # BitTorrent UDP
     ];
     volumes = [
-      "${defaults.appDir}/qbittorrent/config:/config"
-      "${defaults.dataDir}/qbittorrent_downloads:/downloads"
+      "${defaults.appdataDir}/qbittorrent/config:/config"
+      "${defaults.mediaDir}/qbittorrent_downloads:/downloads"
     ];
     autoStart = true;
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.appDir}/qbittorrent 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appDir}/qbittorrent/config 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.dataDir}/qbittorrent_downloads 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/qbittorrent 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/qbittorrent/config 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/qbittorrent_downloads 0755 ${defaults.user} ${defaults.group} -"
   ];
 }

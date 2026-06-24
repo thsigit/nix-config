@@ -11,8 +11,3 @@ secrets/**
 # Windows
 Thumbs.db
 Desktop.ini
-
-# Files (temporary gitignored)
-hardware-configuration.nix
-modules/network/dnsmasq.nix
-modules/web/default.nix

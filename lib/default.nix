@@ -16,9 +16,9 @@ in
   gid   = mainGid;
   
   # Directories
-  dataDir   = "/srv/media";
-  appDir    = "/srv/app";
-  repoDir   = "/srv/repo";
+  mediaDir   = "/srv/media";
+  appdataDir = "/srv/appdata";
+  repoDir    = "/srv/repo";
 
   # Timezone
   timezone = mainTz;

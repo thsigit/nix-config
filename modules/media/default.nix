@@ -4,26 +4,15 @@
 
 {  
   imports = [
+    ./pulseaudio.nix
+    ./bluetooth.nix
     ./calibre-web.nix
-    # ./lidarr.nix
+    ./wallabag.nix
     ./linkding.nix
     ./mpd.nix
     ./navidrome.nix
+    # ./lidarr.nix
     # ./qbittorrent.nix
     # ./transmission.nix
-    ./wallabag.nix
   ];
-
-  # PipeWire audio control
-  security.rtkit.enable = true; 
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
-
-  # Activate Bluetooth 
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
 }

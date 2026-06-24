@@ -1,4 +1,4 @@
-# modules/apps/security/default.nix 
+# modules/security/firewall.nix 
 
 { config, lib, pkgs, ... }:
 

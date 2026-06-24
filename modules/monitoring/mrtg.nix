@@ -26,11 +26,11 @@
     serviceConfig = {
       Type = "oneshot";
       User = "sigit";
-      WorkingDirectory = "/var/www/mrtg";
+      WorkingDirectory = "/srv/www/mrtg";
     };
 
     script = ''
-      ${pkgs.mrtg}/bin/mrtg /var/www/mrtg/mrtg.cfg
+      ${pkgs.mrtg}/bin/mrtg /srv/www/mrtg/mrtg.cfg
     '';
   };
 

@@ -11,7 +11,7 @@ in
     enable = true;
     user = defaults.user;
     group = defaults.group;
-    dataDir = "${defaults.appDir}/lidarr/config";
+    mediaDir = "${defaults.appdataDir}/lidarr/config";
     settings = {
       server = {
       port = 8686;
@@ -21,8 +21,8 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.dataDir}/downloads 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.dataDir}/music 0775 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appDir}/lidarr/config 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/downloads 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/music 0775 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/lidarr/config 0755 ${defaults.user} ${defaults.group} -"
   ];
 }

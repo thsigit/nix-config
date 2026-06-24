@@ -3,15 +3,15 @@
 { config, lib, pkgs, ... }:
 
 {
-  #boot.uki.name = "UKI";
+  boot.uki.name = "UKI";
   boot.loader = {
     systemd-boot = {
-      enable = true;
+      enable = false;
       configurationLimit = 3;
     };
 	
     grub = {
-      enable = false;
+      enable = true;
       efiSupport = true;
       device = "nodev";
       gfxmodeEfi = "text";
@@ -32,9 +32,9 @@
 
   # Kernel parameters
   boot.kernelParams = [
-    "quiet" "loglevel=3" "consoleblank=60" "acpi_osi=Linux"
-    "initcall_blacklist=atkbd_init" # DAN MATIKAN KEYBOARD
-    "ahci.mobile_lpm_policy=0" # DAN MATIKAN LPM
+    "quiet" "loglevel=3" "consoleblank=120" "acpi_osi=Linux"
+    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled; use ydotool/consolectl
+    "ahci.mobile_lpm_policy=0"
   ];
 
   services.logind.settings.Login.HandleLidSwitch = "ignore";
@@ -86,9 +86,6 @@
   services.getty.autologinUser = "sigit";
 
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.permittedInsecurePackages = [
-    "openclaw-2026.5.7"
-  ];
 
   # System Packages
   environment.systemPackages = with pkgs; [
@@ -103,27 +100,27 @@
     glances zenith nload iotop sysstat
 
     # Security
-    openssl mkcert
+    openssl mkcert sops
 
     # Media
     rmpc mpc mpv alsa-utils pulsemixer ncmpcpp yewtube musikcube 
 
     # Programming
-    go git
+    go git nodejs_22
 
     # Misc
     sqlite exiftool fzf file dmidecode tree binutils tmuxai zensical apache-answer coreutils fetchutils usbutils bottom tlp bc rink yt-dlp nix-tree
 
-    # LLM
-    ollama-cpu claude-code qwen-code codex github-copilot-cli opencode openclaw
+    # AI CLI
+    claude-code qwen-code codex github-copilot-cli opencode openclaw
   ];
-  
+
   # CLI tool
   programs.ydotool.enable = true;
 
   # Terminal theme for the homelab
   programs.bash.promptInit = ''
-    export PS1="\[\e[1;36m\]🏠 HOMELAB\[\e[0m\]\w (\u) $ "
+    export PS1="\[\e[1;36m\]🏠 HOMELAB \[\e[0m\]\w (\u) $ "
   '';
 
   programs.tmux = {

@@ -11,7 +11,7 @@ in
     image = "sissbruecker/linkding:latest";
     ports = [ "9093:9090" ];
     volumes = [
-      "${defaults.appDir}/linkding/data:/etc/linkding/data"
+      "${defaults.appdataDir}/linkding/data:/etc/linkding/data"
     ];
     environment = {
       # LD_SUPERUSER_NAME = "admin";
@@ -20,6 +20,6 @@ in
     };
   };
   systemd.tmpfiles.rules = [
-    "d ${defaults.appDir}/linkding/data 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/linkding/data 0755 ${defaults.user} ${defaults.group} -"
   ];
 }

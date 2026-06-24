@@ -12,16 +12,16 @@ in
     image = "lscr.io/linuxserver/calibre-web:latest";
     ports = [ "8083:8083" ];
     volumes = [
-      "${defaults.dataDir}/books:/books"
-      "${defaults.appDir}/calibre/config-web:/config"
-      "${defaults.dataDir}/uploads:/uploads"
+      "${defaults.mediaDir}/books:/books"
+      "${defaults.appdataDir}/calibre/config-web:/config"
+      "${defaults.mediaDir}/uploads:/uploads"
     ];
     environment = defaults.baseEnv;
     autoStart = true;
   };
   systemd.tmpfiles.rules = [
-    "d ${defaults.dataDir}/books 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.dataDir}/uploads 0775 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appDir}/calibre/config-web 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/books 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/uploads 0775 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/calibre/config-web 0755 ${defaults.user} ${defaults.group} -"
   ];
 }

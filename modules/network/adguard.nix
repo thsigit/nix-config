@@ -1,4 +1,5 @@
 # modules/network/adguard.nix
+
 { config, pkgs, lib, ... }:
 
 let
@@ -10,13 +11,13 @@ in
     image = "adguard/adguardhome:latest";
     ports = [ "3000:3000" "53:53/tcp" "53:53/udp" ];
     volumes = [
-      "${defaults.appDir}/adguard/work:/opt/adguardhome/work"
-      "${defaults.appDir}/adguard/conf:/opt/adguardhome/conf"
+      "${defaults.appdataDir}/adguard/work:/opt/adguardhome/work"
+      "${defaults.appdataDir}/adguard/conf:/opt/adguardhome/conf"
     ];
   };
   systemd.tmpfiles.rules = [
-    "d ${defaults.appDir}/adguard/work 0775 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appDir}/adguard/conf 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/adguard/work 0775 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/adguard/conf 0755 ${defaults.user} ${defaults.group} -"
   ];
 }
 

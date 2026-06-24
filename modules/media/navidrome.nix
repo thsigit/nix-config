@@ -13,8 +13,8 @@ in
     group = defaults.group;
     
     settings = {
-      DataFolder = "${defaults.appDir}/navidrome/data";
-      MusicFolder = "${defaults.dataDir}/music";
+      DataFolder = "${defaults.appdataDir}/navidrome/data";
+      MusicFolder = "${defaults.mediaDir}/music";
       ScanSchedule = "1h";
       LogLevel = "info";
       SessionTimeout = "24h";
@@ -25,7 +25,7 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.dataDir}/music 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appDir}/navidrome/data 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/music 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/navidrome/data 0755 ${defaults.user} ${defaults.group} -"
   ];
 }

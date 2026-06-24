@@ -15,9 +15,9 @@ in
     ];
     
     volumes = [
-      "${defaults.appDir}/transmission/config:/config:Z"
-      "${defaults.dataDir}/transmission_downloads:/downloads:Z"
-      "${defaults.dataDir}/transmission_watch:/watch:Z"
+      "${defaults.appdataDir}/transmission/config:/config:Z"
+      "${defaults.mediaDir}/transmission_downloads:/downloads:Z"
+      "${defaults.mediaDir}/transmission_watch:/watch:Z"
     ];
     
     environment = defaults.transmissionEnv;   
@@ -25,9 +25,9 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.appDir}/transmission 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appDir}/transmission/config 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.dataDir}/transmission_downloads 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.dataDir}/transmission_watch 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/transmission 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/transmission/config 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/transmission_downloads 0755 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.mediaDir}/transmission_watch 0755 ${defaults.user} ${defaults.group} -"
   ];
 }
