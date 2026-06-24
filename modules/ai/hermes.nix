@@ -1,19 +1,15 @@
 # modules/ai/hermes.nix
+{ hermes-agent, pkgs, ... }:
 
-{ config, pkgs, ... }:
-
-let
-  hermes-flake = builtins.getFlake "github:NousResearch/hermes-agent";
-in
 {
   imports = [
-    hermes-flake.nixosModules.default
+    hermes-agent.nixosModules.default
   ];
 
-  services.hermes-agent = {
-    enable = true;
-    # settings.model.default = "anthropic/claude-sonnet-4"; 
-    # environmentFiles = [ config.sops.secrets."hermes-env".path ];
-    addToSystemPackages = true; # 
-  };
+  # services.hermes-agent = {
+  #   enable = true;
+  #   settings.model.default = "anthropic/claude-sonnet-4"; 
+  #   environmentFiles = [ config.sops.secrets."hermes-env".path ];
+  #   port = 8080;
+  # };
 }

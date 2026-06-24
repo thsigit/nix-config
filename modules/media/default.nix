@@ -4,7 +4,8 @@
 
 {  
   imports = [
-    ./pulseaudio.nix
+    #./pulseaudio.nix
+	#./pipewire.nix
     ./bluetooth.nix
     ./calibre-web.nix
     ./wallabag.nix

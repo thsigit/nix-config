@@ -5,5 +5,6 @@
 {
   imports = [
     ./ollama.nix
+	./hermes.nix
   ];
 }
