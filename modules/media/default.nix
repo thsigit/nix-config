@@ -7,13 +7,13 @@
     #./pulseaudio.nix
 	#./pipewire.nix
     ./bluetooth.nix
-    ./calibre-web.nix
-    ./wallabag.nix
-    ./linkding.nix
+    ./podman-calibre-web.nix
+    ./podman-wallabag.nix
+    ./podman-linkding.nix
     ./mpd.nix
     ./navidrome.nix
     # ./lidarr.nix
-    # ./qbittorrent.nix
-    # ./transmission.nix
+    # ./podman-qbittorrent.nix
+    # ./podman-transmission.nix
   ];
 }

@@ -22,6 +22,7 @@ in
   systemd.tmpfiles.rules = [
     "d ${defaults.mediaDir}/books 0755 ${defaults.user} ${defaults.group} -"
     "d ${defaults.mediaDir}/uploads 0775 ${defaults.user} ${defaults.group} -"
+    "d ${defaults.appdataDir}/calibre 0755 ${defaults.user} ${defaults.group} -"
     "d ${defaults.appdataDir}/calibre/config-web 0755 ${defaults.user} ${defaults.group} -"
   ];
 }

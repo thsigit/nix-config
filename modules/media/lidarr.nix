@@ -11,7 +11,7 @@ in
     enable = true;
     user = defaults.user;
     group = defaults.group;
-    mediaDir = "${defaults.appdataDir}/lidarr/config";
+    dataDir = "${defaults.appdataDir}/lidarr/config";
     settings = {
       server = {
       port = 8686;

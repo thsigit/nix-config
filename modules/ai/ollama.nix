@@ -8,5 +8,8 @@
     models = "/srv/ai/models";
     openFirewall = true;
     package = pkgs.ollama-cpu;
+	environmentVariables = {
+      OLLAMA_NUM_THREADS = "4";
+    };
   };
 }

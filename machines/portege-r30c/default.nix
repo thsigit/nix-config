@@ -14,4 +14,9 @@
     ../../modules/media        # pipewire and alsa
     ../../modules/ai           # ollama etc
   ];
+
+  boot.kernelParams = lib.mkAfter [
+    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
+  ];
+
 }

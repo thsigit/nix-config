@@ -20,7 +20,7 @@ in
       "${defaults.mediaDir}/transmission_watch:/watch:Z"
     ];
     
-    environment = defaults.transmissionEnv;   
+    environment = defaults.baseEnv;   
     autoStart = true;
   };
 

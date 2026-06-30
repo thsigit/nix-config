@@ -62,18 +62,24 @@ in
     enable = true;
     
     virtualHosts."homelab.home.arpa".extraConfig = ''
-      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+#      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      tls internal
       ${homepageConfig}
     '';
     
+    virtualHosts."newapi.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:3000
+    '';
+	
     virtualHosts."wallabag.home.arpa".extraConfig = ''
       tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key
       reverse_proxy 127.0.0.1:8085
     '';
 
     virtualHosts."darkstat.home.arpa".extraConfig = ''
-      reverse_proxy 127.0.0.1:667
       tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key
+      reverse_proxy 127.0.0.1:667
     '';
 
     virtualHosts."homelab.basa-komodo.ts.net".extraConfig = ''

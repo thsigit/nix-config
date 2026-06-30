@@ -105,12 +105,12 @@ in
   # Pastikan direktori ada (infra responsibility)
   systemd.tmpfiles.rules = [
     "d ${defaults.mediaDir} 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/uploads 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/downloads 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/appdata 0755 ${defaults.user} ${defaults.group} -"
     "d ${defaults.mediaDir}/books 0755 ${defaults.user} ${defaults.group} -"
     "d ${defaults.mediaDir}/music 0755 ${defaults.user} ${defaults.group} -"
     "d ${defaults.mediaDir}/lyrics 0755 ${defaults.user} ${defaults.group} -"
+
+    # "d ${defaults.mediaDir}/uploads 0755 ${defaults.user} ${defaults.group} -"
+    # "d ${defaults.mediaDir}/downloads 0755 ${defaults.user} ${defaults.group} -"	
   ];
 
   environment.systemPackages = with pkgs; [
