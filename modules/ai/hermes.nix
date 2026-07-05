@@ -2,10 +2,10 @@
 { hermes-agent, pkgs, ... }:
 
 {
-  imports = [
-    hermes-agent.nixosModules.default
+  environment.systemPackages = [
+    hermes-agent.packages.${pkgs.system}.default
   ];
-
+  
   # services.hermes-agent = {
   #   enable = true;
   #   settings.model.default = "anthropic/claude-sonnet-4"; 

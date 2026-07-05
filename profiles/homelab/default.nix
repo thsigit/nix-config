@@ -1,10 +1,9 @@
-# hosts/homelab/default.nix
+# profiles/homelab/default.nix
 
 { config, lib, pkgs, ... }:
 
 {
   imports = [
-    ./hardware-configuration.nix
     ../../modules/core
     ../../modules/network      # tailscale, zerotier, dnsmasq
     ../../modules/storage      # mount SSD, rsync, samba, vsftpd
@@ -15,8 +14,8 @@
     ../../modules/ai           # ollama etc
   ];
 
-  boot.kernelParams = lib.mkAfter [
-    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
-  ];
+#  boot.kernelParams = lib.mkAfter [
+#    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
+#  ];
 
 }

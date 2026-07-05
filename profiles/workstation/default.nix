@@ -1,23 +1,18 @@
-# hosts/workspace/default.nix
+# profiles/workstation/default.nix
 
-{ config, pkgs, ... }:
+{ config, pkgs, callPackage, ... }:
 
 {
   imports = [
-    ./hardware-configuration.nix
     ../../modules/core
-    ../../modules/network      # tailscale, zerotier, dnsmasq
-    ../../modules/storage      # mount SSD, rsync, samba, vsftpd
-    ../../modules/security     # pki.nix, sertifikat CA
-    ../../modules/monitoring   # cockpit, darkstat, mrtg
-    ../../modules/web          # caddy server
-    ../../modules/media        # pipewire and alsa
-    ../../modules/ai           # ollama etc
+    ../../modules/network # tailscale, zerotier, dnsmasq
+    ../../modules/storage # mount SSD, rsync, samba, vsftpd
+    ../../modules/security # pki.nix, sertifikat CA
+    ../../modules/monitoring # cockpit, darkstat, mrtg
+    ../../modules/web # caddy server
+    ../../modules/media # pipewire and alsa
+    ../../modules/ai # ollama etc
+    ./xfce4.nix
+    ./packages.nix
   ];
-
-  # Enable Plasma
-  services = {
-    desktopManager.plasma6.enable = true;
-    displayManager.plasma-login-manager.enable = true;
-  };
 }

@@ -1,8 +1,7 @@
 # Keep directory
 !secrets/.gitkeep
-
 # Editor files
-.qwen/**
+.qwen
 *.swp
 *~
 

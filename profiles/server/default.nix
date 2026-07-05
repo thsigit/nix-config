@@ -1,10 +1,9 @@
-# profiles/server.nix 
+# profiles/server/default.nix 
 
 { config, lib, pkgs, ... }:
 
 {
   imports = [
-    ./hardware-configuration.nix
     ../../module/core
     ../../module/network      # tailscale, zerotier, dnsmasq
     ../../module/storage      # mount SSD, rsync, samba, vsftpd
@@ -14,4 +13,9 @@
     ../../module/media        # pipewire and alsa
     ../../module/ai           # ollama etc
   ];
+
+  boot.kernelParams = lib.mkAfter [
+    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
+  ];
+  
 }

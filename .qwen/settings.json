@@ -3,7 +3,8 @@
     "allow": [
       "Bash(find *)",
       "Bash(mkdir *)",
-      "Bash(cp *)"
+      "Bash(cp *)",
+      "Bash(python3 *)"
     ]
   },
   "$version": 4
