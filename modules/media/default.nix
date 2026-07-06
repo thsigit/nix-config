@@ -12,6 +12,7 @@
     ./podman-linkding.nix
     ./mpd.nix
     ./navidrome.nix
+    ./trilium-server.nix
     # ./lidarr.nix
     # ./podman-qbittorrent.nix
     # ./podman-transmission.nix

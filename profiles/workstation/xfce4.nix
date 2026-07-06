@@ -19,7 +19,7 @@
     sddm = {
 	  enable = true;
       theme = "pkgs.sddm-sugar-dark";
-      autoLogin.relogin = true;
+      # autoLogin.relogin = true;
     };
     autoLogin = {
       enable = true;
