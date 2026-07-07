@@ -8,8 +8,8 @@
 	./hermes.nix
     #./litellm.nix
 	#./llama-cpp.nix
-	#./vane.nix
-	#./local-ai.nix
+	./podman-vane.nix
+	./podman-localai.nix
   ];
   environment.systemPackages = with pkgs; [
     claude-code qwen-code codex github-copilot-cli opencode openclaw 

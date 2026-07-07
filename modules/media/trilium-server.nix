@@ -1,4 +1,4 @@
-# modules/ai/trilium-server.nix
+# modules/media/trilium-server.nix
 { config, pkgs, lib, ... }:
 
 let
@@ -17,8 +17,9 @@ in
     package = pkgs.trilium-server;
   };
 
+  # trilium-server menggunakan user/grups-nya sendiri
   systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/trillium 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appdataDir}/trillium/data 0755 ${defaults.user} ${defaults.group} -"
-  ];}
+    "d ${defaults.appdataDir}/trillium 0755 trilium trilium -"
+    "d ${defaults.appdataDir}/trillium/data 0755 trilium trilium -"
+	];
 }

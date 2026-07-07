@@ -10,7 +10,7 @@ let
     "homelab.home.arpa"
     "wallabag.home.arpa"
     "darkstat.home.arpa"
-    "newapi.home.arpa"
+    "triliumnotes.home.arpa"
   ];
   allDomains = baseDomains ++ serviceDomains;
 

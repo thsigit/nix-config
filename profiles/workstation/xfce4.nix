@@ -28,7 +28,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    xfce4-whiskermenu-plugin
+    xinit xfce4-whiskermenu-plugin
   ];
 
   environment.xfce.excludePackages = with pkgs; [

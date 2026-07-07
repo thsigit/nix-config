@@ -33,27 +33,19 @@ let
       file_server
     }
 
-    handle /linkding* {
-      reverse_proxy 127.0.0.1:9093
-    }
-
     handle /lidarr* {
       reverse_proxy 127.0.0.1:8686
     }
-
-    handle /navidrome* {
-      reverse_proxy 127.0.0.1:4533
-    }
       
-    handle /calibre* {
-      uri strip_prefix /calibre
-      reverse_proxy 127.0.0.1:8083 {
-        #header_up Host {host}
-        #header_up X-Scheme {scheme}
-        header_up X-Script-Name /calibre
-      }
-    }
-  '';
+#    handle /calibre* {
+#      uri strip_prefix /calibre
+#      reverse_proxy 127.0.0.1:8083 {
+#        #header_up Host {host}
+#        #header_up X-Scheme {scheme}
+#        header_up X-Script-Name /calibre
+#      }
+#    }
+#  '';
 
 in
 
@@ -62,14 +54,39 @@ in
     enable = true;
     
     virtualHosts."homelab.home.arpa".extraConfig = ''
-#      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
-      tls internal
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      # tls internal
       ${homepageConfig}
     '';
-    
-    virtualHosts."newapi.home.arpa".extraConfig = ''
+
+    virtualHosts."vane.home.arpa".extraConfig = ''
       tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
-      reverse_proxy 127.0.0.1:3000
+      reverse_proxy 127.0.0.1:8089
+    '';
+
+    virtualHosts."triliumnotes.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:8088
+    '';
+
+    virtualHosts."localai.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:8087
+    '';
+    
+    virtualHosts."calibre.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key
+      reverse_proxy 127.0.0.1:8083
+    '';
+	
+    virtualHosts."navidrome.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:4533
+    '';
+	
+    virtualHosts."linkding.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:9093
     '';
 	
     virtualHosts."wallabag.home.arpa".extraConfig = ''

@@ -7,9 +7,17 @@
 
   programs.ydotool.enable = true;
 
-  programs.bash.promptInit = ''
+  programs.bash = {
+    promptInit = ''
     export PS1="\[\e[1;36m\]🏠 HOMELAB \[\e[0m\]\w (\u) $ "
-  '';
+    '';
+    completion = {
+      enable = true;
+      package = pkgs.bash-completion;
+    };
+    
+  };
+
 
   programs.tmux = {
     enable = true;

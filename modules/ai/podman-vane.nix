@@ -7,7 +7,7 @@ in
 {
   virtualisation.oci-containers.containers.vane = {
     image = "itzcrazykns1337/vane:latest"; 
-    ports = [ "3000:3000" ]; 
+    ports = [ "8089:3000" ]; 
     volumes = [
       "${defaults.appdataDir}/vane/data:/home/vane/data"
     ];
