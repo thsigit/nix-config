@@ -1,10 +1,17 @@
 # modules/security/sops.nix
-{ pkgs, ... }:
+
+{ config, pkgs, ... }:
 
 {
   sops = {
-    age.keyFile = "/var/lib/sops-nix/key.txt"; 
+    age.keyFile = "/home/sigit/.config/sops/age/keys.txt";
   };
+
+  sops.secrets."providers.env" = {
+    sopsFile = ../../secrets/providers.env;
+    format = "dotenv";
+  };
+
 
   environment.systemPackages = with pkgs; [
     sops

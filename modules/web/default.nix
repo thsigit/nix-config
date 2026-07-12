@@ -28,7 +28,7 @@ let
       file_server
     }
 
-    handle_path /mrtg* {
+    handle /mrtg* {
       root * /srv/www
       file_server
     }
