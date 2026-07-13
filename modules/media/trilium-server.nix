@@ -1,14 +1,17 @@
 # modules/media/trilium-server.nix
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    directories;
+  appdataDir = "${directories.appdata}/trillium";
 in
 
 {
   services.trilium-server = {
     enable = true;
-    dataDir = "${defaults.appdataDir}/trillium/data";
+    dataDir = "${appdataDir}/data";
     host = "127.0.0.1";
     port = 8088;
     instanceName = "Trilium";
@@ -19,7 +22,7 @@ in
 
   # trilium-server menggunakan user/grups-nya sendiri
   systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/trillium 0755 trilium trilium -"
-    "d ${defaults.appdataDir}/trillium/data 0755 trilium trilium -"
+    "d ${appdataDir} 0755 trilium trilium -"
+    "d ${appdataDir}/data 0755 trilium trilium -"
 	];
 }

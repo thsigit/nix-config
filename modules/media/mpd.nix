@@ -1,17 +1,21 @@
 # modules/media/mpd.nix
-{ config, pkgs, lib, ... }:
+
+{ config, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories;
 in
 
 {
   services.mpd = {
     enable = true;
-    user = defaults.user;
-    startWhenNeeded = true; 
+    user = user.name;
+    startWhenNeeded = true;
     settings = {
-      music_directory = "${defaults.mediaDir}/music";
+      music_directory = "${directories.media}/music";
       audio_output = [
         {
           type = "pipewire";
@@ -20,8 +24,8 @@ in
       ];
     };
   };
-  
+
   systemd.services.mpd.environment = {
-    XDG_RUNTIME_DIR = "/run/user/1000"; 
-  };  
+    XDG_RUNTIME_DIR = "/run/user/1000";
+  };
 }

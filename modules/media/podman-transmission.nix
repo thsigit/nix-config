@@ -2,32 +2,38 @@
 { config, pkgs, lib, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories 
+    baseEnv;
+  appdataDir = "${directories.appdata}/transmission";
+  mediaRoot = directories.media;
 in
 
 {
   virtualisation.oci-containers.containers.transmission = {
-    image = "lscr.io/linuxserver/transmission:latest";    
+    image = "lscr.io/linuxserver/transmission:latest";
     ports = [
       "127.0.0.1:9091:9091"
       "51413:51413"
       "51413:51413/udp"
     ];
-    
+
     volumes = [
-      "${defaults.appdataDir}/transmission/config:/config:Z"
-      "${defaults.mediaDir}/transmission_downloads:/downloads:Z"
-      "${defaults.mediaDir}/transmission_watch:/watch:Z"
+      "${appdataDir}/config:/config:Z"
+      "${mediaRoot}/transmission_downloads:/downloads:Z"
+      "${mediaRoot}/transmission_watch:/watch:Z"
     ];
-    
-    environment = defaults.baseEnv;   
+
+    environment = baseEnv;
     autoStart = true;
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/transmission 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appdataDir}/transmission/config 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/transmission_downloads 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/transmission_watch 0755 ${defaults.user} ${defaults.group} -"
+    "d ${appdataDir} 0755 ${user.name} ${user.group} -"
+    "d ${appdataDir}/config 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/transmission_downloads 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/transmission_watch 0755 ${user.name} ${user.group} -"
   ];
 }

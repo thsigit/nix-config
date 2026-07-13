@@ -1,6 +1,6 @@
 # modules/media/bluetooth.nix 
 
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 
 {
   hardware.bluetooth = {

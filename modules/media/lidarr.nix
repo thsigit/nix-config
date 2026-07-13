@@ -3,15 +3,20 @@
 { config, pkgs, lib, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories;
+  appdataDir = "${directories.appdata}/lidarr";
+  mediaRoot = directories.media;
 in
 
 {
   services.lidarr = {
     enable = true;
-    user = defaults.user;
-    group = defaults.group;
-    dataDir = "${defaults.appdataDir}/lidarr/config";
+    user = user.name;
+    group = user.group;
+    dataDir = "${appdataDir}/config";
     settings = {
       server = {
       port = 8686;
@@ -21,8 +26,9 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.mediaDir}/downloads 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/music 0775 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appdataDir}/lidarr/config 0755 ${defaults.user} ${defaults.group} -"
+    "d ${mediaRoot} 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/downloads 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/music 0775 ${user.name} ${user.group} -"
+    "d ${appdataDir}/config 0755 ${user.name} ${user.group} -"
   ];
 }

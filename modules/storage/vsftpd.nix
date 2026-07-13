@@ -1,6 +1,6 @@
 # modules/storage/vsftpd.nix 
 
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 
 {
   # FTP Server

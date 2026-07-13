@@ -1,26 +1,30 @@
 # modules/media/qbittorrent.nix
 
-{ config, pkgs, lib, ... }:
+{ config, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories 
+    baseEnv;
+  appdataDir = "${directories.appdata}/qbittorrent";
+  mediaRoot = directories.media;
 in
 
 {
   virtualisation.oci-containers.containers.qbittorrent = {
     image = "lscr.io/linuxserver/qbittorrent:latest";
-    environment = {
-      PUID = "1000";
-      PGID = "100";
-      TZ = "Asia/Jakarta";
+    environment = baseEnv // {
       WEBUI_PORT = "8080";
+    
       # Proxy instructions
-      #PROXY_TYPE = "SOCKS5";
-      #PROXY_ADDR = "socks5-proxy:1080"; # Nama container ini
-      #PROXY_USER = "user";
-      #PROXY_PASS = "pass";
-      #PROXY_PEER_CONN = "true";
-      #PROXY_HOSTNAME_LOOKUP = "true";
+      # PROXY_TYPE = "SOCKS5";
+      # PROXY_ADDR = "socks5-proxy:1080";
+      # PROXY_USER = "user";
+      # PROXY_PASS = "pass";
+      # PROXY_PEER_CONN = "true";
+      # PROXY_HOSTNAME_LOOKUP = "true";
     };
     # ports = [ "127.0.0.1:8080:8080" ];
     # dependsOn = [ "socks5-proxy" ];
@@ -30,15 +34,15 @@ in
       "51411:51411/udp"         # BitTorrent UDP
     ];
     volumes = [
-      "${defaults.appdataDir}/qbittorrent/config:/config"
-      "${defaults.mediaDir}/qbittorrent_downloads:/downloads"
+      "${appdataDir}/config:/config"
+      "${mediaRoot}/qbittorrent_downloads:/downloads"
     ];
     autoStart = true;
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/qbittorrent 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appdataDir}/qbittorrent/config 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/qbittorrent_downloads 0755 ${defaults.user} ${defaults.group} -"
+    "d ${appdataDir} 0755 ${user.name} ${user.group} -"
+    "d ${appdataDir}/config 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/qbittorrent_downloads 0755 ${user.name} ${user.group} -"
   ];
 }

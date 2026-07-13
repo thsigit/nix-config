@@ -1,48 +1,45 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults)
+    user
+    directories;
+  appdataDir = "${directories.appdata}/copyparty";
 in
 
 {
-  users.users.copyparty = {
-    isSystemUser = true;
-    group = "copyparty";
-    home = "${defaults.appdataDir}/copyparty";
-  };
-
-  users.groups.copyparty = {};
-
-  systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/copyparty 0755 copyparty copyparty -"
-  ];
-
   systemd.services.copyparty = {
     description = "Copyparty";
+
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
       Type = "simple";
-
-      User = "copyparty";
-      Group = "copyparty";
-      WorkingDirectory = "${defaults.appdataDir}/copyparty";
-
+      User = user.name;
+      Group = user.group;
       ExecStart =
-        "${pkgs.copyparty}/bin/copyparty -c ${defaults.appdataDir}/copyparty/copyparty.conf";
+        "${pkgs.copyparty}/bin/copyparty -c ${appdataDir}/copyparty.conf";
 
       Restart = "on-failure";
       RestartSec = 5;
 
-      # Hardening
       NoNewPrivileges = true;
       PrivateTmp = true;
       ProtectSystem = "strict";
+
       ReadWritePaths = [
-        "${defaults.appdataDir}/copyparty"
+        appdataDir
+        "/home/${user.name}"
+        "/etc/ssl"
+        "/srv"
       ];
     };
   };
+
+  systemd.tmpfiles.rules = [
+    "d ${appdataDir} 0755 ${user.name} ${user.group} -"
+  ];
 }

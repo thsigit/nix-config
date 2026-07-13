@@ -1,9 +1,13 @@
 # modules/storage/samba.nix
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories;
+  mediaRoot = directories.media;
 in
 
 {
@@ -33,65 +37,65 @@ in
 
       # Private (read-only)
       home = {
-        "path" = "/home/${defaults.user}";
+        "path" = "/home/${user.name}";
         "writable" = "yes";
-        "valid users" = defaults.user;
-        "force user" = defaults.user;
+        "valid users" = user.name;
+        "force user" = user.name;
         "create mask" = "0644";
         "directory mask" = "0755";
       };
 
       repo = {
-        "path" = defaults.repoDir;
+        "path" = "/srv/repo";
         "writable" = "yes";
-        "valid users" = defaults.user;
-        "force user" = defaults.user;
+        "valid users" = user.name;
+        "force user" = user.name;
         "create mask" = "0600";
         "directory mask" = "0700";
       };
 
       appdata = {
-        "path" = defaults.appdataDir;
+        "path" = directories.appdata;
         "writable" = "yes";
         "read only" = "no";
         "guest ok" = "yes";
-        "force user" = defaults.user;
+        "force user" = user.name;
         "create mask" = "0644";
         "directory mask" = "0755";
       };
-  
+
         web = {
         "path" = "/srv/www";
         "writable" = "yes";
-        "valid users" = defaults.user;
-        "force user" = defaults.user;
+        "valid users" = user.name;
+        "force user" = user.name;
         "create mask" = "0644";
         "directory mask" = "0755";
       };
-	  
+
       # Public (read-only)
       books = {
-        "path" = "${defaults.mediaDir}/books";
+        "path" = "${mediaRoot}/books";
         "read only" = "yes";
         "guest ok" = "yes";
-        "valid users" = defaults.user;
-        "write list" = defaults.user;
+        "valid users" = user.name;
+        "write list" = user.name;
       };
 
       music = {
-        "path" = "${defaults.mediaDir}/music";
+        "path" = "${mediaRoot}/music";
         "read only" = "yes";
         "guest ok" = "yes";
-        "valid users" = defaults.user;
-        "write list" = defaults.user;
+        "valid users" = user.name;
+        "write list" = user.name;
       };
 
       lyrics = {
-        "path" = "${defaults.mediaDir}/lyrics";
+        "path" = "${mediaRoot}/lyrics";
         "read only" = "yes";
         "guest ok" = "yes";
-        "valid users" = defaults.user;
-        "write list" = defaults.user;
+        "valid users" = user.name;
+        "write list" = user.name;
       };
     };
   };
@@ -104,13 +108,13 @@ in
 
   # Pastikan direktori ada (infra responsibility)
   systemd.tmpfiles.rules = [
-    "d ${defaults.mediaDir} 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/books 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/music 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.mediaDir}/lyrics 0755 ${defaults.user} ${defaults.group} -"
+    "d ${mediaRoot} 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/books 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/music 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/lyrics 0755 ${user.name} ${user.group} -"
 
-    # "d ${defaults.mediaDir}/uploads 0755 ${defaults.user} ${defaults.group} -"
-    # "d ${defaults.mediaDir}/downloads 0755 ${defaults.user} ${defaults.group} -"	
+    # "d ${mediaRoot}/uploads 0755 ${user.name} ${user.group} -"
+    # "d ${mediaRoot}/downloads 0755 ${user.name} ${user.group} -"
   ];
 
   environment.systemPackages = with pkgs; [

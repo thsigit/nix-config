@@ -1,6 +1,6 @@
 # modules/monitoring/default.nix 
 
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 
 {
   imports = [

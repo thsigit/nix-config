@@ -8,6 +8,6 @@
     ./pki.nix
     ./ssh.nix
     ./firewall.nix
-    #./sops.nix
+    ./sops.nix
   ];
 }

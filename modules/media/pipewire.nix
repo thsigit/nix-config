@@ -1,6 +1,6 @@
 # modules/media/pipewire.nix 
 
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 
 {
   # PipeWire audio control

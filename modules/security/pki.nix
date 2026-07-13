@@ -1,26 +1,40 @@
 # modules/security/pki.nix
+
 { config, pkgs, lib, ... }:
+
 let
+
   sslDir = "/etc/ssl/homelab";
   baseDomains = [
     "*.home.arpa"
     "home.arpa"
   ];
+
   serviceDomains = [
     "homelab.home.arpa"
+    "litellm.home.arpa"
+    "vane.home.arpa"
+    "triliumnotes.home.arpa"
+    "localai.home.arpa"
+    "calibre.home.arpa"
+    "navidrome.home.arpa"
+    "linkding.home.arpa"
     "wallabag.home.arpa"
     "darkstat.home.arpa"
-    "triliumnotes.home.arpa"
   ];
+
   allDomains = baseDomains ++ serviceDomains;
 
   # Dipakai untuk SAN di cert (section [v3_ext] terpisah dari [req_ext])
+
   altNames =
     lib.concatStringsSep "\n"
       (lib.imap1
         (i: domain: "DNS.${toString i} = ${domain}")
         allDomains);
+
 in
+
 {
   environment.systemPackages = with pkgs; [ openssl ];
 

@@ -1,6 +1,6 @@
 # modules/network/default.nix 
 
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 
 {
   imports = [

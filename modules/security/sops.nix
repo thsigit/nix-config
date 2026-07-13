@@ -12,7 +12,6 @@
     format = "dotenv";
   };
 
-
   environment.systemPackages = with pkgs; [
     sops
     age

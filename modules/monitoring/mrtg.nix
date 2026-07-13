@@ -1,6 +1,6 @@
 # modules/monitoring/mrtg.nix
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 {
   services.snmpd = {

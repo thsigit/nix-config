@@ -3,7 +3,11 @@
 { config, pkgs, lib, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories;
+  appdataDir = "${directories.appdata}/adguard";
 in
 
 {
@@ -11,13 +15,13 @@ in
     image = "adguard/adguardhome:latest";
     ports = [ "3000:3000" "53:53/tcp" "53:53/udp" ];
     volumes = [
-      "${defaults.appdataDir}/adguard/work:/opt/adguardhome/work"
-      "${defaults.appdataDir}/adguard/conf:/opt/adguardhome/conf"
+      "${appdataDir}/conf:/opt/adguardhome/conf"
+      "${appdataDir|/work:/opt/adguardhome/work"
     ];
   };
   systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/adguard/work 0775 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appdataDir}/adguard/conf 0755 ${defaults.user} ${defaults.group} -"
+    "d ${appdataDir}/work 0775 ${user.name} ${user.group} -"
+    "d ${appdataDir}/conf 0755 ${user.name} ${user.group} -"
   ];
 }
 

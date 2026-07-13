@@ -1,5 +1,5 @@
 # modules/security/insecure-packages.nix
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 {
   nixpkgs.config.permittedInsecurePackages = [

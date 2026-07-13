@@ -10,8 +10,8 @@
     parted gptfdisk efibootmgr dmidecode # low-level hardware-tools
     file binutils # low-level software-tools
 	openssl mkcert sops #security
-    rmpc mpc mpv alsa-utils pulsemixer ncmpcpp yewtube musikcube yt-dlp #media
-    go git nodejs_22 jq yq alejandra # programming
-    apache-answer fzf tmuxai bc rink exiftool sqlite tlp # misc
+    copyparty exiftool rmpc mpc mpv alsa-utils pulsemixer ncmpcpp yewtube musikcube yt-dlp #media
+    go git nodejs_22 jq yq sqlite alejandra # programming
+    apache-answer fzf tmuxai bc rink tlp # misc
   ];
 }

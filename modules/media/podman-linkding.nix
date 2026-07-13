@@ -1,9 +1,13 @@
-# modules/media/linkding.nix
+# modules/media/podman-linkding.nix
 
-{ config, pkgs, lib, ... }:
+{ config, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories;
+  appdataDir = "${directories.appdata}/linkding";
 in
 
 {
@@ -11,7 +15,7 @@ in
     image = "sissbruecker/linkding:latest";
     ports = [ "9093:9090" ];
     volumes = [
-      "${defaults.appdataDir}/linkding/data:/etc/linkding/data"
+      "${appdataDir}/data:/etc/linkding/data"
     ];
     environment = {
       # LD_SUPERUSER_NAME = "admin";
@@ -20,6 +24,6 @@ in
     };
   };
   systemd.tmpfiles.rules = [
-    "d ${defaults.appdataDir}/linkding/data 0755 ${defaults.user} ${defaults.group} -"
+    "d ${appdataDir}/data 0755 ${user.name} ${user.group} -"
   ];
 }

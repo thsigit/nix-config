@@ -1,20 +1,25 @@
 # modules/media/navidrome.nix
 
-{ config, pkgs, lib, ... }:
+{ config, ... }:
 
 let
-  defaults = import ../../lib;
+  defaults = import ../../settings;
+  inherit (defaults) 
+    user 
+    directories;
+  appdataDir = "${directories.appdata}/navidrome";
+  mediaRoot = directories.media;
 in
 
 {
   services.navidrome = {
     enable = true;
-    user = defaults.user;
-    group = defaults.group;
-    
+    user = user.name;
+    group = user.group;
+
     settings = {
-      DataFolder = "${defaults.appdataDir}/navidrome/data";
-      MusicFolder = "${defaults.mediaDir}/music";
+      DataFolder = "${appdataDir}/data";
+      MusicFolder = "${mediaRoot}/music";
       ScanSchedule = "1h";
       LogLevel = "info";
       SessionTimeout = "24h";
@@ -25,7 +30,8 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${defaults.mediaDir}/music 0755 ${defaults.user} ${defaults.group} -"
-    "d ${defaults.appdataDir}/navidrome/data 0755 ${defaults.user} ${defaults.group} -"
+    "d ${mediaRoot} 0755 ${user.name} ${user.group} -"
+    "d ${mediaRoot}/music 0755 ${user.name} ${user.group} -"
+    "d ${appdataDir}/data 0755 ${user.name} ${user.group} -"
   ];
 }

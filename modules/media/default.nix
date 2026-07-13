@@ -1,7 +1,5 @@
 # modules/media/default.nix 
 
-{ config, lib, pkgs, ... }:
-
 {  
   imports = [
     ./bluetooth.nix

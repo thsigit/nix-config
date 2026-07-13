@@ -1,5 +1,6 @@
 # modules/security/ssh.nix
-{ config, pkgs, lib, ... }:
+
+{ config, ... }:
 
 {
   services.openssh = {

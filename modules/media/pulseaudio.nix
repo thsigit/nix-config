@@ -1,6 +1,6 @@
 # modules/media/pulseaudio.nix 
 
-{ config, lib, pkgs, ... }:
+{ config ... }:
 
 {
   services.pulseaudio = {

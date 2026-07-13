@@ -59,6 +59,16 @@ in
       ${homepageConfig}
     '';
 
+    virtualHosts."copyparty.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:3923
+    '';
+
+    virtualHosts."litellm.home.arpa".extraConfig = ''
+      tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
+      reverse_proxy 127.0.0.1:4000
+    '';
+	
     virtualHosts."vane.home.arpa".extraConfig = ''
       tls /etc/ssl/homelab/homelab.crt /etc/ssl/homelab/homelab.key      
       reverse_proxy 127.0.0.1:8089

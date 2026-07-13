@@ -1,11 +1,10 @@
 # modules/storage/default.nix 
 
-{ config, lib, pkgs, ... }:
-
 {  
   imports = [
     ./samba.nix
     ./vsftpd.nix
+    ./copyparty.nix
     # ./filemount.nix
     # ./rsync.nix
   ];
