@@ -9,6 +9,10 @@ let
 in
 
 {
+  services.caddy.services.copyparty = {
+    port = 3923;
+  };
+
   systemd.services.copyparty = {
     description = "Copyparty";
 

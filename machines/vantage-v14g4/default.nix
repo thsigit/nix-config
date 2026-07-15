@@ -1,22 +1,18 @@
-# hosts/homelab/default.nix
+# machines/vantage-v14g4/default.nix
+#
+# Placeholder for upcoming NixOS machine.
+# When ready, replace the contents with the actual machine config, e.g.:
+#
+#   { config, lib, pkgs, ... }: {
+#     imports = [ ./hardware-configuration.nix ];
+#     # machine-specific overrides...
+#   }
 
 { config, lib, pkgs, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-    ../../modules/core
-    ../../modules/network      # tailscale, zerotier, dnsmasq
-    ../../modules/storage      # mount SSD, rsync, samba, vsftpd
-    ../../modules/security     # pki.nix, sertifikat CA
-    ../../modules/monitoring   # cockpit, darkstat, mrtg
-    ../../modules/web          # caddy server
-    ../../modules/media        # pipewire and alsa
-    ../../modules/ai           # ollama etc
-  ];
+  imports = [ ];
 
-  boot.kernelParams = lib.mkAfter [
-    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
-  ];
-
+  # Uncomment and adjust when hardware-configuration.nix exists:
+  # imports = [ ./hardware-configuration.nix ];
 }

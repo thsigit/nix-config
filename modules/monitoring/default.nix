@@ -9,8 +9,5 @@
     ./cockpit.nix
   ];
 
-  services.darkstat = {
-    enable = true;
-    interface = "enp0s31f6";
-  };
+  services.darkstat.enable = true;
 }

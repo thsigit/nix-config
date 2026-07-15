@@ -14,6 +14,10 @@ let
 in
 
 {
+  services.caddy.services.calibre-web = {
+    port = 8083;
+  };
+
   virtualisation.oci-containers.containers.calibre-web = {
     image = "lscr.io/linuxserver/calibre-web:latest";
     ports = [ "8083:8083" ];

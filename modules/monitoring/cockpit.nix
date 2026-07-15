@@ -17,7 +17,7 @@
     port = 9090;
     settings = {
       WebService = {
-        ClientCertAuthentication = false;
+        ClientCertAuthentication = true;
         AllowUnencrypted = false;
         Origins = lib.mkForce "https://homelab.home.arpa:9090";
       };

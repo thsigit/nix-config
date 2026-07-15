@@ -12,6 +12,10 @@ in
 
 
 {
+  services.caddy.services.wallabag = {
+    port = 8085;
+  };
+
   virtualisation.oci-containers.containers.wallabag = {
     image = "wallabag/wallabag:latest";
     ports = [ "8085:80" ];

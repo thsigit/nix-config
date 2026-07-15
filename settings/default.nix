@@ -21,10 +21,13 @@ let
     models = "/srv/ai/models";
   };
 
+  tailnet = "basa-komodo";
+  domain = "home.arpa";
+
 in
 
 {
-  inherit user timezone directories ai;
+  inherit user timezone directories ai tailnet domain;
 
   baseEnv = {
     PUID = user.uid;

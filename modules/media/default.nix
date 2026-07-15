@@ -10,6 +10,7 @@
     #./pulseaudio.nix
 	#./pipewire.nix
     ./podman-calibre-web.nix
+    ./karakeep.nix
     ./podman-wallabag.nix
     ./podman-linkding.nix
     # ./podman-qbittorrent.nix

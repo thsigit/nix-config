@@ -11,6 +11,10 @@ let
 in
 
 {
+  services.caddy.services.vane = {
+    port = 8089;
+  };
+
   virtualisation.oci-containers.containers.vane = {
     image = "itzcrazykns1337/vane:latest";
     ports = [ "8089:3000" ];

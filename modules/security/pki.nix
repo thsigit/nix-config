@@ -10,18 +10,10 @@ let
     "home.arpa"
   ];
 
-  serviceDomains = [
-    "homelab.home.arpa"
-    "litellm.home.arpa"
-    "vane.home.arpa"
-    "triliumnotes.home.arpa"
-    "localai.home.arpa"
-    "calibre.home.arpa"
-    "navidrome.home.arpa"
-    "linkding.home.arpa"
-    "wallabag.home.arpa"
-    "darkstat.home.arpa"
-  ];
+  caddyServices = config.services.caddy.services or { };
+  lanServices = lib.filterAttrs (name: svc: svc.visibility.lan) caddyServices;
+  serviceDomains = [ "homelab.home.arpa" ] ++
+    lib.mapAttrsToList (name: svc: "${name}.home.arpa") lanServices;
 
   allDomains = baseDomains ++ serviceDomains;
 

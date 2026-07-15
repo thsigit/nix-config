@@ -11,6 +11,10 @@ let
 in
 
 {
+  services.caddy.services.linkding = {
+    port = 9093;
+  };
+
   virtualisation.oci-containers.containers.linkding = {
     image = "sissbruecker/linkding:latest";
     ports = [ "9093:9090" ];

@@ -12,6 +12,10 @@ let
 in
 
 {
+  services.caddy.services.navidrome = {
+    port = 4533;
+  };
+
   services.navidrome = {
     enable = true;
     user = user.name;

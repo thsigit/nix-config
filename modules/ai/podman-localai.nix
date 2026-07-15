@@ -12,7 +12,10 @@ let
 in
 
 {
-  # Definisi container
+  services.caddy.services.localai = {
+    port = 8087;
+  };
+
   virtualisation.oci-containers.containers.localai = {
     image = "localai/localai:latest-cpu";
     ports = [ "8087:8080" ];

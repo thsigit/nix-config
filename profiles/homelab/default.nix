@@ -9,7 +9,7 @@
     ../../modules/storage      # mount SSD, rsync, samba, vsftpd
     ../../modules/security     # pki.nix, sertifikat CA
     ../../modules/monitoring   # cockpit, darkstat, mrtg
-    ../../modules/web          # caddy server
+    ../../modules/caddy        # caddy reverse proxy
     ../../modules/media        # pipewire and alsa
     ../../modules/ai           # ollama etc
   ];

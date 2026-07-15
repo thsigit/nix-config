@@ -1,21 +1,31 @@
-# profiles/server/default.nix 
+# profiles/server/default.nix
+#
+# Placeholder — this profile is reserved for a future headless
+# server machine that does not need a desktop environment.
+# When ready, import the required modules from ../../modules/.
+#
+# Example:
+#
+#   imports = [
+#     ../../modules/core
+#     ../../modules/network
+#     ../../modules/storage
+#     ../../modules/security
+#     ../../modules/caddy
+#     # etc.
+#   ];
 
 { config, lib, pkgs, ... }:
 
 {
   imports = [
-    ../../module/core
-    ../../module/network      # tailscale, zerotier, dnsmasq
-    ../../module/storage      # mount SSD, rsync, samba, vsftpd
-    ../../module/security     # pki.nix, sertifikat CA
-    ../../module/monitoring   # cockpit, darkstat, mrtg
-    ../../module/web          # caddy server
-    ../../module/media        # pipewire and alsa
-    ../../module/ai           # ollama etc
+    ../../modules/core
+    ../../modules/network
+    ../../modules/storage
+    ../../modules/security
+    ../../modules/monitoring
+    ../../modules/caddy
+    ../../modules/media
+    ../../modules/ai
   ];
-
-  boot.kernelParams = lib.mkAfter [
-    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
-  ];
-  
 }

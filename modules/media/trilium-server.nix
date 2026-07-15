@@ -9,6 +9,10 @@ let
 in
 
 {
+  services.caddy.services.triliumnotes = {
+    port = 8088;
+  };
+
   services.trilium-server = {
     enable = true;
     dataDir = "${appdataDir}/data";

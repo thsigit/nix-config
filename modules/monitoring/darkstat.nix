@@ -15,6 +15,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    services.caddy.services.darkstat = {
+      port = 667;
+      visibility.tailscale = false;
+    };
+
+    services.darkstat.interface = lib.mkDefault "enp0s31f6";
     environment.systemPackages = [ pkgs.darkstat ];
 
     systemd.services.darkstat = {
