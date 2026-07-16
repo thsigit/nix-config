@@ -5,6 +5,10 @@
 *.swp
 *~
 
+# Nix build result
+result
+result-*
+
 # Windows
 Thumbs.db
 Desktop.ini
