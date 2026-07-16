@@ -24,7 +24,6 @@ in
     environment = {
       # LD_SUPERUSER_NAME = "admin";
       # LD_SUPERUSER_PASSWORD = "password";
-      LD_CONTEXT_PATH="linkding/";
     };
   };
   systemd.tmpfiles.rules = [

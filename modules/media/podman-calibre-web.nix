@@ -14,7 +14,7 @@ let
 in
 
 {
-  services.caddy.services.calibre-web = {
+  services.caddy.services.calibre = {
     port = 8083;
   };
 
