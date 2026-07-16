@@ -40,15 +40,17 @@
     sddm-sugar-dark
 
     (writeShellScriptBin "xfce-setup" ''
-      ${xfce.xfconf}/bin/xfconf-query \
+      ${xfconf}/bin/xfconf-query \
         -c xfce4-desktop \
         -p /backdrop/screen0/monitoreDP-1/workspace0/image-style \
-        -n -t int -s 1
-
-      ${xfce.xfconf}/bin/xfconf-query \
+        -t int \
+        -s 1
+      
+      ${xfconf}/bin/xfconf-query \
         -c xfce4-desktop \
         -p /backdrop/screen0/monitoreDP-1/workspace0/last-image \
-        -n -t string -s ${./PLANCIUS-1594-maps.jpg}
+        -t string \
+        -s ${../../assets/wallpaper.jpg}
     '')
   ];
 
