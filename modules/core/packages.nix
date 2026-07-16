@@ -11,7 +11,7 @@
     file binutils # low-level software-tools
 	openssl mkcert sops #security
     copyparty exiftool rmpc mpc mpv alsa-utils pulsemixer ncmpcpp yewtube musikcube yt-dlp #media
-    go git nodejs_22 jq yq sqlite alejandra # programming
+    go git gh nodejs_22 jq yq sqlite alejandra # programming
     apache-answer fzf tmuxai bc rink tlp # misc
   ];
 }

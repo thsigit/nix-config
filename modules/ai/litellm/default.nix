@@ -29,6 +29,6 @@
     };
 
     # Provided by secrets.nix
-    environmentFile = config.sops.secrets."litellm.yaml".path;
+    environmentFile = config.sops.secrets."litellm.env".path;
   };
 }
