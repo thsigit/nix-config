@@ -3,7 +3,7 @@
 {
   services.litellm.settings = {
     general_settings = {
-      database_url = "postgresql:///litellm?host=/run/postgresql";
+      # database_url = "postgresql:///litellm?host=/run/postgresql";
       master_key = "os.environ/LITELLM_MASTER_KEY";
     };
 

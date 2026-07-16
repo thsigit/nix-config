@@ -7,7 +7,8 @@
     ./settings.nix
     ./router.nix
     ./postgres.nix
-    (import ./models.nix { providers = import ./providers.nix; })
+    ./models.nix
+    ./fetch-models-service.nix
   ];
 
   services.caddy.services.litellm = {
@@ -23,7 +24,6 @@
     # Caddy will proxy requests.
     openFirewall = false;
 
-    # Disable cache to avoid prisma requirement
     environment = {
       LITELLM_DISABLE_CHAT_CACHE = "true";
     };

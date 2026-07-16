@@ -25,6 +25,7 @@
         "/homelab.home.arpa/100.65.109.117"
         "/wallabag.home.arpa/100.65.109.117"
         "/darkstat.home.arpa/100.65.109.117"
+        "/litellm.home.arpa/100.65.109.117"
       ];
 
     };
