@@ -20,6 +20,12 @@
   kenari = {
     env = "KENARI_API_KEY";
     prefix = "openai";
+    models = [
+      "deepseek-v4-flash:free"
+      "hy3:free"
+      "kimi-k2-7-code:free"
+      "mimo-v2-5"
+    ];
   };
   zai = {
     env = "ZHIPU_API_KEY";

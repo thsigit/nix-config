@@ -24,9 +24,11 @@ let
     in
     if apiBase == null then [ ]
     else if provider == null then [ ]
-    else map (modelId:
+    else
+    let modelIds = cfg.models or (builtins.attrNames provider.models);
+    in map (modelId:
       mkEntry providerKey prefix envVar modelId apiBase
-    ) (builtins.attrNames provider.models)
+    ) modelIds
   ) providers;
 
   freeModelList = lib.flatten (genModels freeProviders);
