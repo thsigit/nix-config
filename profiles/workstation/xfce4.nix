@@ -20,7 +20,8 @@
     defaultSession = "xfce";
     sddm = {
       enable = true;
-      theme = "pkgs.sddm-sugar-dark";
+	  extraPackages = [ pkgs.sddm-astronaut ];
+      theme = "sddm-astronaut";
     };
     autoLogin = {
       enable = true;
@@ -37,7 +38,6 @@
     xinit
     xfce4-whiskermenu-plugin
     bibata-cursors
-    sddm-sugar-dark
 
     (writeShellScriptBin "xfce-setup" ''
       ${xfconf}/bin/xfconf-query \
