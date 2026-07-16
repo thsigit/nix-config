@@ -13,33 +13,31 @@
   };
 
   outputs = { self, nixpkgs, hermes-agent, sops-nix, ... }:
-
+  
     let
       system = "x86_64-linux";
-
-      opencode-overlay = import ./pkgs/opencode;
-
+    
       commonSpecialArgs = {
         inherit hermes-agent;
       };
-
+    
       mkSystem = machine: profile:
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = commonSpecialArgs;
-
+    
           modules = [
             sops-nix.nixosModules.sops
             (./machines + "/${machine}")
             (./profiles + "/${profile}")
-            { nixpkgs.overlays = [ opencode-overlay ]; }
           ];
-        };
+        };	  
     in {
 
     nixosConfigurations = {
       homelab =
         mkSystem "portege-r30c" "homelab";
+
       workstation =
         mkSystem "portege-r30c" "workstation";
     };

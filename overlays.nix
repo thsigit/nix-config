@@ -1,3 +1,0 @@
-{
-  opencode = import ./pgs/opencode;
-}
