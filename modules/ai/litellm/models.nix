@@ -1,16 +1,16 @@
 # modules/ai/litellm/models.nix
-# Generates model data and writes to /srv/appdata/litellm/ for runtime use
+# Generates model data and writes to runtime directory for renderer
 
 { config, lib, pkgs, ... }:
 
 let
-  dataDir = "/srv/appdata/litellm";
+  state = config.litellm.state;
   jsonData = builtins.fromJSON (builtins.readFile ./models-dev.json);
   openProviders = import ./providers-open.nix;
   restrictedProviders = import ./providers-restricted.nix;
 
   mkEntry = providerKey: prefix: envVar: modelId: apiBase: {
-    model_name = modelId;
+    model_name = "${providerKey}/${modelId}";
     litellm_params = {
       model = if prefix == null then modelId else "${prefix}/${modelId}";
       api_base = apiBase;
@@ -70,24 +70,26 @@ in
     ("litellm: providers with free models but no configured API key: "
     + lib.concatStringsSep ", " (builtins.attrNames missingProviders));
 
-  # Write models.json to /srv/appdata/litellm/
   systemd.tmpfiles.rules = [
-    "d ${dataDir} 0755 sigit users -"
-    "C+ ${dataDir}/models.json 0644 sigit users - ${modelsJson}"
-    "e+ ${dataDir}/providers-enabled.json 0644 sigit users - - -"  # create if missing
+    "d ${state.dataDir} 0755 sigit users -"
     "d /etc/litellm 0755 root root -"
-    "C /etc/litellm/missing-providers.json 0644 root root - ${missingJson}"
   ];
 
-  # Write default providers-enabled.json (only if missing)
-  # The 'e+' in tmpfiles means: create if doesn't exist, don't overwrite
-  # We need a separate activation script for the JSON default
-  system.activationScripts.litellm-providers-enabled = lib.mkAfter ''
-    if [ ! -f ${dataDir}/providers-enabled.json ]; then
-      echo '{"aihubmix":true,"cohere":true,"nvidia":true,"openrouter":true,"kenari":true,"zai":true,"fireworks-ai":true}' > ${dataDir}/providers-enabled.json
-      chown sigit:users ${dataDir}/providers-enabled.json
+  # Activation scripts ensure files are synced on every rebuild
+  system.activationScripts.litellm-state = lib.mkAfter ''
+    # Copy models.json (always updated)
+    cp ${modelsJson} ${state.modelsJson}
+    chown sigit:users ${state.modelsJson}
+
+    # Create providers-enabled.json only if missing (preserves manual changes)
+    if [ ! -f ${state.providersEnabledJson} ]; then
+      echo '{"aihubmix":true,"cohere":true,"nvidia":true,"openrouter":true,"kenari":true,"zai":true,"fireworks-ai":true}' > ${state.providersEnabledJson}
+      chown sigit:users ${state.providersEnabledJson}
       echo "Created default providers-enabled.json"
     fi
+
+    # Copy missing providers data
+    cp ${missingJson} /etc/litellm/missing-providers.json
   '';
 
   environment.systemPackages = [

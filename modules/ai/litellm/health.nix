@@ -1,13 +1,11 @@
 # modules/ai/litellm/health.nix
-# Provider health monitoring for the AI gateway
+# Provider health monitoring — reads/writes from state paths
 
 { config, lib, pkgs, ... }:
 
 let
   cfg = config.services.litellm;
-  dataDir = "/srv/appdata/litellm";
-
-  enabledProvidersJson = "${dataDir}/providers-enabled.json";
+  state = config.litellm.state;
 
   # Provider registry — mirrors providers-open.nix and providers-restricted.nix
   providers = {
@@ -35,7 +33,7 @@ let
       env = "ZHIPU_API_KEY";
       api = "https://open.bigmodel.cn/api/paas/v4/models";
     };
-    fireworks-ai = {
+    "fireworks-ai" = {
       env = "FIREWORKS_API_KEY";
       api = "https://api.fireworks.ai/inference/v1/models";
     };
@@ -52,10 +50,10 @@ let
     export PATH="${lib.makeBinPath [ pkgs.curl pkgs.jq ]}:$PATH"
 
     PROVIDERS="${providerJson}"
-    STATE_FILE="${dataDir}/health.json"
+    STATE_FILE="${state.healthJson}"
+    ENABLED_FILE="${state.providersEnabledJson}"
 
     # Read enabled providers from JSON
-    ENABLED_FILE="${enabledProvidersJson}"
     if [ -f "$ENABLED_FILE" ]; then
       ENABLED=$(cat "$ENABLED_FILE")
     else
@@ -64,14 +62,15 @@ let
 
     # Filter providers to only enabled ones
     if [ "$ENABLED" = "{}" ]; then
-      CHECK_PROVIDERS="$PROVIDERS"
+      PROVIDER_SOURCE="$PROVIDERS"
     else
-      CHECK_PROVIDERS=$(jq --argjson enabled "$ENABLED" '
+      PROVIDER_SOURCE=$(mktemp)
+      jq --argjson enabled "$ENABLED" '
         to_entries | map(select(
-          (.key | split("/")[0]) as $name |
+          .key as $name |
           ($enabled | has($name)) and ($enabled[$name] == true)
         )) | from_entries
-      ' "$PROVIDERS")
+      ' "$PROVIDERS" > "$PROVIDER_SOURCE"
     fi
 
     check_provider() {
@@ -162,7 +161,7 @@ let
     fi
 
     # Read providers from JSON and check each
-    jq -r 'to_entries[] | "\(.key) \(.value.env) \(.value.api)"' "$CHECK_PROVIDERS" | \
+    jq -r 'to_entries[] | "\(.key) \(.value.env) \(.value.api)"' "$PROVIDER_SOURCE" | \
     while read -r name env_var api_url; do
       check_provider "$name" "$env_var" "$api_url"
     done
@@ -170,6 +169,11 @@ let
     echo
     echo "State saved to: $STATE_FILE"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    # Clean up temp file if we created one
+    if [ "$PROVIDER_SOURCE" != "$PROVIDERS" ]; then
+      rm -f "$PROVIDER_SOURCE"
+    fi
 
     # Summary from state file
     jq -r '
@@ -180,7 +184,7 @@ let
   # Quick status without network calls
   statusScript = pkgs.writeShellScriptBin "litellm-status" ''
     export PATH="${lib.makeBinPath [ pkgs.jq ]}:$PATH"
-    STATE_FILE="${dataDir}/health.json"
+    STATE_FILE="${state.healthJson}"
 
     if [ ! -f "$STATE_FILE" ]; then
       echo "No health data yet. Run: litellm-doctor"

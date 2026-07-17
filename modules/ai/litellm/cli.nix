@@ -4,7 +4,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  dataDir = "/srv/appdata/litellm";
+  state = config.litellm.state;
 
   enableScript = pkgs.writeShellScriptBin "litellm-enable-provider" ''
     export PATH="${lib.makeBinPath [ pkgs.jq ]}:$PATH"
@@ -21,7 +21,7 @@ let
     fi
 
     PROVIDER="$1"
-    ENABLED_FILE="${dataDir}/providers-enabled.json"
+    ENABLED_FILE="${state.providersEnabledJson}"
 
     if [ ! -f "$ENABLED_FILE" ]; then
       echo "Error: $ENABLED_FILE not found"
@@ -58,7 +58,7 @@ let
     fi
 
     PROVIDER="$1"
-    ENABLED_FILE="${dataDir}/providers-enabled.json"
+    ENABLED_FILE="${state.providersEnabledJson}"
 
     if [ ! -f "$ENABLED_FILE" ]; then
       echo "Error: $ENABLED_FILE not found"
@@ -83,8 +83,8 @@ let
   listScript = pkgs.writeShellScriptBin "litellm-providers" ''
     export PATH="${lib.makeBinPath [ pkgs.jq ]}:$PATH"
 
-    ENABLED_FILE="${dataDir}/providers-enabled.json"
-    MODELS_FILE="${dataDir}/models.json"
+    ENABLED_FILE="${state.providersEnabledJson}"
+    MODELS_FILE="${state.modelsJson}"
 
     echo "litellm providers — provider registry"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -95,8 +95,8 @@ let
       exit 0
     fi
 
-    # Get all providers from models.json
-    ALL_PROVIDERS=$(jq -r '[.[] | .litellm_params.model | split("/")[0]] | unique | .[]' "$MODELS_FILE")
+    # Get all providers from models.json (using model_name for provider identification)
+    ALL_PROVIDERS=$(jq -r '[.[] | .model_name | split("/")[0]] | unique | .[]' "$MODELS_FILE")
 
     # Get enabled providers
     if [ -f "$ENABLED_FILE" ]; then
@@ -107,7 +107,7 @@ let
 
     # Count models per provider
     for provider in $ALL_PROVIDERS; do
-      MODEL_COUNT=$(jq --arg p "$provider" '[.[] | select(.litellm_params.model | startswith($p + "/"))] | length' "$MODELS_FILE")
+      MODEL_COUNT=$(jq --arg p "$provider" '[.[] | select(.model_name | startswith($p + "/"))] | length' "$MODELS_FILE")
 
       if [ -n "$ENABLED" ] && echo "$ENABLED" | grep -q "^$provider$"; then
         icon="✓"
