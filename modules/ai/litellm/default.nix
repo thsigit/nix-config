@@ -1,18 +1,22 @@
 # modules/ai/litellm/default.nix
+# Composition entry point — imports all layers of the AI gateway controller
 
 { config, lib, pkgs, ... }:
 
 {
   imports = [
+    ./state.nix
     ./settings.nix
     ./router.nix
     ./postgres.nix
-    (import ./models.nix { providers = import ./providers.nix; })
+    ./models.nix
+    ./renderer.nix
+    ./health.nix
+    ./cli.nix
+    ./fetch-models-service.nix
   ];
 
-  services.caddy.services.litellm = {
-    port = 4000;
-  };
+  services.caddy.services.litellm.port = 4000;
 
   services.litellm = {
     enable = true;
@@ -20,15 +24,24 @@
     host = "127.0.0.1";
     port = 4000;
 
-    # Caddy will proxy requests.
     openFirewall = false;
 
-    # Disable cache to avoid prisma requirement
+    environmentFile = config.sops.secrets."litellm.env".path;
+
     environment = {
       LITELLM_DISABLE_CHAT_CACHE = "true";
     };
 
-    # Provided by secrets.nix
-    environmentFile = config.sops.secrets."litellm.env".path;
+    health.enable = true;
+
+    settings = {
+      general_settings = {
+        master_key = "os.environ/LITELLM_MASTER_KEY";
+      };
+      litellm_settings = {
+        json_logs = true;
+        drop_params = true;
+      };
+    };
   };
 }

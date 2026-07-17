@@ -9,7 +9,8 @@
     #./lidarr.nix
     #./pulseaudio.nix
 	#./pipewire.nix
-    ./podman-calibre-web.nix
+    # ./podman-calibre-web.nix
+    ./calibre-web.nix
     ./karakeep.nix
     ./podman-wallabag.nix
     ./podman-linkding.nix

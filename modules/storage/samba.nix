@@ -4,10 +4,8 @@
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    user 
-    directories;
-  mediaRoot = directories.media;
+  inherit (defaults) user;
+  inherit (defaults.directories) appdata media;
 in
 
 {
@@ -55,7 +53,7 @@ in
       };
 
       appdata = {
-        "path" = directories.appdata;
+        "path" = appdata;
         "writable" = "yes";
         "read only" = "no";
         "guest ok" = "yes";
@@ -64,7 +62,7 @@ in
         "directory mask" = "0755";
       };
 
-        web = {
+      web = {
         "path" = "/srv/www";
         "writable" = "yes";
         "valid users" = user.name;
@@ -75,7 +73,7 @@ in
 
       # Public (read-only)
       books = {
-        "path" = "${mediaRoot}/books";
+        "path" = "${media}/books";
         "read only" = "yes";
         "guest ok" = "yes";
         "valid users" = user.name;
@@ -83,7 +81,7 @@ in
       };
 
       music = {
-        "path" = "${mediaRoot}/music";
+        "path" = "${media}/music";
         "read only" = "yes";
         "guest ok" = "yes";
         "valid users" = user.name;
@@ -91,7 +89,7 @@ in
       };
 
       lyrics = {
-        "path" = "${mediaRoot}/lyrics";
+        "path" = "${media}/lyrics";
         "read only" = "yes";
         "guest ok" = "yes";
         "valid users" = user.name;
@@ -106,15 +104,11 @@ in
     hostname = "homelab";
   };
 
-  # Pastikan direktori ada (infra responsibility)
   systemd.tmpfiles.rules = [
-    "d ${mediaRoot} 0755 ${user.name} ${user.group} -"
-    "d ${mediaRoot}/books 0755 ${user.name} ${user.group} -"
-    "d ${mediaRoot}/music 0755 ${user.name} ${user.group} -"
-    "d ${mediaRoot}/lyrics 0755 ${user.name} ${user.group} -"
-
-    # "d ${mediaRoot}/uploads 0755 ${user.name} ${user.group} -"
-    # "d ${mediaRoot}/downloads 0755 ${user.name} ${user.group} -"
+    "d ${media} 0755 ${user.name} ${user.group} -"
+    "d ${media}/books 0755 ${user.name} ${user.group} -"
+    "d ${media}/music 0755 ${user.name} ${user.group} -"
+    "d ${media}/lyrics 0755 ${user.name} ${user.group} -"
   ];
 
   environment.systemPackages = with pkgs; [

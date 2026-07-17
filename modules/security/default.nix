@@ -9,5 +9,6 @@
     ./ssh.nix
     ./firewall.nix
     ./sops.nix
+    ./sudo.nix
   ];
 }

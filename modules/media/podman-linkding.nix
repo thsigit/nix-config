@@ -4,10 +4,10 @@
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    user 
-    directories;
-  appdataDir = "${directories.appdata}/linkding";
+  inherit (defaults) user;
+  inherit (defaults.directories) appdata;
+
+  appdataDir = "${appdata}/linkding";
 in
 
 {
@@ -26,6 +26,7 @@ in
       # LD_SUPERUSER_PASSWORD = "password";
     };
   };
+
   systemd.tmpfiles.rules = [
     "d ${appdataDir}/data 0755 ${user.name} ${user.group} -"
   ];

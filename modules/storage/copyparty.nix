@@ -1,11 +1,13 @@
+# modules/storage/copyparty.nix
+
 { config, pkgs, ... }:
 
 let
   defaults = import ../../settings;
-  inherit (defaults)
-    user
-    directories;
-  appdataDir = "${directories.appdata}/copyparty";
+  inherit (defaults) user;
+  inherit (defaults.directories) appdata;
+
+  appdataDir = "${appdata}/copyparty";
 in
 
 {

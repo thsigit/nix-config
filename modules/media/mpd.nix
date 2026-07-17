@@ -4,9 +4,8 @@
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    user 
-    directories;
+  inherit (defaults) user;
+  inherit (defaults.directories) media;
 in
 
 {
@@ -15,7 +14,7 @@ in
     user = user.name;
     startWhenNeeded = true;
     settings = {
-      music_directory = "${directories.media}/music";
+      music_directory = "${media}/music";
       audio_output = [
         {
           type = "pipewire";

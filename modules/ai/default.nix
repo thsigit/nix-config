@@ -6,7 +6,7 @@
   imports = [
     ./ollama.nix
 	./hermes.nix
-    #./litellm
+    ./litellm
 	#./llama-cpp.nix
 	./podman-vane.nix
 	./podman-localai.nix

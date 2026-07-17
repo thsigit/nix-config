@@ -1,15 +1,14 @@
-# modules/media/wallabag.nix
+# modules/media/podman-wallabag.nix
 
 { config, ... }:
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    user 
-    directories;
-  appdataDir = "${directories.appdata}/wallabag";
-in
+  inherit (defaults) user;
+  inherit (defaults.directories) appdata;
 
+  appdataDir = "${appdata}/wallabag";
+in
 
 {
   services.caddy.services.wallabag = {
@@ -29,6 +28,7 @@ in
       SYMFONY__ENV__DOMAIN_NAME = "https://wallabag.home.arpa/";
     };
   };
+
   systemd.tmpfiles.rules = [
     "d ${appdataDir}/data 0755 ${user.name} ${user.group} -"
     "d ${appdataDir}/images 0755 ${user.name} ${user.group} -"
