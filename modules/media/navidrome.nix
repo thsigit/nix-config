@@ -4,11 +4,10 @@
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    user 
-    directories;
-  appdataDir = "${directories.appdata}/navidrome";
-  mediaRoot = directories.media;
+  inherit (defaults) user;
+  inherit (defaults.directories) appdata media;
+
+  appdataDir = "${appdata}/navidrome";
 in
 
 {
@@ -23,7 +22,7 @@ in
 
     settings = {
       DataFolder = "${appdataDir}/data";
-      MusicFolder = "${mediaRoot}/music";
+      MusicFolder = "${media}/music";
       ScanSchedule = "1h";
       LogLevel = "info";
       SessionTimeout = "24h";
@@ -34,8 +33,8 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d ${mediaRoot} 0755 ${user.name} ${user.group} -"
-    "d ${mediaRoot}/music 0755 ${user.name} ${user.group} -"
+    "d ${media} 0755 ${user.name} ${user.group} -"
+    "d ${media}/music 0755 ${user.name} ${user.group} -"
     "d ${appdataDir}/data 0755 ${user.name} ${user.group} -"
   ];
 }

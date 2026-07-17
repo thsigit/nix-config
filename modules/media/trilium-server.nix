@@ -1,11 +1,12 @@
 # modules/media/trilium-server.nix
+
 { config, pkgs, ... }:
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    directories;
-  appdataDir = "${directories.appdata}/trillium";
+  inherit (defaults.directories) appdata;
+
+  appdataDir = "${appdata}/trillium";
 in
 
 {
@@ -24,9 +25,8 @@ in
     package = pkgs.trilium-server;
   };
 
-  # trilium-server menggunakan user/grups-nya sendiri
   systemd.tmpfiles.rules = [
     "d ${appdataDir} 0755 trilium trilium -"
     "d ${appdataDir}/data 0755 trilium trilium -"
-	];
+  ];
 }
