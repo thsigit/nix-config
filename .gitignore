@@ -5,6 +5,9 @@
 *.swp
 *~
 
+# README draft (review before committing)
+README.md
+
 # Nix build result
 result
 result-*
