@@ -1,10 +1,42 @@
-# LiteLLM — AI Gateway
+# LiteLLM — AI Gateway Controller
 
 ## Overview
 
-This module runs [LiteLLM](https://github.com/BerriAI/litellm) as a local AI proxy on port 4000, fronted by Caddy. The primary goal is to **aggregate LLM providers and models** under a single OpenAI-compatible API endpoint.
+This module runs [LiteLLM](https://github.com/BerriAI/litellm) as a local AI proxy on port 4000, fronted by Caddy. It acts as a **controller** — managing the full lifecycle from provider discovery to runtime config generation.
 
 Models are sourced from [models.dev](https://models.dev) (auto-fetched daily) and hardcoded provider configs. Each provider offers different models with varying rate limits and restrictions.
+
+## Architecture
+
+The system follows a layered controller pattern:
+
+```
+Discovery → Inventory → Policy → Renderer → Runtime
+```
+
+| Layer | Files | Purpose |
+|---|---|---|
+| **Discovery** | `fetch-models-service.nix`, `models-dev.json` | Source providers from models.dev |
+| **Inventory** | `models.nix`, `models.json` | Internal database of all models |
+| **Policy** | `providers-enabled.json`, `health.nix`, `router.nix` | What should be exposed |
+| **Renderer** | `renderer.nix`, `config.yaml` | Convert policy → LiteLLM config |
+| **Runtime** | LiteLLM service | Serves requests |
+
+### Data Flow
+
+```
+models.dev API
+  ↓ (daily fetch)
+models-dev.json
+  ↓ (Nix build: models.nix)
+models.json
+  ↓ (runtime filter: providers-enabled.json)
+renderer.nix
+  ↓ (ExecStartPre)
+config.yaml
+  ↓ (LiteLLM service)
+OpenAI-compatible API
+```
 
 ## Why LiteLLM
 
@@ -17,7 +49,7 @@ LiteLLM provides a unified `v1/chat/completions` interface across dozens of prov
 
 ## Provider Categories
 
-Providers and their models are split into two categories:
+Providers and their models are split into categories:
 
 ### Open
 
@@ -41,56 +73,71 @@ Defined in `providers-manual.nix`. Models that don't come from models.dev or nee
 
 **Current manual models:** gemini/gemini-2.5-flash-lite, ollama/llama3.2
 
-## Provider Management
+## Runtime State
 
-### Enable/Disable Providers
+Runtime files live in `/srv/appdata/litellm/`:
 
-Providers can be enabled or disabled using the CLI tools:
+| File | Purpose |
+|---|---|
+| `models.json` | Full model inventory (written at build time) |
+| `providers-enabled.json` | Which providers are enabled (runtime config, survives rebuilds) |
+| `config.yaml` | Generated LiteLLM config (written by renderer before each start) |
+| `health.json` | Provider health state (written by doctor) |
+
+### State Management
+
+- `models.json` — updated on every rebuild via activation script
+- `providers-enabled.json` — created only if missing (preserves manual changes)
+- `config.yaml` — regenerated before each service start
+- `health.json` — updated by hourly health check
+
+## CLI Tools
+
+### Provider Management
 
 ```bash
 # List all providers and their status
 litellm-providers
 
 # Disable a provider
-litellm-disable-provider kenari
+sudo litellm-disable-provider kenari
 
 # Enable a provider
-litellm-enable-provider kenari
+sudo litellm-enable-provider kenari
 ```
 
-After changing provider status, rebuild to apply:
+After changing provider status, restart the service:
 
 ```bash
-sudo nixos-rebuild switch --flake .#homelab
+sudo systemctl restart litellm
 ```
 
 ### Health Monitoring
 
-The gateway includes health monitoring for all providers:
-
 ```bash
-# Check health of all enabled providers
+# Check health of all enabled providers (requires API keys in env)
 sudo litellm-doctor
 
-# View cached health status
+# View cached health status (no API calls)
 litellm-status
 ```
 
-Health checks are performed hourly via systemd timer.
+Health checks run hourly via systemd timer.
 
 ## File Reference
 
 | File | Purpose |
 |---|---|
-| `default.nix` | Entry point. Enables litellm, configures Caddy proxy, sets env vars. |
+| `default.nix` | Composition entry point. Imports all layers, configures Caddy proxy. |
+| `state.nix` | Centralizes all runtime file paths (dataDir, models.json, etc.) |
 | `settings.nix` | LiteLLM general + litellm settings (master_key, json_logs, drop_params). |
-| `models.nix` | Core model generation logic. Reads providers + models-dev.json, builds the model list, emits warnings for unconfigured providers. |
+| `renderer.nix` | Renders config.yaml from models.json + providers-enabled.json. Owns ExecStart/Pre, ReadWritePaths. |
+| `models.nix` | Generates model inventory. Writes models.json + providers-enabled.json defaults. |
 | `providers-open.nix` | Open provider definitions (API endpoints, env vars, optional model whitelist). |
 | `providers-restricted.nix` | Restricted provider definitions (manually curated). |
 | `providers-manual.nix` | Hardcoded model entries that don't fit the provider framework. |
-| `providers-enabled.nix` | List of enabled providers. Managed by `litellm-enable-provider`/`litellm-disable-provider`. |
 | `health.nix` | Provider health monitoring, CLI tools, systemd timer. |
-| `router.nix` | Router settings placeholder (currently empty). |
+| `router.nix` | Router settings placeholder (future: policy layer). |
 | `postgres.nix` | PostgreSQL setup — currently unused (Prisma broken). Kept for when database backend is re-enabled. |
 | `fetch-models-service.nix` | Systemd timer + oneshot service for daily model snapshot updates. |
 | `fetch-models.sh` | Shell script: fetches models.dev API, filters for free models, auto-commits to git. |
@@ -98,23 +145,31 @@ Health checks are performed hourly via systemd timer.
 
 ## How Model Generation Works
 
-The `models.nix` module generates the LiteLLM `model_list` at Nix build time:
+The `models.nix` module generates the model inventory at Nix build time:
 
 1. `models-dev.json` is read and parsed as the source of truth for available providers and their free models.
 2. For each provider in `providers-open.nix`, the system looks up the provider in `models-dev.json` to get model IDs and the API base URL.
-3. Each model entry is expanded into a litellm config block with `model_name`, `model`, `api_base`, and `api_key` (from env var).
+3. Each model entry is expanded into a litellm config block with `model_name` (includes provider key), `model` (with API prefix), `api_base`, and `api_key`.
 4. Restricted and manual models are appended directly.
-5. Only enabled providers (from `providers-enabled.nix`) are included in the final model list.
-6. A warning is emitted at build time listing any providers in `models.dev` that have free models but no configured API key — these are "missed" providers we could onboard.
+5. `models.json` is written to `/srv/appdata/litellm/` via activation script.
+6. A warning is emitted at build time listing any providers in `models.dev` that have free models but no configured API key.
 
-The `litellm-missing` CLI tool (installed system-wide) shows the same info at runtime.
+## How Rendering Works
+
+The `renderer.nix` module converts policy to runtime config:
+
+1. On service start, `ExecStartPre` runs the `litellm-generate-config` script.
+2. Script reads `models.json` (full inventory) and `providers-enabled.json` (policy).
+3. Filters models to only enabled providers.
+4. Generates `config.yaml` for LiteLLM.
+5. Service starts with `--config /srv/appdata/litellm/config.yaml`.
 
 ## Provider Migration (open ↔ restricted)
 
 Moving a model between categories:
 
 - **open → restricted:** Remove from `providers-open.nix` (or its auto-populated model list) and add an entry to `providers-restricted.nix` with the appropriate env var.
-- **restricted → open:** Remove from `providers-restricted.nix`. If the provider is already in `providers-open.nix` and the model is in models.dev, it will be picked up automatically. Otherwise, add it to the provider's manual model list.
+- **restricted → open:** Remove from `providers-restricted.nix`. If the provider is already in `providers-open.nix` and the model is in models.dev, it will be picked up automatically.
 
 The goal is that this is a **one-line change** in each direction.
 
@@ -128,7 +183,3 @@ The `fetch-models` systemd timer runs daily:
 4. Auto-commits to git with message `auto: update free models snapshot`
 
 This keeps the model catalog current without manual intervention. New free models from supported providers appear automatically after the next rebuild.
-
----
-
-_Auto-generated by opencode_
