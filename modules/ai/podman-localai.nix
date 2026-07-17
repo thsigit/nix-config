@@ -1,14 +1,13 @@
 # modules/ai/podman-localai.nix
+
 { config, pkgs, lib, ... }:
 
 let
   defaults = import ../../settings;
+  inherit (defaults) user ai;
+  inherit (defaults.directories) appdata;
 
-  inherit (defaults)
-    user
-    directories
-    ai;
-  appdataDir = "${directories.appdata}/localai";
+  appdataDir = "${appdata}/localai";
 in
 
 {

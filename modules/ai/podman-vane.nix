@@ -1,13 +1,13 @@
 # modules/ai/podman-vane.nix
+
 { config, pkgs, lib, ... }:
 
 let
   defaults = import ../../settings;
-  inherit (defaults) 
-    user 
-    directories 
-    baseEnv;
-  appdataDir = "${directories.appdata}/vane";
+  inherit (defaults) user baseEnv;
+  inherit (defaults.directories) appdata;
+
+  appdataDir = "${appdata}/vane";
 in
 
 {
