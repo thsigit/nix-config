@@ -11,16 +11,16 @@
       description = "Base directory for litellm runtime state";
     };
 
+    providersJson = lib.mkOption {
+      type = lib.types.path;
+      default = "/srv/appdata/litellm/providers.json";
+      description = "Provider policy + connection (runtime config, admin-owned)";
+    };
+
     modelsJson = lib.mkOption {
       type = lib.types.path;
       default = "/srv/appdata/litellm/models.json";
-      description = "Full model inventory (generated at build time)";
-    };
-
-    providersEnabledJson = lib.mkOption {
-      type = lib.types.path;
-      default = "/srv/appdata/litellm/providers-enabled.json";
-      description = "Which providers are enabled (runtime config)";
+      description = "Canonical model inventory (runtime mirror of the committed snapshot)";
     };
 
     configYaml = lib.mkOption {

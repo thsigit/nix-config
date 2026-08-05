@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# litellm-enable-provider — enable a provider in providers.json
+set -euo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: this command must be run as root (sudo)"
+  exit 1
+fi
+
+if [ $# -eq 0 ]; then
+  echo "Usage: litellm-enable-provider <provider-name>"
+  echo "Example: litellm-enable-provider kenari"
+  exit 1
+fi
+
+PROVIDER="$1"
+STATE_DIR="${LITELLM_STATE_DIR:-/srv/appdata/litellm}"
+PROVIDERS_JSON="${LITELLM_PROVIDERS_JSON:-$STATE_DIR/providers.json}"
+LOCK_FILE="$STATE_DIR/providers.json.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -x -w 5 9; then
+  echo "Error: another process is modifying $PROVIDERS_JSON. Try again."
+  exit 1
+fi
+
+if [ ! -f "$PROVIDERS_JSON" ]; then
+  echo "Error: $PROVIDERS_JSON not found"
+  exit 1
+fi
+
+if ! jq -e "has(\"$PROVIDER\")" "$PROVIDERS_JSON" >/dev/null 2>&1; then
+  echo "Error: provider '$PROVIDER' not found in $PROVIDERS_JSON"
+  exit 1
+fi
+
+jq ".\"$PROVIDER\".enabled = true" "$PROVIDERS_JSON" > "$PROVIDERS_JSON.tmp" \
+  && mv "$PROVIDERS_JSON.tmp" "$PROVIDERS_JSON"
+
+echo "Enabled provider: $PROVIDER"
+echo "litellm-config will auto-restart the podman-litellm container shortly (via path unit)."
+echo "Done. Provider '$PROVIDER' is now enabled."

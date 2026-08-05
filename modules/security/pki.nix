@@ -41,13 +41,19 @@ in
     description = "Generate and Trust Homelab Internal CA";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-tmpfiles-setup.service" ];
-    path = [ pkgs.openssl pkgs.coreutils ];
+    path = [ pkgs.openssl pkgs.coreutils pkgs.systemd ];
+    # Tanpa RemainAfterExit: oneshot ini idempotent dan HARUS di-run ulang
+    # tiap `nixos-rebuild switch`/boot. Dengan RemainAfterExit=true, unit yang
+    # sudah "active (exited)" tidak pernah di-run ulang saat switch, sehingga
+    # /etc/ssl/homelab yang terhapus manual tidak ter-regenerate.
     serviceConfig = {
       Type = "oneshot";
-      RemainAfterExit = true;
     };
     script = ''
       set -euxo pipefail
+
+      # Pastikan dir ada tanpa bergantung pada timing systemd-tmpfiles.
+      install -d -m0750 -o root -g caddy ${sslDir}
 
       # Generate CA key jika belum ada
       if [ ! -f ${sslDir}/homelab-ca.key ]; then
@@ -67,35 +73,56 @@ in
         # Trust CA via security.pki.certificateFiles di configuration.nix.
         # Copy ke /etc/ssl/certs/ hanya sebagai referensi mudah, bukan trust.
         cp ${sslDir}/homelab-ca.crt /etc/ssl/certs/homelab-ca.pem
+
+        # CA baru dibuat → leaf lama (kalau ada) ditandatangani CA lama dan
+        # rantai kepercayaannya putus. Hapus leaf + hash agar homelab-cert
+        # meng-generate ulang leaf yang ditandatangani CA baru, lalu tandai
+        # perlu reload Caddy (Caddy meng-cache cert di memori).
+        rm -f ${sslDir}/homelab.crt ${sslDir}/homelab.cnf.hash
+        NEW_CA=1
       fi
 
       chmod 640 ${sslDir}/homelab-ca.key
       chmod 644 ${sslDir}/homelab-ca.crt
       chown root:caddy ${sslDir}/homelab-ca.key
       chown root:root  ${sslDir}/homelab-ca.crt
+
+      # Bila CA baru saja diregenerasi: regen leaf lalu reload Caddy.
+      # homelab-cert idempotent — akan membuat leaf baru karena kita hapus di atas.
+      if [ "''${NEW_CA:-0}" = "1" ]; then
+        systemctl start homelab-cert.service || true
+        if systemctl is-active --quiet caddy.service; then
+          systemctl reload-or-restart caddy.service || true
+        fi
+      fi
     '';
   };
 
   # ── 2. Trust CA ke system store NixOS (deklaratif) ───────────────────────
   # Ini pengganti update-ca-certificates yang tidak ada di NixOS.
-  # Dibaca saat nixos-rebuild, jadi CA harus sudah ada sebelumnya
-  # (bootstrap pertama: rebuild lagi setelah homelab-ca.service jalan).
-  security.pki.certificateFiles = lib.mkIf
-    (builtins.pathExists "${sslDir}/homelab-ca.crt")
-    [ "${sslDir}/homelab-ca.crt" ];
+  # CA di-commit ke repo sebagai store path (sandbox-safe). Jika CA runtime
+  # diregenerasi (hapus /etc/ssl/homelab/homelab-ca.crt lalu reboot), update
+  # modules/security/homelab-ca.crt agar bundle trust mengikuti.
+  security.pki.certificateFiles = [ ./homelab-ca.crt ];
 
   # ── 3. Generate Homelab Wildcard Certificate ──────────────────────────────
   systemd.services.homelab-cert = {
     description = "Generate Homelab Wildcard Certificate";
     wantedBy = [ "multi-user.target" ];
+    # requires + after: cert tidak boleh jalan tanpa CA (After= hanya ordering).
+    requires = [ "homelab-ca.service" ];
     after = [ "homelab-ca.service" ];
-    path = [ pkgs.openssl pkgs.coreutils ];
+    path = [ pkgs.openssl pkgs.coreutils pkgs.systemd ];
+    # Tanpa RemainAfterExit — lihat catatan di homelab-ca. Script idempotent:
+    # regen hanya bila cert hilang atau SAN berubah (hash .cnf).
     serviceConfig = {
       Type = "oneshot";
-      RemainAfterExit = true;
     };
     script = ''
       set -euxo pipefail
+
+      # Pastikan dir ada tanpa bergantung pada timing systemd-tmpfiles.
+      install -d -m0750 -o root -g caddy ${sslDir}
 
       # Tulis config — selalu di-overwrite agar hash bisa dibandingkan
       cat > ${sslDir}/homelab.cnf <<EOF
@@ -159,6 +186,13 @@ EOF
 
         # Cleanup
         rm -f ${sslDir}/homelab.csr
+
+        # Cert berubah (mis. LAN service baru → SAN bertambah). Caddy meng-cache
+        # cert di memori, jadi harus di-reload agar menyajikan cert baru.
+        # Hanya reload bila caddy sedang jalan (aman saat bootstrap awal).
+        if systemctl is-active --quiet caddy.service; then
+          systemctl reload-or-restart caddy.service || true
+        fi
       fi
 
       chmod 640 ${sslDir}/homelab.key

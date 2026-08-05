@@ -11,7 +11,7 @@
     ../../modules/monitoring # cockpit, darkstat, mrtg
     ../../modules/caddy # caddy reverse proxy
     ../../modules/media # pipewire and alsa
-    ../../modules/ai # ollama etc
+    #../../modules/ai # ollama etc
     ./xfce4.nix
     ./packages.nix
   ];

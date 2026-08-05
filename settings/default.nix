@@ -14,11 +14,13 @@ let
   directories = {
     media   = "/srv/media";
     appdata = "/srv/appdata";
+    www     = "/srv/www";
   };
 
   ai = {
     root = "/srv/ai";
     models = "/srv/ai/models";
+    repo = "/srv/repo/nix-config";
   };
 
   tailnet = "basa-komodo";

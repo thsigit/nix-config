@@ -20,6 +20,7 @@ in
     ports = [ "8089:3000" ];
     volumes = [
       "${appdataDir}/data:/home/vane/data"
+      "${appdataDir}/searxng:/etc/searxng"
     ];
     environment = baseEnv;
     autoStart = true;
@@ -28,5 +29,6 @@ in
   systemd.tmpfiles.rules = [
     "d ${appdataDir} 0755 ${user.name} ${user.group} -"
     "d ${appdataDir}/data 0755 ${user.name} ${user.group} -"
+    "d ${appdataDir}/searxng 0755 ${user.name} ${user.group} -"
   ];
 }

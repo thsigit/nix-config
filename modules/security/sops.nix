@@ -15,6 +15,9 @@
   sops.secrets."providers.env" = {
     sopsFile = ../../secrets/providers.env;
     format = "dotenv";
+    owner = "sigit";
+    group = "users";
+    mode = "0440";
   };
 
   environment.systemPackages = with pkgs; [

@@ -3,18 +3,18 @@
 { config, lib, pkgs, ... }:
 
 {
-  boot.uki.name = "UKI";
+  # boot.uki.name = "UKI";
   boot.loader = {
     systemd-boot = {
       enable = false;
-      configurationLimit = 3;
+      configurationLimit = 20;
     };
     grub = {
       enable = true;
       efiSupport = true;
       device = "nodev";
       gfxmodeEfi = "text";
-      configurationLimit = 3;
+      configurationLimit = 20;
       useOSProber = false;
     };
     efi = {

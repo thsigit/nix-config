@@ -5,8 +5,6 @@
     ./samba.nix
     ./vsftpd.nix
     ./copyparty.nix
-    # ./filemount.nix
-    # ./rsync.nix
   ];
 
 }

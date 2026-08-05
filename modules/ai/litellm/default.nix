@@ -1,47 +1,23 @@
 # modules/ai/litellm/default.nix
-# Composition entry point — imports all layers of the AI gateway controller
+# AI gateway — just imports
+#
+# Disabled by default (2026-07-18): runtime moved to podman-litellm.
+# Kept in tree as reference/codebase for the operational wrapper layer.
 
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 
 {
+  options.litellm.enable = lib.mkEnableOption "LiteLLM AI gateway (systemd-native)";
+
   imports = [
     ./state.nix
     ./settings.nix
     ./router.nix
     ./postgres.nix
-    ./models.nix
-    ./renderer.nix
-    ./health.nix
+    ./gateway.nix
+    ./activation.nix
     ./cli.nix
-    ./fetch-models-service.nix
+    ./maintenance.nix
+    ./service.nix
   ];
-
-  services.caddy.services.litellm.port = 4000;
-
-  services.litellm = {
-    enable = true;
-    package = pkgs.litellm;
-    host = "127.0.0.1";
-    port = 4000;
-
-    openFirewall = false;
-
-    environmentFile = config.sops.secrets."litellm.env".path;
-
-    environment = {
-      LITELLM_DISABLE_CHAT_CACHE = "true";
-    };
-
-    health.enable = true;
-
-    settings = {
-      general_settings = {
-        master_key = "os.environ/LITELLM_MASTER_KEY";
-      };
-      litellm_settings = {
-        json_logs = true;
-        drop_params = true;
-      };
-    };
-  };
 }

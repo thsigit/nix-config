@@ -2,6 +2,13 @@
 
 { config, pkgs, ... }:
 
+let
+  defaults = import ../../settings;
+  inherit (defaults.directories) www;
+
+  mrtgDir = "${www}/mrtg";
+in
+
 {
   services.snmpd = {
     enable = true;
@@ -26,11 +33,11 @@
     serviceConfig = {
       Type = "oneshot";
       User = "sigit";
-      WorkingDirectory = "/srv/www/mrtg";
+      WorkingDirectory = mrtgDir;
     };
 
     script = ''
-      ${pkgs.mrtg}/bin/mrtg /srv/www/mrtg/mrtg.cfg
+      ${pkgs.mrtg}/bin/mrtg ${mrtgDir}/mrtg.cfg
     '';
   };
 
@@ -42,5 +49,4 @@
       OnUnitActiveSec = "5min";
     };
   };
-
 }

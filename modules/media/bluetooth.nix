@@ -5,10 +5,10 @@
 {
   hardware.bluetooth = {
     enable = true;
-    settings = {
-      General = {
-        Enable = "Source,Sink,Media,Control";
-      };
-    };
+    # settings = {
+    #  General = {
+    #    Enable = "Source,Sink,Media,Control";
+    #  };
+    # };
   };
 }

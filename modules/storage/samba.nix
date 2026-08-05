@@ -95,6 +95,78 @@ in
         "valid users" = user.name;
         "write list" = user.name;
       };
+
+      # XDG user dirs (writable, private)
+      desktop = {
+        "path" = "${media}/desktop";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+
+      documents = {
+        "path" = "${media}/documents";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+
+      downloads = {
+        "path" = "${media}/downloads";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+      pictures = {
+        "path" = "${media}/pictures";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+
+      projects = {
+        "path" = "${media}/projects";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+
+      public = {
+        "path" = "${media}/public";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+
+      templates = {
+        "path" = "${media}/templates";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
+
+      videos = {
+        "path" = "${media}/videos";
+        "writable" = "yes";
+        "valid users" = user.name;
+        "force user" = user.name;
+        "create mask" = "0644";
+        "directory mask" = "0755";
+      };
     };
   };
 

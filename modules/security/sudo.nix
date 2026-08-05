@@ -16,6 +16,8 @@ in
           { command = "ALL"; options = [ "NOPASSWD" ]; }
         ];
       }
+      # Require a password for nixos-rebuild even though passwordless sudo is
+      # otherwise allowed. Intentional: prevents accidental/unattended rebuilds.
       {
         users = [ user.name ];
         commands = [

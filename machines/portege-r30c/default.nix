@@ -7,7 +7,7 @@
     ./hardware-configuration.nix
   ];
 
-  boot.kernelParams = lib.mkAfter [
-    "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
-  ];
+  # boot.kernelParams = lib.mkAfter [
+  #   "initcall_blacklist=atkbd_init" # physical laptop keyboard disabled
+  # ];
 }

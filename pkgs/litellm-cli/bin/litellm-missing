@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# litellm-missing — show enabled providers whose API key env var is not set
+set -euo pipefail
+
+export PATH="@jq@/bin:$PATH"
+
+STATE_DIR="${LITELLM_STATE_DIR:-/srv/appdata/litellm}"
+PROVIDERS_JSON="${LITELLM_PROVIDERS_JSON:-$STATE_DIR/providers.json}"
+
+if [ ! -f "$PROVIDERS_JSON" ]; then
+  echo "No providers.json found."
+  exit 0
+fi
+
+jq -r '
+  to_entries[]
+  | select(.value.enabled == true)
+  | .value.connection.api_key_env // "" as $key
+  | select($key != "")
+  | .key as $name
+  | ($key | env) as $val
+  | select($val == "" or $val == null)
+  | "\($name): API key \($key) is not set"
+' "$PROVIDERS_JSON"

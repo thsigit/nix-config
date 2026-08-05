@@ -4,7 +4,7 @@
 
 {  
   imports = [
-    ./insecure-packages.nix
+    #./insecure-packages.nix
     ./pki.nix
     ./ssh.nix
     ./firewall.nix
