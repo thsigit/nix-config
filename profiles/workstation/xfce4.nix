@@ -158,6 +158,9 @@ in
     };
   };
 
+  programs.xfconf.enable = true;
+  programs.thunar.enable = true;
+
   environment.sessionVariables = {
     XCURSOR_THEME = "Bibata-Modern-Ice";
     XCURSOR_SIZE = "24";
