@@ -10,12 +10,25 @@ let
     "home.arpa"
   ];
 
+  # Domain layanan yang selalu masuk SAN, terlepas dari status enable service.
+  # Auto-generate dari services.caddy.services hanya menjaring service yang
+  # AKTIF; service yang direferensikan di dnsmasq/hosts tapi nonaktif (mis.
+  # darkstat, litellm, bitrouter) atau di-archive (wallabag, localai) tetap
+  # perlu SAN eksplisit agar TLS valid saat diakses.
+  extraDomains = [
+    "darkstat.home.arpa"
+    "litellm.home.arpa"
+    "bitrouter.home.arpa"
+    "wallabag.home.arpa"
+    "localai.home.arpa"
+  ];
+
   caddyServices = config.services.caddy.services or { };
   lanServices = lib.filterAttrs (name: svc: svc.visibility.lan) caddyServices;
   serviceDomains = [ "homelab.home.arpa" ] ++
     lib.mapAttrsToList (name: svc: "${name}.home.arpa") lanServices;
 
-  allDomains = baseDomains ++ serviceDomains;
+  allDomains = lib.unique (baseDomains ++ serviceDomains ++ extraDomains);
 
   # Dipakai untuk SAN di cert (section [v3_ext] terpisah dari [req_ext])
 
