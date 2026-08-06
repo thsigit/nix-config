@@ -14,6 +14,9 @@
     ./htop.nix
     ./bandwhich.nix
     ./iftop.nix
+    ./tcpdump.nix
+    ./traceroute.nix
+    ./wireshark.nix
   ];
 
   environment.systemPackages = with pkgs; [
@@ -31,7 +34,7 @@
     sqlite alejandra
     tlp
     tmuxai apache-answer
-    dig mtr nmap tshark tcpdump traceroute net-tools inetutils ethtool iw nftables
+    dig mtr nmap tshark net-tools inetutils ethtool iw nftables
     lshw lsof smartmontools lm_sensors libinput evtest pciutils fetchutils usbutils
     parted gptfdisk efibootmgr dmidecode psmisc
     mpv yt-dlp
