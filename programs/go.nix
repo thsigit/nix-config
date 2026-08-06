@@ -1,7 +1,0 @@
-# programs/go.nix
-{ config, lib, pkgs, ... }:
-{
-  environment.systemPackages = with pkgs; [
-    go
-  ];
-}
