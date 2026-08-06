@@ -16,16 +16,16 @@
       bind-interfaces = true;
       listen-address = [
         "127.0.0.1"
-        "100.65.109.117"
+        "100.85.193.9"
         "192.168.1.3"
       ];
 
       # Local homelab domains
       address = [
-        "/homelab.home.arpa/100.65.109.117"
-        "/wallabag.home.arpa/100.65.109.117"
-        "/darkstat.home.arpa/100.65.109.117"
-        "/litellm.home.arpa/100.65.109.117"
+        "/homelab.home.arpa/100.85.193.9"
+        "/wallabag.home.arpa/100.85.193.9"
+        "/darkstat.home.arpa/100.85.193.9"
+        "/litellm.home.arpa/100.85.193.9"
       ];
 
     };
