@@ -5,7 +5,9 @@
 
 {
   imports = [
-    ./shell.nix
+    ./ydotool.nix
+    ./bash.nix
+    ./tmux.nix
   ];
 
   environment.systemPackages = with pkgs; [
