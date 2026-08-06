@@ -1,4 +1,4 @@
-# AGENTS.md — nix-config
+# AGENTS.md — nix-lab
 
 Instructions for coding agents working in this repo. Read this first.
 
@@ -23,8 +23,7 @@ Also `failsafe` = minimal recovery profile.
 - `#homelab` and `#workstation` are the SAME hardware. The only divergence today
   is headless vs desktop GUI. **Keep it that way** — do not add meaningful
   differences between the two profiles beyond that.
-- `/srv/repo/nix-lab` is the **archived** reference repo (do not edit). The active
-  repo is `/srv/repo/nix-config` (branch `main`).
+- `/srv/repo/nix-lab` is the **active** repo (branch `main`). `/srv/repo/nix-config` is the **stable** repo. GitHub's nix-config is the **rolling release**.
 
 ## Operating constraints (hard rules — do not "fix" them away)
 

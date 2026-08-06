@@ -5,9 +5,7 @@
 {
   environment.systemPackages = with pkgs; [
     deskflow
-    microsoft-edge
+    google-chrome
     cudatext
-    plano-theme
-    vimix-icon-theme
   ];
 }
