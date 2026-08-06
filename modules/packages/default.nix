@@ -1,9 +1,25 @@
-# programs/packages.nix
-# All interactive applications and user-invoked tools (except shell config).
+# modules/packages/default.nix
+# All interactive applications (user-invoked) and installed packages.
 
 { config, lib, pkgs, ... }:
 
 {
+  imports = [
+    ./ydotool.nix
+    ./bash.nix
+    ./tmux.nix
+    ./vim.nix
+    ./git.nix
+    ./fzf.nix
+    ./htop.nix
+    ./bandwhich.nix
+    ./iftop.nix
+    ./iotop.nix
+    ./tcpdump.nix
+    ./traceroute.nix
+    ./wireshark.nix
+  ];
+
   environment.systemPackages = with pkgs; [
     bc rink
     copyparty exiftool

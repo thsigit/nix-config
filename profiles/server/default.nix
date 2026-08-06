@@ -4,7 +4,7 @@
   imports = [
     ../../system
     #../../modules/ap
-    ../../programs
+    ../../modules/packages
     ../../modules
   ];
 }
