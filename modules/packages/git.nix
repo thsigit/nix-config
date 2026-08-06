@@ -1,4 +1,4 @@
-# programs/git.nix
+# modules/packages/git.nix
 
 { config, lib, pkgs, ... }:
 

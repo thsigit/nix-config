@@ -1,4 +1,4 @@
-# programs/vim.nix
+# modules/packages/vim.nix
 
 { config, lib, pkgs, ... }:
 

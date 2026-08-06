@@ -1,4 +1,4 @@
-# programs/tmux.nix
+# modules/packages/tmux.nix
 { config, lib, pkgs, ... }:
 {
   programs.tmux = {

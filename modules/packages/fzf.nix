@@ -1,4 +1,4 @@
-# programs/fzf.nix
+# modules/packages/fzf.nix
 
 { config, lib, pkgs, ... }:
 
