@@ -5,7 +5,7 @@
     ../../system
     #../../modules/ap
     ../../programs
-    ../../services
+    ../../modules
     ./xfce4.nix
     ./packages.nix
   ];

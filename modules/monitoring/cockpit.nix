@@ -1,0 +1,20 @@
+# modules/monitoring/cockpit.nix
+{ config, lib, pkgs, ... }:
+{
+  environment.etc = {
+    "cockpit/ws-certs.d/50-homelab.cert".source = "/etc/ssl/homelab/homelab.crt";
+    "cockpit/ws-certs.d/50-homelab.key".source = "/etc/ssl/homelab/homelab.key";
+  };
+  services.cockpit = {
+    enable = true;
+    port = 9090;
+    settings = {
+      WebService = {
+        ClientCertAuthentication = true;
+        AllowUnencrypted = false;
+        Origins = lib.mkForce "https://homelab.home.arpa:9090";
+      };
+    };
+    plugins = [ pkgs.cockpit-files pkgs.cockpit-podman ];
+  };
+}

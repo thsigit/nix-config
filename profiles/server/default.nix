@@ -5,6 +5,6 @@
     ../../system
     #../../modules/ap
     ../../programs
-    ../../services
+    ../../modules
   ];
 }
