@@ -1,5 +1,5 @@
-# modules/ai/vane.nix
-# Vane (SearXNG-based) — enable + config only.
+# modules/ai/vane-container.nix
+# Vane (SearXNG-based) — container runtime + config only.
 
 { config, pkgs, lib, ... }:
 

@@ -3,9 +3,10 @@
 {
   imports = [
     ./llama-cpp.nix
-    ./vane.nix
+    ./vane-container.nix
     ./opencode.nix
     ./bitrouter.nix
     ./litellm.nix
+    # ./litellm-container.nix  # container variant (disabled reference)
   ];
 }

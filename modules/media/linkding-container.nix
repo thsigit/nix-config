@@ -1,4 +1,6 @@
-# modules/media/linkding.nix
+# modules/media/linkding-container.nix
+# Linkding (self-hosted bookmark manager) — container runtime + config.
+
 { config, ... }:
 let
   defaults = import ../../settings;
