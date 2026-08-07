@@ -10,12 +10,12 @@ in
     enable = true;
     listenAddress = "127.0.0.1";
     port = 161;
-    configText = 
+    configText = ''
       rocommunity public 127.0.0.1
       syslocation Tamalate, Makassar
       syscontact sigit@homelab
       sysname homelab
-    ;
+    '';
   };
   environment.systemPackages = with pkgs; [ mrtg net-snmp ];
   systemd.services.mrtg = {
