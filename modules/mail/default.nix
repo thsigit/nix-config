@@ -5,7 +5,6 @@
 { ... }:
 {
   services.mailpit.instances.default = {
-    enable = true;
     smtp = "127.0.0.1:1025";
     listen = "127.0.0.1:8025";
   };
