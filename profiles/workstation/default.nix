@@ -3,8 +3,6 @@
 {
   imports = [
     ../../system
-    #../../modules/ap
-    ../../modules/packages
     ../../modules
     ./xfce4.nix
     ./packages.nix

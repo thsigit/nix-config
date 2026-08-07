@@ -6,7 +6,9 @@
     ./vane-container.nix
     ./opencode.nix
     ./bitrouter.nix
-    ./litellm.nix
-    # ./litellm-container.nix  # container variant (disabled reference)
+    ./litellm-container.nix
   ];
+
+  ai.podmanLitellm.enable = true;
+  ai.litellmConfig.enable = true;
 }

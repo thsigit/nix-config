@@ -1,12 +1,14 @@
 # modules/ai/litellm-container.nix
 # LiteLLM gateway (Podman container) — runtime + config layer.
 #
-# DISABLED by default. The active runtime is the systemd-native ./litellm.nix.
-# To switch to the container instead:
+# ACTIVE runtime. The systemd-native ./litellm.nix is disabled.
+# Toggled on via modules/ai/default.nix:
 #   ai.podmanLitellm.enable = true;
 #   ai.litellmConfig.enable = true;
 #
 # Volumes live under /srv/appdata/litellm-container.
+# DB credentials are provided by modules/db: database.env (DATABASE_URL) is
+# generated at activation and mounted here alongside the sops litellm.env.
 
 { config, pkgs, lib, ... }:
 
@@ -108,9 +110,11 @@ in
         environment = {
           LITELLM_DISABLE_CHAT_CACHE = "true";
         };
-        # Mount sops-derived env (master key, provider keys) into the container.
+        # Mount sops-derived env (master key, provider keys) + the db module's
+        # generated DATABASE_URL into the container.
         environmentFiles = [
           config.sops.secrets."litellm.env".path
+          "${appdataDir}/database.env"
         ];
         autoStart = true;
       };

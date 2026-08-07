@@ -4,11 +4,14 @@
 {
   imports = [
     ./ai
+    ./db
+    # ./ap
     ./mail
     ./media
     ./monitoring
-    ./web
     ./network
+    ./packages
     ./storage
+    ./web
   ];
 }
