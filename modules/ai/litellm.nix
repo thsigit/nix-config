@@ -1,14 +1,16 @@
 # modules/ai/litellm.nix
 # LiteLLM AI gateway — systemd-native runtime (upstream services.litellm).
-# State/configurable settings live under /srv/appdata/litellm (no /var/lib).
+# State/configurable settings live under ${appdata}/litellm (no /var/lib).
 # Container variant: ./litellm-container.nix (disabled reference).
 
 { config, lib, pkgs, ... }:
 
 let
-  stateDir = "/srv/appdata/litellm";
-  user = "sigit";
-  group = "users";
+  defaults = import ../../settings;
+  inherit (defaults) user;
+  inherit (defaults.directories) appdata;
+
+  stateDir = "${appdata}/litellm";
 in
 {
   services.caddy.services.litellm = { port = 4000; };
@@ -41,19 +43,19 @@ in
     };
   };
 
-  # Run as sigit (not the upstream DynamicUser) so the state dirs under
-  # /srv/appdata are writable; drop the upstream /var/lib StateDirectory.
+  # Run as the declared user (not the upstream DynamicUser) so the state dirs
+  # under ${appdata} are writable; drop the upstream /var/lib StateDirectory.
   systemd.services.litellm.serviceConfig = {
     DynamicUser = lib.mkForce false;
-    User = lib.mkForce user;
+    User = lib.mkForce user.name;
     StateDirectory = lib.mkForce [ ];
   };
 
   # Appended after the upstream ui/tiktoken-cache rules for the same paths,
   # so these ownership/mode settings win.
   systemd.tmpfiles.rules = [
-    "d ${stateDir} 0755 ${user} ${group} -"
-    "d ${stateDir}/ui 0700 ${user} ${group} -"
-    "d ${stateDir}/tiktoken-cache 0700 ${user} ${group} -"
+    "d ${stateDir} 0755 ${user.name} ${user.group} -"
+    "d ${stateDir}/ui 0700 ${user.name} ${user.group} -"
+    "d ${stateDir}/tiktoken-cache 0700 ${user.name} ${user.group} -"
   ];
 }
