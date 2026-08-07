@@ -4,6 +4,7 @@
 {
   imports = [
     ./ai
+    ./mail
     ./media
     ./monitoring
     ./web
