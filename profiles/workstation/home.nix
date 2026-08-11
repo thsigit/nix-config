@@ -18,7 +18,9 @@
 
   programs.git = {
     enable = true;
-    userName = "Sigit Prasetyo";
-    userEmail = "sigit.prasetyo@home.arpa";
+    settings = {
+      user.name = "Sigit Prasetyo";
+      user.email = "sigit.prasetyo@home.arpa";
+    };
   };
 }
