@@ -1,5 +1,18 @@
 {
   "nodes": {
+    "litellm-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786379513,
+        "narHash": "sha256-OmsMhJMDY96Xq2WE0jUwTtNtf6BxDCEeuQaegjKssTs=",
+        "path": "/srv/repo/nix-lab/pkgs/litellm-cli",
+        "type": "path"
+      },
+      "original": {
+        "path": "/srv/repo/nix-lab/pkgs/litellm-cli",
+        "type": "path"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1782535326,
@@ -18,6 +31,7 @@
     },
     "root": {
       "inputs": {
+        "litellm-cli": "litellm-cli",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix"
       }

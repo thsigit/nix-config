@@ -10,7 +10,7 @@
 # DB credentials are provided by modules/db: database.env (DATABASE_URL) is
 # generated at activation and mounted here alongside the sops litellm.env.
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, litellmCli, ... }:
 
 let
   defaults = import ../../settings;
@@ -21,7 +21,7 @@ let
   configFile = "${appdataDir}/config.yaml";
   committedModelsJson = gw.modelsJsonPath;
 
-  controller = pkgs.callPackage ../../pkgs/litellm-cli { };
+  controller = pkgs.callPackage litellmCli { };
   gw = controller.mkGateway {
     stateDir = appdataDir;
     configYamlPath = configFile;
@@ -157,7 +157,7 @@ YAML
       # -disable, -add-provider, -missing, -doctor, -status).
       environment.systemPackages = gw.systemPackages;
 
-      # Seed providers.json (from committed seed, if absent) + mirror models.json,
+      # Seed gateway.json (from committed seed, if absent) + mirror models.json,
       # then render config.yaml so the Podman container has a fresh config on boot.
       systemd.tmpfiles.rules = [
         "d ${appdataDir} 0755 ${user.name} ${user.group} -"
@@ -171,9 +171,8 @@ YAML
         # Fail loudly (no `|| true`): a render failure means the gateway would
         # boot with a stale/empty config — better to abort activation.
         LITELLM_STATE_DIR=${appdataDir} \
-          LITELLM_PROVIDERS_JSON=${appdataDir}/providers.json \
+          LITELLM_GATEWAY_JSON=${appdataDir}/gateway.json \
           LITELLM_MODELS_JSON=${appdataDir}/models.json \
-          LITELLM_ROUTER_YAML=${appdataDir}/router.yaml \
           LITELLM_CONFIG_YAML=${configFile} \
           PATH="${lib.makeBinPath [ pkgs.jq pkgs.yq ]}:$PATH" \
           ${gw.renderScript}/bin/litellm-render
@@ -234,8 +233,8 @@ YAML
             mv "$_tmp" ${appdataDir}/models.json
           fi
 
-          # Touch providers.json to trigger path unit → re-render.
-          touch ${appdataDir}/providers.json
+          # Touch models.json to trigger path unit → re-render.
+          touch ${appdataDir}/models.json
         '';
       };
 
@@ -248,7 +247,7 @@ YAML
         };
       };
 
-      # Re-render automatically whenever the admin edits providers.json / models.json
+      # Re-render automatically whenever the admin edits gateway.json / models.json
       # (the inputs). The rendered output (config.yaml) is NOT watched, to avoid a
       # render→change→render loop.
       systemd.services.litellm-render = {
@@ -263,7 +262,7 @@ YAML
         description = "Trigger config render on inventory/policy change";
         wantedBy = [ "paths.target" ];
         pathConfig = {
-          PathChanged = [ "${appdataDir}/providers.json" "${appdataDir}/models.json" "${appdataDir}/router.yaml" ];
+          PathChanged = [ "${appdataDir}/gateway.json" "${appdataDir}/models.json" ];
         };
       };
     })

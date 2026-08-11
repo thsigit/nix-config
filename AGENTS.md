@@ -62,8 +62,12 @@ Also `failsafe` = minimal recovery profile.
   `modules/network/ap/` (hostapd, router/NAT, freeradius, opennds), toggled by a
   single `services.ap.enable` flag. dnsmasq is imported directly by
   `modules/network/default.nix` (LAN DNS must survive the AP bundle being off).
-- `pkgs/litellm-cli/` — inventory (`models.json`), policy (`providers.json`),
-  renderer (`litellm-render`), and admin CLIs.
+- `pkgs/litellm-cli/` — inventory, policy, renderer, admin CLIs. Its OWN git
+  repo (gitignored here); consumed as flake input `litellm-cli` =
+  `path:/srv/repo/nix-lab/pkgs/litellm-cli` (absolute path, `flake = false`),
+  passed to modules via specialArgs `litellmCli`. DO NOT git-add it into this
+  repo. (A relative `path:./pkgs/litellm-cli` fails: Nix rejects untracked
+  paths in a git tree.)
 - `pkgs/opennds/` — openNDS 11.0.0 package (unwrapped binaries in `libexec`,
   PATH wrappers in `bin`).
 - `secrets/` + `.sops.yaml` — sops secrets: `litellm.env`, `providers.env`,
