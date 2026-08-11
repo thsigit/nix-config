@@ -38,10 +38,9 @@ let
 in
 {
   options.services.opennds = {
-    enable = lib.mkEnableOption "openNDS captive portal";
     interface = lib.mkOption {
       type = lib.types.str;
-      default = config.services.ap.interface;
+      default = "wlp2s0";
       description = "Network interface for the captive portal";
     };
     gatewayName = lib.mkOption {
@@ -71,10 +70,10 @@ in
     };
   };
 
-  config = lib.mkMerge [
-    # Self-enabling: import this module to activate the captive portal.
-    { services.opennds.enable = true; }
-    (lib.mkIf cfg.enable {
+  # Gated on the bundle switch (services.ap.enable) like the other ap modules,
+  # so removing/commenting any one module leaves the rest building. Runtime data
+  # lives under /srv/appdata/opennds; secrets come from sops at activation.
+  config = lib.mkIf config.services.ap.enable {
     environment.systemPackages = [ opennds ];
 
     # Copy static resources once at activation (each boot / rebuild), not on
@@ -162,6 +161,5 @@ in
       "d /srv/appdata/opennds 0755 root root -"
       "d /tmp/ndslog 0755 root root -"
     ];
-    })
-  ];
+  };
 }

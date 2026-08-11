@@ -5,7 +5,7 @@
   imports = [
     ./ai
     ./db
-    # ./ap
+    ./ap
     ./mail
     ./media
     ./monitoring
