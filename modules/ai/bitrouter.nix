@@ -125,7 +125,7 @@ in
         copyToRoot = pkgs.buildEnv {
           name = "bitrouter-root";
           paths = [ cfg.package pkgs.cacert ];
-          pathsToLink = [ "/bin" ];
+          pathsToLink = [ "/bin" "/etc/ssl/certs" ];
         };
         config = {
           Entrypoint = [ "/bin/bitrouter" "serve" "-c" "/etc/bitrouter/bitrouter.yaml" ];
