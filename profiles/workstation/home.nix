@@ -32,24 +32,31 @@ in
   home.file = {
     ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml" = {
       source = ./xfce4-panel.xml;
+      force = true;
     };
     ".config/xfce4/panel/launcher-13/17860240691.desktop" = {
       source = ./panel/launcher-13/17860240691.desktop;
+      force = true;
     };
     ".config/xfce4/panel/launcher-14/17860240832.desktop" = {
       source = ./panel/launcher-14/17860240832.desktop;
+      force = true;
     };
     ".config/xfce4/panel/launcher-15/17860241034.desktop" = {
       source = ./panel/launcher-15/17860241034.desktop;
+      force = true;
     };
     ".config/xfce4/panel/launcher-16/17860241426.desktop" = {
       source = ./panel/launcher-16/17860241426.desktop;
+      force = true;
     };
     ".config/autostart/Deskflow.desktop" = {
       source = ./autostart/Deskflow.desktop;
+      force = true;
     };
     ".config/mimeapps.list" = {
       source = ./mimeapps.list;
+      force = true;
     };
   };
 

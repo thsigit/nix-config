@@ -28,9 +28,9 @@
       </property>
       <property name="background-style" type="uint" value="1"/>
       <property name="background-rgba" type="array">
-        <value type="double" value="0.10196078431372549"/>
-        <value type="double" value="0.37254901960784315"/>
-        <value type="double" value="0.70588235294117652"/>
+        <value type="double" value="0.96470588235294119"/>
+        <value type="double" value="0.38039215686274508"/>
+        <value type="double" value="0.31764705882352939"/>
         <value type="double" value="1"/>
       </property>
       <property name="length-adjust" type="bool" value="false"/>
@@ -49,9 +49,9 @@
       <property name="position-locked" type="bool" value="true"/>
       <property name="background-style" type="uint" value="1"/>
       <property name="background-rgba" type="array">
-        <value type="double" value="0.89803921568627454"/>
-        <value type="double" value="0.6470588235294118"/>
-        <value type="double" value="0.039215686274509803"/>
+        <value type="double" value="0.86274509803921573"/>
+        <value type="double" value="0.54117647058823526"/>
+        <value type="double" value="0.8666666666666667"/>
         <value type="double" value="1"/>
       </property>
       <property name="plugin-ids" type="array">
@@ -79,6 +79,7 @@
       <property name="show-button-title" type="bool" value="true"/>
       <property name="profile-shape" type="int" value="2"/>
       <property name="recent" type="array">
+        <value type="string" value="xfce-ui-settings.desktop"/>
         <value type="string" value="xfce-session-settings.desktop"/>
         <value type="string" value="rmpc.desktop"/>
         <value type="string" value="mpv.desktop"/>
