@@ -22,8 +22,9 @@ in
   programs.git = {
     enable = true;
     settings = {
-      user.name = "Sigit Prasetyo";
-      user.email = "sigit.prasetyo@home.arpa";
+      user.name = "thsigit";
+      user.email = "th.sigit@gmail.com";
+      safe.directory = [ "/srv/repo/nix-config" ];
     };
   };
 
@@ -43,6 +44,12 @@ in
     };
     ".config/xfce4/panel/launcher-16/17860241426.desktop" = {
       source = ./panel/launcher-16/17860241426.desktop;
+    };
+    ".config/autostart/Deskflow.desktop" = {
+      source = ./autostart/Deskflow.desktop;
+    };
+    ".config/mimeapps.list" = {
+      source = ./mimeapps.list;
     };
   };
 
