@@ -40,9 +40,6 @@
     xfce4-whiskermenu-plugin
     xfce4-panel-profiles
     bibata-cursors
-    papirus-icon-theme
-    arc-theme
-    plano-theme
     vimix-icon-theme
   ];
 

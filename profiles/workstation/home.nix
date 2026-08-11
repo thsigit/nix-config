@@ -50,7 +50,7 @@ in
   xfconf.settings = {
     "xfce4-desktop" = {
       "backdrop/screen0/monitoreDP-1/workspace0/last-image" = "${wallpaper}";
-      "backdrop/screen0/monitoreDP-1/workspace0/image-style" = 5;
+      "backdrop/screen0/monitoreDP-1/workspace0/image-style" = 4;
       "backdrop/screen0/monitoreDP-1/workspace0/image-show" = true;
     };
   };
