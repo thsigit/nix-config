@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786356609,
+        "narHash": "sha256-ou8fYz5w9yhXC8YbvvExybFIa19MyW5G/8dEPqa90hM=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "c30c7955cec30d664a9baced6bc0112e263d4647",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
     "litellm-cli": {
       "flake": false,
       "locked": {
@@ -31,6 +51,7 @@
     },
     "root": {
       "inputs": {
+        "home-manager": "home-manager",
         "litellm-cli": "litellm-cli",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix"

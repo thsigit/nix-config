@@ -9,18 +9,25 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     litellm-cli = {
       url = "path:/srv/repo/nix-lab/pkgs/litellm-cli";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, sops-nix, ... }:
+  outputs = { self, nixpkgs, sops-nix, home-manager, ... }:
 
     let
       system = "x86_64-linux";
 
-      commonSpecialArgs = { litellmCli = self.inputs.litellm-cli; };
+      commonSpecialArgs = {
+        litellmCli = self.inputs.litellm-cli;
+        inherit home-manager;
+      };
 
       mkSystem = machine: profile:
         nixpkgs.lib.nixosSystem {
