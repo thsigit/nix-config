@@ -9,6 +9,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    litellm-cli = {
+      url = "path:/srv/repo/nix-lab/pkgs/litellm-cli";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, sops-nix, ... }:
@@ -16,7 +20,7 @@
     let
       system = "x86_64-linux";
 
-      commonSpecialArgs = { };
+      commonSpecialArgs = { litellmCli = self.inputs.litellm-cli; };
 
       mkSystem = machine: profile:
         nixpkgs.lib.nixosSystem {
@@ -41,6 +45,9 @@
 
       failsafe =
         mkSystem "portege-r30c" "failsafe";
+
+      system =
+        mkSystem "portege-r30c" "system";
     };
   };
 }
