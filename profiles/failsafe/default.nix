@@ -57,12 +57,53 @@
 
   # Recovery toolkit — define the full list later.
   environment.systemPackages = with pkgs; [
-    vim
+    # Nix / config
     git
+    vim
+    nix-tree
+    nix-diff
+  
+    # Filesystems / disks
+    util-linux
+    e2fsprogs
+    gptfdisk
+    parted
+    dosfstools
+    smartmontools
+  
+    # EFI / boot
+    efibootmgr
+  
+    # Storage
+    cryptsetup
+    lvm2
+    rsync
+  
+    # Network
     curl
     wget
-    htop
-    tmux
+    dnsutils
+    iproute2
+    iputils
+    ethtool
+    tcpdump
+    openssh
+  
+    # Diagnostics
+    btop
+    tree
+    file
+    binutils
+    lsof
+    psmisc
+    pciutils
+    usbutils
+    dmidecode
+    lshw
+    lm_sensors
+  
+    # Troubleshooting
+    strace
   ];
 
   system.stateVersion = "26.05";
