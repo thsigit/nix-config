@@ -11,7 +11,7 @@
 ## 2. Architecture (high-level diagram)
 ```
 repo layout:
-  modules/          # reusable NixOS modules
+  commons/          # reusable NixOS modules
     ai/            # LiteLLM gateway (wrapper + podman runtime)
     network/       # Wi-Fi gateway (hostapd, dnsmasq, openNDS, firewall)
   profiles/        # role compositions (homelab, workstation, desktop)
@@ -38,7 +38,7 @@ Changes to `models.json` or `providers.json` trigger a systemd path unit that re
 ```
 
 ## 3. Operating notes – gotchas (verified)
-### openNDS (`modules/network/opennds.nix`)
+### openNDS (`commons/network/opennds.nix`)
 - **PATH** for the service must include `wget` and the `opennds` package; otherwise the MHD health-check loop constantly restarts the daemon.
 - **Theme symlink:** `theme_click-to-continue.sh` → `theme_click-to-continue-basic.sh` (handled in the setup script).
 - **`ndsctl` / `ndscfg`** are symlinked into `/usr/local/bin` by the setup script.
@@ -47,7 +47,7 @@ Changes to `models.json` or `providers.json` trigger a systemd path unit that re
 - **`nft` usage:** reference the full path `${pkgs.nftables}/bin/nft` in `extraCommands` – the firewall-start script does not inherit `nft`.
 - **`&` in nft rules:** wrap the rule block in a single-quoted heredoc (`<<'HEREDOC'`) to prevent the shell from interpreting `&`.
 
-### LiteLLM (`modules/ai/podman-litellm.nix` & `litellm-config.nix`)
+### LiteLLM (`commons/ai/podman-litellm.nix` & `litellm-config.nix`)
 - **Image pinned:** `ghcr.io/berriai/litellm:v1.92.0`. The `:main` nightly hangs the event loop with large model lists.
 - **Mount point:** container expects `/app/config.yaml`. The module passes `--config /app/config.yaml` explicitly.
 - **No database:** `sqlite://` is unsupported and crashes the container. Run in no-DB mode; the UI’s user management is unavailable unless a PostgreSQL instance is added.
@@ -57,7 +57,7 @@ Changes to `models.json` or `providers.json` trigger a systemd path unit that re
 - **Health endpoint:** `/health` returns `000` in no-DB mode; use `/v1/models` or `litellm-doctor` for health checks.
 
 ## 4. Active task
-- See `sessions/2026-08-01-gateway-service-refactor.md` for the current refactor plan: each gateway (AI and Internet) will become a self-contained directory under `modules/gateways/...` and be enable-able from a profile with a single import line or `services.<name>.enable = true`.
+- See `sessions/2026-08-01-gateway-service-refactor.md` for the current refactor plan: each gateway (AI and Internet) will become a self-contained directory under `commons/gateways/...` and be enable-able from a profile with a single import line or `services.<name>.enable = true`.
 
 ## 5. Decisions log (atomic entries)
 - **2026-07-19** – Keep all three LiteLLM modules (`litellm` reference, `podman-litellm` runtime, `litellm-wrapper` core). The wrapper is the primary operational layer.

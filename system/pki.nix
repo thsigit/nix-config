@@ -1,4 +1,4 @@
-# modules/security/pki.nix
+# commons/security/pki.nix
 
 { config, pkgs, lib, ... }:
 

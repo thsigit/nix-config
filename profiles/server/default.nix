@@ -3,6 +3,6 @@
 {
   imports = [
     ../../system
-    ../../modules
+    ../../commons
   ];
 }

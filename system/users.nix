@@ -1,4 +1,4 @@
-# modules/core/users.nix
+# commons/core/users.nix
 
 { config, lib, pkgs, ... }:
 {

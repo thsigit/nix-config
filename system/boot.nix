@@ -1,4 +1,4 @@
-# modules/core/boot.nix
+# commons/core/boot.nix
 
 { config, lib, pkgs, ... }:
 

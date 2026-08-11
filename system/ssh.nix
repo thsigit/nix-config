@@ -1,4 +1,4 @@
-# modules/security/ssh.nix
+# commons/security/ssh.nix
 
 { config, ... }:
 

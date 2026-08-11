@@ -1,4 +1,4 @@
-# modules/media/bluetooth.nix 
+# commons/media/bluetooth.nix 
 
 { config, ... }:
 
