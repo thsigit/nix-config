@@ -1,4 +1,4 @@
-# commons/security/sops.nix
+# common/security/sops.nix
 
 { config, pkgs, ... }:
 

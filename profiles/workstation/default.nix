@@ -3,7 +3,7 @@
 {
   imports = [
     ../../system
-    ../../commons
+    ../../common
     home-manager.nixosModules.home-manager
     ./xfce4.nix
     ./packages.nix

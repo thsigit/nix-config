@@ -21,7 +21,7 @@ response**, so openNDS never adds it as a client:
 
 - Repo: `/srv/repo/nix-config` (branch `main`); homelab box `192.168.1.3`, SSH `homelab`.
   `/srv/repo/nix-lab` is the archived reference (do not edit).
-- AP stack = single toggle `services.ap.enable`; files in `commons/network/ap/`
+- AP stack = single toggle `services.ap.enable`; files in `common/network/ap/`
   (`opennds.nix`, `hostapd.nix`, `dnsmasq.nix`, `freeradius.nix`, `router.nix`, `default.nix`).
 - `hostapd` uses `wlp2s0` (192.168.4.1/24); WAN = `enp0s31f6` (192.168.1.3).
 - dnsmasq listens on `192.168.4.1:53` (fd 6), `192.168.1.3:53`, `127.0.0.1:53`.
@@ -153,7 +153,7 @@ stack or driver-level delivery issue, NOT the openNDS client-detection chain
 
 - `/tmp/opencode/phone-trace.pcap` — live capture (on homelab)
 - `/tmp/opencode/full-ruleset.txt` — full `nft list ruleset` dump (on homelab)
-- `/srv/repo/nix-config/commons/network/ap/*.nix` — AP config
+- `/srv/repo/nix-config/common/network/ap/*.nix` — AP config
 - openNDS 11.0.0 source: `src/http_microhttpd.c`, `src/client_list.c`, `src/auth.c`,
   `src/fw_iptables.c` (in `/nix/store/...-opennds-11.0.0/`) — used to map detection flow
 - runtime: `/etc/config/opennds`, `/var/lib/dnsmasq/dnsmasq.leases`,
@@ -161,7 +161,7 @@ stack or driver-level delivery issue, NOT the openNDS client-detection chain
 
 ## 8. Useful invariants / related past notes
 
-- Post-refactor invariant: `commons/ai` and `commons/network` must not mix AI vs Internet
+- Post-refactor invariant: `common/ai` and `common/network` must not mix AI vs Internet
   gateway concerns; toggling a gateway must not require editing the gateway's own files.
 - openNDS needs dnsmasq as a hard runtime dependency (reads its leases file).
 - Once working: single-use 1-hour voucher login via `binauth-voucher.sh` + custom splash is the

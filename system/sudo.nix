@@ -1,4 +1,4 @@
-# commons/security/sudo.nix
+# common/security/sudo.nix
 
 { config, lib, pkgs, ... }:
 

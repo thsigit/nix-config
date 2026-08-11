@@ -1,4 +1,4 @@
-# commons/core/kernel.nix
+# common/core/kernel.nix
 
 { config, lib, pkgs, ... }:
 {

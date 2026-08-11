@@ -29,7 +29,7 @@ Also `failsafe` = minimal recovery profile.
 
 ### NEVER run `sudo nixos-rebuild` (switch/build/boot/test)
 - Passwordless sudo is allowed for everything EXCEPT `nixos-rebuild`.
-  `commons/security/sudo.nix` requires a password for
+  `common/security/sudo.nix` requires a password for
   `/run/current-system/sw/bin/nixos-rebuild`.
 - This rule was wrongly dropped in `3a474af` (to unblock an activation script)
   and restored in `4a7b55e`. Do not remove it again.
@@ -50,7 +50,7 @@ Also `failsafe` = minimal recovery profile.
 
 - `settings/` — canonical `user`, `ai`, `directories` (incl. `appdata`).
 - `flake.nix` — defines which machine + profile builds what.
-- `commons/ai/` — AI gateway stack, one self-contained dir per service:
+- `common/ai/` — AI gateway stack, one self-contained dir per service:
   - `litellm-podman/` — LiteLLM gateway: `podman.nix` (active container, port 4000)
     + `config.nix` (inventory/policy + renderer, the core of the project).
     Enabled via `ai.podmanLitellm.enable` + `ai.litellmConfig.enable`.
@@ -58,10 +58,10 @@ Also `failsafe` = minimal recovery profile.
     Enabled via `services.bitrouter.enable`; mode `native`/`container`.
   - `litellm/` — disabled reference systemd-native module (do not enable).
   - `ollama.nix`, `opencode.nix`, `podman-vane.nix` — other AI services.
-- `commons/network/` — network services. Access-point bundle lives in
-  `commons/network/ap/` (hostapd, router/NAT, freeradius, opennds), toggled by a
+- `common/network/` — network services. Access-point bundle lives in
+  `common/network/ap/` (hostapd, router/NAT, freeradius, opennds), toggled by a
   single `services.ap.enable` flag. dnsmasq is imported directly by
-  `commons/network/default.nix` (LAN DNS must survive the AP bundle being off).
+  `common/network/default.nix` (LAN DNS must survive the AP bundle being off).
 - `pkgs/litellm-cli/` — inventory, policy, renderer, admin CLIs. Its OWN git
   repo (gitignored here); consumed as flake input `litellm-cli` =
   `path:/srv/repo/nix-lab/pkgs/litellm-cli` (absolute path, `flake = false`),
@@ -73,7 +73,7 @@ Also `failsafe` = minimal recovery profile.
 - `secrets/` + `.sops.yaml` — sops secrets: `litellm.env`, `providers.env`,
   `opennds.yaml` (faskey), `radius.yaml` (radius-secret, radius-users).
   All AP secrets are read at runtime from sops, never baked into the store.
-- `commons/security/sops.nix` — declares the sops secrets.
+- `common/security/sops.nix` — declares the sops secrets.
 
 ## LiteLLM runtime notes
 

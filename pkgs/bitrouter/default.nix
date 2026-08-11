@@ -1,4 +1,4 @@
-# commons/ai/bitrouter/package.nix
+# common/ai/bitrouter/package.nix
 # BitRouter derivation — prebuilt release binary from GitHub.
 #
 # Pinned to v1.0.0-alpha.27 (x86_64-linux). The release tarball is a

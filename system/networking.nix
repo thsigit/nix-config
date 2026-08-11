@@ -1,4 +1,4 @@
-# commons/core/networking.nix
+# common/core/networking.nix
 
 { config, lib, pkgs, ... }:
 {
