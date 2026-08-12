@@ -28,8 +28,9 @@ in
 
   services.litellm-cli = {
     enable = true;
-    # Keep runtime state alongside the container's appdata for a single tree.
-    stateDir = "${appdata}/litellm-container";
+    # Admin-configurable gateway.json / models.json / config.yaml / health.json
+    # live here; the podman runtime keeps its own data under litellm-podman.
+    stateDir = "${appdata}/litellm-cli";
     providersEnvFile = config.sops.secrets."providers.env".path;
   };
 

@@ -10,7 +10,8 @@
 # runtime (native systemd, Docker, ...). Toggled on via common/ai/default.nix:
 #   ai.podmanLitellm.enable = true;
 #
-# Volumes live under /srv/appdata/litellm-container.
+# Container data/logs live under /srv/appdata/litellm-podman (the old
+# /srv/appdata/litellm-container directory is left in place, untouched).
 { config, pkgs, lib, ... }:
 
 let
@@ -19,7 +20,7 @@ let
   inherit (defaults.directories) appdata;
 
   cli = config.services.litellm-cli;
-  appdataDir = "${appdata}/litellm-container";
+  appdataDir = "${appdata}/litellm-podman";
   configFile = cli.configYamlPath;
 in
 {

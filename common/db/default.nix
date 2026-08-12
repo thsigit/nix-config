@@ -1,6 +1,6 @@
 # common/db/default.nix
 # PostgreSQL server for homelab services (first consumer: LiteLLM).
-# DB credentials live in ${appdata}/litellm-container/database.env (0600),
+# DB credentials live in ${appdata}/litellm-podman/database.env (0600),
 # generated with a random password on first activation.
 
 { config, lib, pkgs, ... }:
@@ -10,7 +10,7 @@ let
   inherit (defaults.user) name group;
   inherit (defaults.directories) appdata;
 
-  appdataDir = "${appdata}/litellm-container";
+  appdataDir = "${appdata}/litellm-podman";
   dbName = "litellm";
   dbUser = "litellm";
   databaseEnv = "${appdataDir}/database.env";
