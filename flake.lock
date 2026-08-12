@@ -24,8 +24,8 @@
     "litellm-cli": {
       "flake": false,
       "locked": {
-        "lastModified": 1786379513,
-        "narHash": "sha256-OmsMhJMDY96Xq2WE0jUwTtNtf6BxDCEeuQaegjKssTs=",
+        "lastModified": 1786557131,
+        "narHash": "sha256-ny2datRzbHNw8tn7wM6t8mGLkv8Vv9z9sQU/LGxHEVI=",
         "path": "/srv/repo/nix-lab/pkgs/litellm-cli",
         "type": "path"
       },
