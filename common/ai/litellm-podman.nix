@@ -21,7 +21,7 @@ let
   inherit (defaults) user;
   inherit (defaults.directories) appdata;
 
-  cfg = config.services.litellm;
+  cfg = config.services.litellm // { environmentFile = config.sops.secrets."litellm.env".path; };
   cliCfg = config.services.litellm-cli;
 
   appdataDir = "${appdata}/litellm-podman";
@@ -121,7 +121,7 @@ in
       (toString cfg.port)
     ];
 
-    environment = cfg.environment;
+    environment = cfg.environment // { DATABASE_URL = "postgresql://litellm:7e6c710715946628a0051ee65683f229b18e0d3ec26413fd0a6ed14a01b7c154@127.0.0.1:5432/litellm"; };
 
     environmentFiles =
       lib.optional (cfg.environmentFile != null) cfg.environmentFile;
