@@ -42,10 +42,11 @@ Also `failsafe` = minimal recovery profile.
   `wall` was removed (it freezes terminals). Do not reintroduce `wall`.
 
 ### Do not experiment against the real runtime state dir
-- The wrapped `result/sw/bin/*` CLIs hardcode
-  `LITELLM_STATE_DIR=/srv/appdata/litellm` and write into the real runtime.
+- The wrapped `result/sw/bin/*` CLIs hardcode the deployment env and write
+  into the real runtime (gateway.json under `/srv/appdata/litellm`, ephemeral
+  files under `/run/litellm-cli`).
 - For verification, use a temp dir with the raw
-  `pkgs/litellm-cli/bin/*` scripts and explicit `LITELLM_*` env vars.
+  `/srv/repo/litellm-cli/bin/*` scripts and explicit `LITELLM_*` env vars.
 
 ## Key paths / sources of truth
 
@@ -66,12 +67,14 @@ Also `failsafe` = minimal recovery profile.
   `common/network/ap/` (hostapd, router/NAT, freeradius, opennds), toggled by a
   single `services.ap.enable` flag. dnsmasq is imported directly by
   `common/network/default.nix` (LAN DNS must survive the AP bundle being off).
-- `pkgs/litellm-cli/` — inventory, policy, renderer, admin CLIs. Its OWN git
-  repo (gitignored here); consumed as flake input `litellm-cli` =
-  `path:/srv/repo/nix-lab/pkgs/litellm-cli` (absolute path, `flake = false`),
-  passed to modules via specialArgs `litellmCli`. DO NOT git-add it into this
-  repo. (A relative `path:./pkgs/litellm-cli` fails: Nix rejects untracked
-  paths in a git tree.)
+- `/srv/repo/litellm-cli/` (separate git repo, NOT part of nix-lab) — the
+  `services.litellm-cli` module: inventory, policy, renderer, admin CLIs.
+  Consumed as flake input `litellm-cli` = `path:/srv/repo/litellm-cli`
+  (`flake = false`), passed to modules via specialArgs `litellmCli`.
+  DO NOT git-add it into this repo. Its data contract:
+  `/srv/appdata/litellm/gateway.json` (persistent, admin-owned) →
+  `/run/litellm-cli/{models.json,config.yaml,health.json}` (ephemeral, rebuilt
+  each boot).
 - `pkgs/opennds/` — openNDS 11.0.0 package (unwrapped binaries in `libexec`,
   PATH wrappers in `bin`).
 - `secrets/` + `.sops.yaml` — sops secrets: `litellm.env`, `providers.env`,
