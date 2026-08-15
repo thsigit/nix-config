@@ -72,9 +72,10 @@ Also `failsafe` = minimal recovery profile.
   Consumed as flake input `litellm-cli` = `path:/srv/repo/litellm-cli`
   (`flake = false`), passed to modules via specialArgs `litellmCli`.
   DO NOT git-add it into this repo. Its data contract:
-  `/srv/appdata/litellm/gateway.json` (persistent, admin-owned) →
+  `/srv/appdata/litellm/gateway.json` (persistent, admin-owned; holds provider
+  config + routing + MANUAL models via `providers add --models`) →
   `/run/litellm-cli/{models.json,config.yaml,health.json}` (ephemeral, rebuilt
-  each boot).
+  each boot). Never put hand-added models in `models.json` — it's tmpfs.
 - `pkgs/opennds/` — openNDS 11.0.0 package (unwrapped binaries in `libexec`,
   PATH wrappers in `bin`).
 - `secrets/` + `.sops.yaml` — sops secrets: `litellm.env`, `providers.env`,
