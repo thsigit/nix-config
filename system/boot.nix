@@ -9,6 +9,14 @@
       enable = true;
       configurationLimit = 20;
     };
+    grub = {
+      enable = false;
+      efiSupport = true;
+      device = "nodev";
+      gfxmodeEfi = "text";
+      configurationLimit = 20;
+      useOSProber = false;
+    };
     efi = {
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";

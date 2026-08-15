@@ -1,4 +1,4 @@
-# common/ai/vane-container.nix
+# common/ai/vane-podman.nix
 # Vane (SearXNG-based) — container runtime + config only.
 
 { config, pkgs, lib, ... }:

@@ -1,4 +1,4 @@
-# common/media/linkding-container.nix
+# common/media/linkding-podman.nix
 # Linkding (self-hosted bookmark manager) — container runtime + config.
 
 { config, ... }:

@@ -7,6 +7,6 @@
     ./trilium.nix
     ./calibre-web.nix
     ./mpd.nix
-    ./linkding-container.nix
+    ./linkding-podman.nix
   ];
 }

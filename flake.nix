@@ -14,7 +14,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     litellm-cli = {
-      url = "path:/srv/repo/nix-lab/pkgs/litellm-cli";
+      url = "path:/srv/repo/litellm-cli";
+      flake = false;
+    };
+    bitrouter = {
+      url = "path:/srv/repo/bitrouter";
+      flake = false;
+    };
+    opennds = {
+      url = "path:/srv/repo/opennds";
       flake = false;
     };
   };
@@ -26,6 +34,8 @@
 
       commonSpecialArgs = {
         litellmCli = self.inputs.litellm-cli;
+        bitrouter = self.inputs.bitrouter;
+        opennds = self.inputs.opennds;
         inherit home-manager;
       };
 

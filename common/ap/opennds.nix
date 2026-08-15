@@ -1,11 +1,11 @@
 # common/ap/opennds.nix
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, opennds, ... }:
 
 let
   defaults = import ../../settings;
   inherit (defaults) user;
 
-  opennds = pkgs.callPackage ../../pkgs/opennds { };
+  opennds = pkgs.callPackage opennds { };
 
   cfg = config.services.opennds;
 

@@ -1,7 +1,12 @@
 # common/ai/bitrouter.nix
-# BitRouter LLM gateway — consolidated service config.
-
-{ config, pkgs, lib, ... }:
+# BitRouter LLM gateway — consolidated service config (self-enabling leaf).
+#
+# BitRouter is a bespoke service, so `options.services.bitrouter` is declared
+# here (intrinsic to the module, not a wrapper). The leaf self-enables with
+# mkDefault so importing it turns the gateway on; real config knobs (mode,
+# port, ...) stay as options. This matches the mrtg-style standard of
+# "import = enable" for the common case while keeping genuine configuration.
+{ config, pkgs, lib, bitrouter, ... }:
 
 let
   defaults = import ../../settings;
@@ -25,7 +30,7 @@ let
       };
     });
 
-  bitrouterPackage = pkgs.callPackage ../../pkgs/bitrouter { };
+  bitrouterPackage = pkgs.callPackage bitrouter { };
 in
 
 {
@@ -88,62 +93,70 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ cfg.package ];
+  config = lib.mkMerge [
+    # Self-enable + default env when imported. Override per-profile with a
+    # plain `services.bitrouter.enable = false` / `environmentFiles = [...]`.
+    {
+      services.bitrouter.enable = lib.mkDefault true;
+      services.bitrouter.environmentFiles = lib.mkDefault [ config.sops.secrets."providers.env".path ];
+    }
+    (lib.mkIf cfg.enable {
+      environment.systemPackages = [ cfg.package ];
 
-    systemd.tmpfiles.rules = [
-      "d ${cfg.stateDir} 0755 ${user.name} ${user.group} -"
-    ];
-
-    system.activationScripts.bitrouter-config = lib.stringAfter [ "users" ] ''
-      mkdir -p ${cfg.stateDir}
-      if [ ! -f ${cfg.configFile} ]; then
-        install -m 0644 ${renderedConfig} ${cfg.configFile}
-        chown ${user.name}:${user.group} ${cfg.configFile}
-      fi
-    '';
-
-    systemd.services.bitrouter = lib.mkIf (cfg.mode == "native") {
-      description = "BitRouter LLM gateway (native)";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      environmentFiles = cfg.environmentFiles;
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = "${cfg.package}/bin/bitrouter serve -c ${cfg.configFile}";
-        WorkingDirectory = cfg.stateDir;
-        Restart = "on-failure";
-        RestartSec = "3";
-      };
-    };
-
-    virtualisation.oci-containers.containers.bitrouter = lib.mkIf (cfg.mode == "container") {
-      image = "bitrouter:${cfg.package.version or "v1.0.0-alpha.27"}";
-      imageFile = pkgs.dockerTools.buildImage {
-        name = "bitrouter";
-        tag = cfg.package.version or "v1.0.0-alpha.27";
-        copyToRoot = pkgs.buildEnv {
-          name = "bitrouter-root";
-          paths = [ cfg.package pkgs.cacert ];
-          pathsToLink = [ "/bin" "/etc/ssl/certs" ];
-        };
-        config = {
-          Entrypoint = [ "/bin/bitrouter" "serve" "-c" "/etc/bitrouter/bitrouter.yaml" ];
-          WorkingDir = "/var/lib/bitrouter";
-          Env = [ "HOME=/var/lib/bitrouter" ];
-          ExposedPorts = { "${toString cfg.port}/tcp" = { }; };
-        };
-      };
-      ports = [ "${cfg.listenAddress}:${toString cfg.port}:4356" ];
-      volumes = [
-        "${cfg.configFile}:/etc/bitrouter/bitrouter.yaml:ro"
-        "${cfg.stateDir}:/var/lib/bitrouter"
+      systemd.tmpfiles.rules = [
+        "d ${cfg.stateDir} 0755 ${user.name} ${user.group} -"
       ];
-      environmentFiles = cfg.environmentFiles;
-      autoStart = true;
-    };
 
-    services.caddy.services.bitrouter = { port = cfg.port; };
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
-  };
+      system.activationScripts.bitrouter-config = lib.stringAfter [ "users" ] ''
+        mkdir -p ${cfg.stateDir}
+        if [ ! -f ${cfg.configFile} ]; then
+          install -m 0644 ${renderedConfig} ${cfg.configFile}
+          chown ${user.name}:${user.group} ${cfg.configFile}
+        fi
+      '';
+
+      systemd.services.bitrouter = lib.mkIf (cfg.mode == "native") {
+        description = "BitRouter LLM gateway (native)";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" ];
+        environmentFiles = cfg.environmentFiles;
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${cfg.package}/bin/bitrouter serve -c ${cfg.configFile}";
+          WorkingDirectory = cfg.stateDir;
+          Restart = "on-failure";
+          RestartSec = "3";
+        };
+      };
+
+      virtualisation.oci-containers.containers.bitrouter = lib.mkIf (cfg.mode == "container") {
+        image = "bitrouter:${cfg.package.version or "v1.0.0-alpha.27"}";
+        imageFile = pkgs.dockerTools.buildImage {
+          name = "bitrouter";
+          tag = cfg.package.version or "v1.0.0-alpha.27";
+          copyToRoot = pkgs.buildEnv {
+            name = "bitrouter-root";
+            paths = [ cfg.package pkgs.cacert ];
+            pathsToLink = [ "/bin" "/etc/ssl/certs" ];
+          };
+          config = {
+            Entrypoint = [ "/bin/bitrouter" "serve" "-c" "/etc/bitrouter/bitrouter.yaml" ];
+            WorkingDir = "/var/lib/bitrouter";
+            Env = [ "HOME=/var/lib/bitrouter" ];
+            ExposedPorts = { "${toString cfg.port}/tcp" = { }; };
+          };
+        };
+        ports = [ "${cfg.listenAddress}:${toString cfg.port}:4356" ];
+        volumes = [
+          "${cfg.configFile}:/etc/bitrouter/bitrouter.yaml:ro"
+          "${cfg.stateDir}:/var/lib/bitrouter"
+        ];
+        environmentFiles = cfg.environmentFiles;
+        autoStart = true;
+      };
+
+      services.caddy.services.bitrouter = { port = cfg.port; };
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
+    })
+  ];
 }

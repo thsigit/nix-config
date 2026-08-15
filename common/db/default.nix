@@ -79,9 +79,4 @@ EOF
       ${pkgs.util-linux}/bin/runuser -u postgres -- psql -d postgres -tAc "ALTER ROLE ${dbUser} WITH LOGIN PASSWORD '$pw';"
     '';
   };
-
-  # Let the gateway wait for the password sync before connecting to the DB.
-  systemd.services.podman-litellm.after = lib.mkIf (config.ai.podmanLitellm.enable or false) [
-    "litellm-db-password.service"
-  ];
 }

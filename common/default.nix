@@ -5,7 +5,7 @@
   imports = [
     ./ai
     ./db
-    ./ap
+    # ./ap  # disabled: suspected cause of no usable init (Part 3)
     ./mail
     ./media
     ./monitoring

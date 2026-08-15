@@ -4,6 +4,7 @@
 {
   imports = [
     ./boot.nix
+    ./grub-failsafe.nix
     ./kernel.nix
     ./locale.nix
     ./networking.nix

@@ -16,8 +16,5 @@ result-*
 Thumbs.db
 Desktop.ini
 
-# LiteLLM CLI (separate repo)
-pkgs/litellm-cli/
-
 # OpenCode sessions
 sessions/
