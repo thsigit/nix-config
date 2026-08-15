@@ -7,7 +7,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  configFile = config.ai.litellmPodman.configFile;
+  configFile = config.services.litellm-cli.configFile;
 in
 {
   config = {
