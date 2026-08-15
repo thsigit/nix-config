@@ -1,5 +1,18 @@
 {
   "nodes": {
+    "bitrouter": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786608843,
+        "narHash": "sha256-vbKYQ/+ZPUP7NIjqKalD2LHS8jJxcAtQVf5vFV07Q/U=",
+        "path": "/srv/repo/bitrouter",
+        "type": "path"
+      },
+      "original": {
+        "path": "/srv/repo/bitrouter",
+        "type": "path"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -24,13 +37,13 @@
     "litellm-cli": {
       "flake": false,
       "locked": {
-        "lastModified": 1786561889,
-        "narHash": "sha256-kT9QhVS9zZJTAmrBSvaZBGjgnm0vRdjscaduY4ip2j8=",
-        "path": "/srv/repo/nix-lab/pkgs/litellm-cli",
+        "lastModified": 1786779785,
+        "narHash": "sha256-npMS2V9nxbR+plv8B/8dn3DEbjQBL10+NEhS92g3me4=",
+        "path": "/srv/repo/litellm-cli",
         "type": "path"
       },
       "original": {
-        "path": "/srv/repo/nix-lab/pkgs/litellm-cli",
+        "path": "/srv/repo/litellm-cli",
         "type": "path"
       }
     },
@@ -50,11 +63,26 @@
         "type": "github"
       }
     },
+    "opennds": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786608843,
+        "narHash": "sha256-n8VWcTpvLUQaoxpVTwoiuz5pKuPFue2bFnLhCNnzWUE=",
+        "path": "/srv/repo/opennds",
+        "type": "path"
+      },
+      "original": {
+        "path": "/srv/repo/opennds",
+        "type": "path"
+      }
+    },
     "root": {
       "inputs": {
+        "bitrouter": "bitrouter",
         "home-manager": "home-manager",
         "litellm-cli": "litellm-cli",
         "nixpkgs": "nixpkgs",
+        "opennds": "opennds",
         "sops-nix": "sops-nix"
       }
     },

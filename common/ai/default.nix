@@ -1,38 +1,25 @@
 # common/ai/default.nix
 #
-# Wires the AI gateway concerns. The LiteLLM config layer + admin CLI live in
-# the independent `services.litellm-cli` module (imported from the litellm-cli
-# repo). The Podman runtime (ai.podmanLitellm) is a separate, decoupled module
-# that only consumes the rendered config.yaml. Either can be toggled independently.
-{ config, litellmCli, ... }:
-
-let
-  defaults = import ../../settings;
-  inherit (defaults.directories) appdata;
-in
+# AI gateway stack. Each leaf module owns its own defaults and is always-on
+# when imported (mrtg-style standard) — this file is a pure index.
+# The LiteLLM config layer + admin CLI (`services.litellm-cli`) are wired in
+# ./litellm-cli.nix, which imports that module from the litellm-cli repo.
+{ config, lib, litellmCli, ... }:
 {
   imports = [
     ./llama-cpp.nix
-    ./vane-container.nix
+    ./vane-podman.nix
     ./opencode.nix
     ./bitrouter.nix
+    ./litellm-cli.nix
     ./litellm-podman.nix
-    # Independent, releasable module: config layer + admin CLI.
-    (litellmCli + "/module.nix")
+    ./litellm-podman-helper.nix
   ];
 
-  services.bitrouter = {
-    enable = true;
-    environmentFiles = [ config.sops.secrets."providers.env".path ];
+  options.ai.litellmPodman.configFile = lib.mkOption {
+    type = lib.types.str;
+    description = "Path to the rendered LiteLLM config.yaml consumed by the Podman runtime and watched by the restart helper.";
   };
 
-  services.litellm-cli = {
-    enable = true;
-    # Admin-configurable gateway.json / models.json / config.yaml / health.json
-    # live here; the podman runtime keeps its own data under litellm-podman.
-    stateDir = "${appdata}/litellm-cli";
-    providersEnvFile = config.sops.secrets."providers.env".path;
-  };
-
-  ai.podmanLitellm.enable = true;
+  config.ai.litellmPodman.configFile = config.services.litellm-cli.configFile;
 }

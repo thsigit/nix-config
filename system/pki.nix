@@ -21,6 +21,7 @@ let
     "bitrouter.home.arpa"
     "wallabag.home.arpa"
     "localai.home.arpa"
+    "reports.home.arpa"
   ];
 
   caddyServices = config.services.caddy.services or { };

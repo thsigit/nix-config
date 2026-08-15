@@ -10,6 +10,7 @@ in
     username = "sigit";
     homeDirectory = "/home/sigit";
     stateVersion = "26.05";
+    sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
   };
 
   programs.home-manager.enable = true;
@@ -24,7 +25,6 @@ in
     settings = {
       user.name = "thsigit";
       user.email = "th.sigit@gmail.com";
-      safe.directory = [ "/srv/repo/nix-config" ];
     };
   };
 
@@ -64,7 +64,7 @@ in
   xfconf.settings = {
     "xfce4-desktop" = {
       "backdrop/screen0/monitoreDP-1/workspace0/last-image" = "${wallpaper}";
-      "backdrop/screen0/monitoreDP-1/workspace0/image-style" = 3;
+      "backdrop/screen0/monitoreDP-1/workspace0/image-style" = 4;
       "backdrop/screen0/monitoreDP-1/workspace0/image-show" = true;
     };
   };
