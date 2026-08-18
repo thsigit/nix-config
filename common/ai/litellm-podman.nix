@@ -121,9 +121,10 @@ in
       (toString litellm.port)
     ];
 
-    environment = litellm.environment // { DATABASE_URL = "postgresql://litellm:7e6c710715946628a0051ee65683f229b18e0d3ec26413fd0a6ed14a01b7c154@127.0.0.1:5432/litellm"; };
+    environment = litellm.environment;
 
     environmentFiles =
-      lib.optional (litellm.environmentFile != null) litellm.environmentFile;
+      [ "${appdata}/litellm-podman/database.env" ]
+      ++ lib.optional (litellm.environmentFile != null) litellm.environmentFile;
   };
 }
