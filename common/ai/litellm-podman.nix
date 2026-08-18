@@ -21,8 +21,8 @@ let
   inherit (defaults) user;
   inherit (defaults.directories) appdata;
 
-  cfg = config.services.litellm // { environmentFile = config.sops.secrets."litellm.env".path; };
-  cliCfg = config.services.litellm-cli;
+  litellm = config.services.litellm // { environmentFile = config.sops.secrets."providers.env".path; };
+  litellmCli = config.services.litellm-cli;
 
   appdataDir = "${appdata}/litellm-podman";
 in
@@ -42,7 +42,7 @@ in
 
   # Failing loudly beats silently overriding. If anything enables the native
   # LiteLLM systemd service, this configuration refuses to evaluate instead of
-  # competing with the Podman runtime for port ${toString cfg.port}.
+  # competing with the Podman runtime for port ${toString litellm.port}.
   assertions = [
     {
       assertion = !config.services.litellm.enable;
@@ -54,7 +54,7 @@ in
       '';
     }
     {
-      assertion = cliCfg.enable;
+      assertion = litellmCli.enable;
       message = ''
         services.litellm-podman requires services.litellm-cli.enable = true.
 
@@ -71,7 +71,7 @@ in
   ##########################################################################
 
   services.caddy.services.litellm = {
-    port = cfg.port;
+    port = litellm.port;
   };
 
   ##########################################################################
@@ -97,7 +97,7 @@ in
       "--network=host"
       "--cap-drop=ALL"
       "--security-opt=no-new-privileges"
-      "--health-cmd=python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:${toString cfg.port}/health/liveliness', timeout=5)\""
+      "--health-cmd=python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:${toString litellm.port}/health/liveliness', timeout=5)\""
       "--health-interval=30s"
       "--health-retries=3"
       "--health-start-period=15s"
@@ -107,7 +107,7 @@ in
     podman.sdnotify = "conmon";
 
     volumes = [
-      "${cliCfg.configFile}:/app/config.yaml:ro"
+      "${litellmCli.configFile}:/app/config.yaml:ro"
       "${appdataDir}/data:/app/data"
       "${appdataDir}/logs:/app/logs"
     ];
@@ -116,14 +116,14 @@ in
       "--config"
       "/app/config.yaml"
       "--host"
-      cfg.host
+      litellm.host
       "--port"
-      (toString cfg.port)
+      (toString litellm.port)
     ];
 
-    environment = cfg.environment // { DATABASE_URL = "postgresql://litellm:7e6c710715946628a0051ee65683f229b18e0d3ec26413fd0a6ed14a01b7c154@127.0.0.1:5432/litellm"; };
+    environment = litellm.environment // { DATABASE_URL = "postgresql://litellm:7e6c710715946628a0051ee65683f229b18e0d3ec26413fd0a6ed14a01b7c154@127.0.0.1:5432/litellm"; };
 
     environmentFiles =
-      lib.optional (cfg.environmentFile != null) cfg.environmentFile;
+      lib.optional (litellm.environmentFile != null) litellm.environmentFile;
   };
 }

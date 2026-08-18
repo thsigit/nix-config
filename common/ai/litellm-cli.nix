@@ -8,7 +8,7 @@
 # Persistence contract:
 #   dataDir (persistent) → gateway.json (admin-owned, survives reinstall)
 #   /run/litellm        → models.json, config.yaml, health.json (rebuilt each boot)
-{ config, litellmCli, ... }:
+{ config, lib, litellmCli, ... }:
 
 let
   defaults = import ../../settings;
@@ -27,4 +27,14 @@ in
     group = defaults.user.group;
     providersEnvFile = config.sops.secrets."providers.env".path;
   };
+
+  system.activationScripts.litellm-healthjson-prep = {
+    deps = [ "users" ];
+    text = ''
+      mkdir -p /run/litellm-cli
+      [ -e /run/litellm-cli/health.json ] || echo '{}' > /run/litellm-cli/health.json
+    '';
+  };
+
+  system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
 }
