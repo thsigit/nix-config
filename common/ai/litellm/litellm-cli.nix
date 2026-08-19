@@ -11,7 +11,7 @@
 { config, lib, litellmCli, ... }:
 
 let
-  defaults = import ../../settings;
+  defaults = import ../../../settings;
   inherit (defaults.directories) appdata;
 in
 {

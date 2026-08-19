@@ -16,7 +16,7 @@
 { config, lib, ... }:
 
 let
-  defaults = import ../../settings;
+  defaults = import ../../../settings;
 
   inherit (defaults) user;
   inherit (defaults.directories) appdata;
