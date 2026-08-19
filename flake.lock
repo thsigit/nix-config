@@ -37,8 +37,8 @@
     "litellm-cli": {
       "flake": false,
       "locked": {
-        "lastModified": 1787017773,
-        "narHash": "sha256-MwzD/h2eAJjoHGIoJQsbaeDzKInZuep9r2lTtbaDcKE=",
+        "lastModified": 1787159259,
+        "narHash": "sha256-NKbcCJdoIs3SV/dPszVEXuTYO2QmMJnu6P0VfS9rMGY=",
         "path": "/srv/repo/litellm-cli",
         "type": "path"
       },
@@ -49,11 +49,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1787101114,
-        "narHash": "sha256-gwrPcFf/rDjHPaVflbDZ040ZDmBTRj/7+s8ZmE2SaIM=",
+        "lastModified": 1782535326,
+        "narHash": "sha256-ZeRxu4yn6shd3SNF5ZUQb4r7BaVo1zBKMjRhfoNSBmw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b18a4b905f8d028dc4476412e6d6891728695379",
+        "rev": "714a5f8c4ead6b31148d829288440ed033ccc041",
         "type": "github"
       },
       "original": {

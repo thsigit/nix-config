@@ -29,10 +29,5 @@
     };
   };
 
-  # karakeep builds against pnpm-9.15.9, which newer nixpkgs flags as insecure.
-  nixpkgs.config = {
-    permittedInsecurePackages = [ "pnpm-9.15.9" ];
-  };
-
   system.stateVersion = "25.11";
 }
