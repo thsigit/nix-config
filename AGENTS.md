@@ -37,6 +37,22 @@ Also `failsafe` = minimal recovery profile.
   `sudo nixos-rebuild switch --flake /srv/repo/nix-lab#server` (or `#workstation`)
   themselves. This agent must not run it.
 
+### On a failed build, revert ONLY the broken module — never roll back nixpkgs
+- When a `nixos-rebuild switch` fails (e.g. an activation script errors),
+  fix the specific offending file. Do NOT `git reset --hard` to a commit that
+  also reverts `flake.lock`/nixpkgs — that discards the already-downloaded and
+  built closure and forces a full ~10+ GiB re-download on the next switch.
+- Nix store paths are content-addressed: a different nixpkgs commit
+  (`flake.lock` rev) yields different derivation hashes, so the next switch
+  re-fetches from `cache.nixos.org` even if an "earlier" rev was already built.
+- Correct fix pattern: restore only the broken files to their pre-change
+  content (e.g. `git checkout <parent> -- common/db/default.nix`) while keeping
+  `flake.lock` pinned to the nixpkgs rev already present in the store.
+- Recorded after the 2026-08-20 incident: a `git reset --hard db4e196` reverted
+  the `0dd31db` nixpkgs bump that had just been built, then re-bumping to
+  `b18a4b9` re-downloaded the whole closure. Lesson: pin to the built rev,
+  revert surgically.
+
 ### No `wall` broadcasts
 - `litellm-podman-helper.nix`'s config-change restart notifies via `logger` only.
   `wall` was removed (it freezes terminals). Do not reintroduce `wall`.
@@ -52,9 +68,11 @@ Also `failsafe` = minimal recovery profile.
 
 - `settings/` — canonical `user`, `ai`, `directories` (incl. `appdata`).
 - `flake.nix` — defines which machine + profile builds what.
-- `common/ai/` — AI gateway stack, flat self-contained leaf modules (no
-  subdirs). Each leaf is always-on when imported (mrtg-style standard); the
-  directory `default.nix` is a pure importer. No per-leaf `enable` toggles.
+- `common/ai/` — AI gateway stack; leaf modules are self-contained and
+  always-on when imported (mrtg-style standard); the directory `default.nix`
+  is a pure importer. The LiteLLM stack is grouped under `common/ai/litellm/`
+  (its own `default.nix` importer + leaf files); other leaves stay flat in
+  `common/ai/`. No per-leaf `enable` toggles.
   - `litellm-podman.nix` — LiteLLM gateway container (port 4000), under
     `virtualisation.oci-containers.containers.litellm`. Always-on.
   - `litellm-podman-helper.nix` — restarts the container on config change.
