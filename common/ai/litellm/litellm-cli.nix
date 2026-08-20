@@ -1,13 +1,13 @@
-# common/ai/litellm-cli.nix
+# common/ai/litellm/litellm-cli.nix
 #
 # Local wiring for the independent `services.litellm-cli` module (imported
 # from the litellm-cli repo). Self-enabling leaf: importing this file enables
-# the config layer + admin CLI. The Podman runtime (./litellm-podman.nix)
+# the config layer + admin CLI. The native runtime (./litellm.nix)
 # consumes its rendered config via config.services.litellm-cli.configFile.
 #
 # Persistence contract:
 #   dataDir (persistent) → gateway.json (admin-owned, survives reinstall)
-#   /run/litellm        → models.json, config.yaml, health.json (rebuilt each boot)
+#   /run/litellm-cli     → models.json, config.yaml, health.json (rebuilt each boot)
 { config, lib, litellmCli, ... }:
 
 let

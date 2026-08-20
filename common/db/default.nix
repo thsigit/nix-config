@@ -1,6 +1,6 @@
 # common/db/default.nix
 # PostgreSQL server for homelab services (first consumer: LiteLLM).
-# DB credentials live in ${appdata}/litellm-podman/database.env (0600),
+# DB credentials live in ${appdata}/litellm/database.env (0600),
 # generated with a random password on first activation.
 
 { config, lib, pkgs, ... }:
@@ -10,7 +10,7 @@ let
   inherit (defaults.user) name group;
   inherit (defaults.directories) appdata;
 
-  appdataDir = "${appdata}/litellm-podman";
+  appdataDir = "${appdata}/litellm";
   dbName = "litellm";
   dbUser = "litellm";
   databaseEnv = "${appdataDir}/database.env";
@@ -24,7 +24,7 @@ in
     dataDir = "/srv/appdata/postgresql";
     enableTCPIP = true;
     settings = {
-      # Loopback only: the gateway container uses host networking and Caddy
+      # Loopback only: the native litellm service binds to 127.0.0.1 and Caddy
       # proxies from the host, so nothing needs LAN exposure.
       listen_addresses = lib.mkForce "127.0.0.1";
       password_encryption = "scram-sha-256";
@@ -60,8 +60,6 @@ EOF
   # Keep the role password in sync with database.env after the role/db exist.
   # Runs as root (NOT postgres) because database.env is 0600 owned by the user;
   # psql is executed as postgres via runuser so local peer auth applies.
-  # wantedBy multi-user.target + After=postgresql-setup: the container only has
-  # After= on this unit, so without a wantedBy this oneshot would never start.
   systemd.services.litellm-db-password = {
     description = "Sync LiteLLM database role password";
     after = [ "postgresql-setup.service" ];
