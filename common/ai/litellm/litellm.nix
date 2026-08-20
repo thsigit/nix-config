@@ -8,10 +8,10 @@
 #   services.litellm-cli.configFile
 #
 # This module:
-#   - runs LiteLLM as a native systemd service
+#   - runs LiteLLM as a native systemd service (no-DB mode)
 #   - consumes the litellm-cli rendered config via --config flag
 #   - exposes LiteLLM through Caddy
-#   - passes provider API keys + DB URL via environmentFiles
+#   - passes provider API keys via environmentFile
 #
 { config, lib, pkgs, ... }:
 
@@ -23,7 +23,6 @@ let
 
   litellmPort = 4000;
   litellmCli = config.services.litellm-cli;
-  databaseEnv = "${appdata}/litellm/database.env";
 in
 {
   ##########################################################################
@@ -55,20 +54,19 @@ in
   ##########################################################################
 
   systemd.services.litellm = {
-    description = "LLM Gateway — LiteLLM native service";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" "postgresql-setup.service" "litellm-db-password.service" ];
-    requires = [ "postgresql-setup.service" ];
+    description = LLM Gateway — LiteLLM native service;
+    wantedBy = [ multi-user.target ];
+    after = [ network.target ];
 
     path = [ pkgs.coreutils ];
 
     environment = {
-      SCARF_NO_ANALYTICS = "True";
-      DO_NOT_TRACK = "True";
-      ANONYMIZED_TELEMETRY = "False";
-      LITELLM_NON_ROOT = "true";
-      LITELLM_UI_PATH = "/var/lib/litellm/ui";
-      CUSTOM_TIKTOKEN_CACHE_DIR = "/var/lib/litellm/tiktoken-cache";
+      SCARF_NO_ANALYTICS = True;
+      DO_NOT_TRACK = True;
+      ANONYMIZED_TELEMETRY = False;
+      LITELLM_NON_ROOT = true;
+      LITELLM_UI_PATH = /var/lib/litellm/ui;
+      CUSTOM_TIKTOKEN_CACHE_DIR = /var/lib/litellm/tiktoken-cache;
     };
 
     serviceConfig = {
@@ -84,7 +82,6 @@ in
       ];
       EnvironmentFile = [
         config.sops.secrets."providers.env".path
-        databaseEnv
       ];
       WorkingDirectory = "/var/lib/litellm";
       StateDirectory = "litellm";

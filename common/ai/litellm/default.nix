@@ -1,9 +1,8 @@
 # common/ai/litellm/default.nix
 #
 # LiteLLM gateway stack. This leaf imports the config layer (litellm-cli)
-# and the native runtime (litellm). Database provisioning lives in
-# common/db and writes ${appdata}/litellm/database.env, which
-# litellm.nix reads as an environmentFile.
+# and the native runtime (litellm). Runs in no-DB mode — no PostgreSQL,
+# no spend tracking, pure API proxying.
 { ... }:
 {
   imports = [

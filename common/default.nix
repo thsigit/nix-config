@@ -4,7 +4,6 @@
 {
   imports = [
     ./ai
-    ./db
     # ./ap  # disabled: suspected cause of no usable init (Part 3)
     ./mail
     ./media
