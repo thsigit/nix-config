@@ -54,7 +54,7 @@ Also `failsafe` = minimal recovery profile.
   revert surgically.
 
 ### No `wall` broadcasts
-- `litellm-podman-helper.nix`'s config-change restart notifies via `logger` only.
+- Config-change restart notifies via `logger` only.
   `wall` was removed (it freezes terminals). Do not reintroduce `wall`.
 
 ### Do not experiment against the real runtime state dir
@@ -73,9 +73,8 @@ Also `failsafe` = minimal recovery profile.
   is a pure importer. The LiteLLM stack is grouped under `common/ai/litellm/`
   (its own `default.nix` importer + leaf files); other leaves stay flat in
   `common/ai/`. No per-leaf `enable` toggles.
-  - `litellm-podman.nix` — LiteLLM gateway container (port 4000), under
-    `virtualisation.oci-containers.containers.litellm`. Always-on.
-  - `litellm-podman-helper.nix` — restarts the container on config change.
+  - `litellm.nix` — LiteLLM native systemd service (port 4000), DynamicUser.
+    Consumes litellm-cli rendered config.yaml. Always-on.
   - `litellm-cli.nix` — wires the external `services.litellm-cli` module
     (config layer + admin CLI from the litellm-cli repo).
   - `bitrouter.nix` — BitRouter LLM gateway, `services.bitrouter` (bespoke
@@ -106,7 +105,7 @@ Also `failsafe` = minimal recovery profile.
 - **Prefer upstream open attrsets over custom `options.services.<x>` wrappers.**
   Write service units directly into the already-declared, open namespaces
   (`systemd.services.*`, `systemd.timers.*`,
-  `virtualisation.oci-containers.containers.*`, `services.caddy.*`,
+  `services.caddy.*`,
   `environment.systemPackages`) instead of inventing a new
   `options.services.<x>` option tree just to wrap a binary. e.g. a leaf that
   runs a binary should define `systemd.services.foo`, not `options.services.foo`.
@@ -124,21 +123,18 @@ Also `failsafe` = minimal recovery profile.
 
 ## LiteLLM runtime notes
 
-- **Runs WITH PostgreSQL.** LiteLLM v1.92.0 requires **PostgreSQL** for DB features;
-  `sqlite://` is rejected at startup and crash-loops the container. `common/db` generates
-  `${appdata}/litellm-podman/database.env` (`DATABASE_URL=postgresql://…`), which
-  `litellm-podman.nix` mounts into the container as an `environmentFiles` entry. The
-  `podman-litellm` unit orders after `litellm-db-password.service` so the role password
-  is synced first. (This note originally described the old native module that ran DB-less;
-  the Podman runtime uses Postgres.) API proxying + UI user/key management both work.
+- **Runs WITH PostgreSQL.** LiteLLM requires **PostgreSQL** for DB features;
+  `sqlite://` is rejected at startup. `common/db` generates
+  `${appdata}/litellm/database.env` (`DATABASE_URL=postgresql://…`), which
+  `litellm.nix` reads as an `environmentFile`. The native service orders after
+  `litellm-db-password.service` so the role password is synced first. API proxying
+  + UI user/key management both work.
 - **Cert:** Caddy serves a valid `*.home.arpa` cert from the Homelab Internal CA. If a
   browser shows a cert error, install that CA in the client trust store — it is a
   client-side trust issue, not a server config problem.
-- **v1.92.0 entrypoint does NOT auto-read `/app/config.yaml`.** The module passes
-  `--config /app/config.yaml` explicitly via the container `cmd` (the upstream
-  `prod_entrypoint.sh` only runs `litellm "$@"`). Without it the proxy boots with an
-  empty model_list. `:main` nightly is broken (hangs on large configs) — do not
-  revert to it.
+- **Config is owned by litellm-cli** and rendered to `/run/litellm-cli/config.yaml`.
+  The native service reads it via `--config` flag. `:main` nightly is broken
+  (hangs on large configs) — do not revert to it.
 
 ## Access-point (openNDS) gotchas
 
