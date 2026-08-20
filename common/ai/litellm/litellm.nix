@@ -54,19 +54,19 @@ in
   ##########################################################################
 
   systemd.services.litellm = {
-    description = LLM Gateway — LiteLLM native service;
-    wantedBy = [ multi-user.target ];
-    after = [ network.target ];
+    description = "LLM Gateway — LiteLLM native service";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
 
     path = [ pkgs.coreutils ];
 
     environment = {
-      SCARF_NO_ANALYTICS = True;
-      DO_NOT_TRACK = True;
-      ANONYMIZED_TELEMETRY = False;
-      LITELLM_NON_ROOT = true;
-      LITELLM_UI_PATH = /var/lib/litellm/ui;
-      CUSTOM_TIKTOKEN_CACHE_DIR = /var/lib/litellm/tiktoken-cache;
+      SCARF_NO_ANALYTICS = "True";
+      DO_NOT_TRACK = "True";
+      ANONYMIZED_TELEMETRY = "False";
+      LITELLM_NON_ROOT = "true";
+      LITELLM_UI_PATH = "/var/lib/litellm/ui";
+      CUSTOM_TIKTOKEN_CACHE_DIR = "/var/lib/litellm/tiktoken-cache";
     };
 
     serviceConfig = {
