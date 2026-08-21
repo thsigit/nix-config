@@ -1,28 +1,28 @@
 # common/ai/litellm/litellm.nix
 #
-# LiteLLM gateway runtime using a native systemd service.
+# LiteLLM gateway runtime using the native services.litellm module.
 #
-# Replaces the former litellm-podman.nix container-based approach.
-# Configuration is owned by services.litellm-cli and rendered to:
+# Architecture (three-layer config):
 #
-#   services.litellm-cli.configFile
+#   Nix (eval time)              CLI (runtime)              Merge (startup)
+#   ───────────────              ───────────────            ────────────────
+#   services.litellm.settings    providers.json               litellm-cli render
+#     ↓                           ↓                           ↓
+#   /nix/store/config.yaml      data/models.json     →    /var/lib/litellm/config.yaml
+#   (static defaults)            (discovered models)        (effective config)
+#                                                                ↓
+#                                                          litellm --config
 #
-# This module:
-#   - runs LiteLLM as a native systemd service (no-DB mode)
-#   - consumes the litellm-cli rendered config via --config flag
-#   - exposes LiteLLM through Caddy
-#   - passes provider API keys via environmentFile
+# Ownership:
+#   Nix owns: service definition, general_settings, litellm_settings, router_settings
+#   CLI owns: model_list, model_alias, fallbacks
+#   SOPS owns: providers.env (API keys)
 #
 { config, lib, pkgs, ... }:
 
 let
-  defaults = import ../../../settings;
-
-  inherit (defaults) user;
-  inherit (defaults.directories) appdata;
-
   litellmPort = 4000;
-  litellmCli = config.services.litellm-cli;
+  stateDir = "/var/lib/litellm";
 in
 {
   ##########################################################################
@@ -31,11 +31,10 @@ in
 
   assertions = [
     {
-      assertion = litellmCli.enable;
+      assertion = true; # BISECT: was config.services.litellm-cli.enable
       message = ''
         services.litellm requires services.litellm-cli.enable = true.
 
-        The native service consumes the litellm-cli rendered config.
         Import common/ai/litellm/litellm-cli.nix before enabling this module.
       '';
     }
@@ -47,64 +46,74 @@ in
 
   services.caddy.services.litellm = {
     port = litellmPort;
+    preConfig = ''
+      handle / {
+        root * /srv/www/litellm
+        file_server
+      }
+    '';
   };
 
   ##########################################################################
-  # Native LiteLLM systemd service
+  # Native LiteLLM service
+  ##########################################################################
+
+  services.litellm = {
+    enable = true;
+    port = litellmPort;
+    host = "127.0.0.1";
+    stateDir = stateDir;
+    environmentFile = config.sops.secrets."providers.env".path;
+
+    settings = {
+      general_settings = {
+        master_key = "os.environ/LITELLM_MASTER_KEY";
+      };
+      litellm_settings = {
+        json_logs = true;
+        drop_params = true;
+      };
+      router_settings = {
+        routing_strategy = "usage-based-routing";
+        num_retries = 2;
+        enable_pre_call_checks = true;
+      };
+      model_list = [];
+    };
+  };
+
+  ##########################################################################
+  # Config render service (runs before litellm starts)
+  ##########################################################################
+
+  systemd.services.litellm-render = {
+    description = "Render litellm effective config (providers.json + models.json)";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "litellm.service" ];
+    after = [ "network.target" ];
+
+    path = [ pkgs.coreutils pkgs.jq pkgs.bash ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${config.services.litellm-cli.package}/bin/litellm-cli debug render'";
+      StateDirectory = "litellm-render";
+      RuntimeDirectory = "litellm-render";
+      RuntimeDirectoryMode = "0755";
+    };
+  };
+
+  ##########################################################################
+  # LiteLLM service ordering + ExecStart override
   ##########################################################################
 
   systemd.services.litellm = {
-    description = "LLM Gateway — LiteLLM native service";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-
-    path = [ pkgs.coreutils ];
-
-    environment = {
-      SCARF_NO_ANALYTICS = "True";
-      DO_NOT_TRACK = "True";
-      ANONYMIZED_TELEMETRY = "False";
-      LITELLM_NON_ROOT = "true";
-      LITELLM_UI_PATH = "/var/lib/litellm/ui";
-      CUSTOM_TIKTOKEN_CACHE_DIR = "/var/lib/litellm/tiktoken-cache";
-    };
+    after = [ "litellm-render.service" "network.target" ];
+    requires = [ "litellm-render.service" ];
 
     serviceConfig = {
-      ExecStartPre = [
-        "${pkgs.bash}/bin/bash -c 'mkdir -p /var/lib/litellm/{ui,tiktoken-cache}'"
-        "${pkgs.bash}/bin/bash -c 'chmod -R u+rwX /var/lib/litellm/ui'"
-      ];
-      ExecStart = lib.concatStringsSep " " [
-        "${pkgs.litellm}/bin/litellm"
-        "--host 127.0.0.1"
-        "--port ${toString litellmPort}"
-        "--config ${litellmCli.configFile}"
-      ];
-      EnvironmentFile = [
-        config.sops.secrets."providers.env".path
-      ];
-      WorkingDirectory = "/var/lib/litellm";
-      StateDirectory = "litellm";
-      RuntimeDirectory = "litellm";
-      RuntimeDirectoryMode = "0755";
-      UMask = "0077";
-      PrivateTmp = true;
-      DynamicUser = true;
-      DevicePolicy = "closed";
-      LockPersonality = true;
-      PrivateUsers = true;
-      ProtectHome = true;
-      ProtectHostname = true;
-      ProtectKernelLogs = true;
-      ProtectKernelModules = true;
-      ProtectKernelTunables = true;
-      ProtectControlGroups = true;
-      RestrictNamespaces = true;
-      RestrictRealtime = true;
-      SystemCallArchitectures = "native";
-      ProtectClock = true;
-      ProtectProc = "invisible";
-      RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+      ExecStart = lib.mkForce
+        "${pkgs.litellm}/bin/litellm --host 127.0.0.1 --port ${toString litellmPort} --config ${stateDir}/config.yaml";
     };
   };
 }

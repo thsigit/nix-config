@@ -6,7 +6,7 @@
 # consumes its rendered config via config.services.litellm-cli.configFile.
 #
 # Persistence contract:
-#   dataDir (persistent) → gateway.json (admin-owned, survives reinstall)
+#   dataDir (persistent) → providers.json (admin-owned, survives reinstall)
 #   /run/litellm-cli     → models.json, config.yaml, health.json (rebuilt each boot)
 { config, lib, litellmCli, ... }:
 
@@ -18,8 +18,8 @@ in
   imports = [ (litellmCli + "/module.nix") ];
 
   services.litellm-cli = {
-    enable = true;
-    # Persistent admin-owned data root. gateway.json (the source of truth)
+    enable = false; # BISECT: disabled to isolate no-usable-init (was true)
+    # Persistent admin-owned data root. providers.json (the source of truth)
     # lives here and survives partition reformat/reinstall.
     dataDir = "${appdata}/litellm";
     # State files are owned by the regular user so `litellm-cli` works without sudo.
@@ -36,5 +36,5 @@ in
     '';
   };
 
-  system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
+# BISECT disabled: system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
 }
