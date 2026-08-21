@@ -7,8 +7,7 @@
 #
 # Persistence contract:
 #   dataDir (persistent) → providers.json (admin-owned, survives reinstall)
-#   /run/litellm-cli     → models.json, health.json (rebuilt each boot)
-#   /var/lib/litellm   → config.yaml (rendered, consumed by native service)
+#   /run/litellm-cli     → models.json, config.yaml, health.json (rebuilt each boot)
 { config, lib, litellmCli, ... }:
 
 let
@@ -19,7 +18,7 @@ in
   imports = [ (litellmCli + "/module.nix") ];
 
   services.litellm-cli = {
-    enable = true;
+    enable = false; # BISECT: disabled to isolate no-usable-init (was true)
     # Persistent admin-owned data root. providers.json (the source of truth)
     # lives here and survives partition reformat/reinstall.
     dataDir = "${appdata}/litellm";
@@ -37,5 +36,5 @@ in
     '';
   };
 
-system.activationScripts.litellm-cli-config.deps = lib.mkIf config.services.litellm-cli.enable [ "users" "litellm-healthjson-prep" ];
+# BISECT disabled: system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
 }
