@@ -31,7 +31,7 @@ in
 
   assertions = [
     {
-      assertion = true; # BISECT: was config.services.litellm-cli.enable
+      assertion = config.services.litellm-cli.enable;
       message = ''
         services.litellm requires services.litellm-cli.enable = true.
 
@@ -90,16 +90,17 @@ in
     description = "Render litellm effective config (providers.json + models.json)";
     wantedBy = [ "multi-user.target" ];
     before = [ "litellm.service" ];
-    after = [ "network.target" ];
+    after = [ "network.target" "systemd-tmpfiles-setup.service" ];
 
     path = [ pkgs.coreutils pkgs.jq pkgs.bash ];
 
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash -c '${config.services.litellm-cli.package}/bin/litellm-cli debug render'";
-      StateDirectory = "litellm-render";
-      RuntimeDirectory = "litellm-render";
+      StateDirectory = "litellm";
+      StateDirectoryMode = "0755";
+      RuntimeDirectory = "litellm-cli";
       RuntimeDirectoryMode = "0755";
+      ExecStart = "${config.services.litellm-cli.package}/bin/litellm-cli debug render";
     };
   };
 

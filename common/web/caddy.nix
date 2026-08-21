@@ -13,6 +13,7 @@ let
   mkLANvhost = name: svc: {
     "${name}.${domain}".extraConfig = ''
       tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
+      ${lib.optionalString (svc.preConfig != null) svc.preConfig}
       reverse_proxy 127.0.0.1:${toString svc.port}
       ${lib.optionalString (svc.extraConfig != null) svc.extraConfig}
     '';
@@ -21,6 +22,7 @@ let
   mkTailscalevhost = name: svc: {
     "${name}.${tailnet}.ts.net".extraConfig = ''
       tls { get_certificate tailscale }
+      ${lib.optionalString (svc.preConfig != null) svc.preConfig}
       reverse_proxy 127.0.0.1:${toString svc.port}
       ${lib.optionalString (svc.extraConfig != null) svc.extraConfig}
     '';
@@ -76,6 +78,7 @@ in
           lan = lib.mkOption { type = lib.types.bool; default = true; };
           tailscale = lib.mkOption { type = lib.types.bool; default = true; };
         };
+        preConfig = lib.mkOption { type = lib.types.nullOr lib.types.lines; default = null; };
         extraConfig = lib.mkOption { type = lib.types.nullOr lib.types.lines; default = null; };
       };
     }));

@@ -59,7 +59,7 @@ Also `failsafe` = minimal recovery profile.
 
 ### Do not experiment against the real runtime state dir
 - The wrapped `result/sw/bin/*` CLIs hardcode the deployment env and write
-  into the real runtime (gateway.json under `/srv/appdata/litellm`, ephemeral
+  into the real runtime (providers.json under `/srv/appdata/litellm`, ephemeral
   files under `/run/litellm-cli`).
 - For verification, use a temp dir with the raw
   `/srv/repo/litellm-cli/bin/*` scripts and explicit `LITELLM_*` env vars.
@@ -89,7 +89,7 @@ Also `failsafe` = minimal recovery profile.
   Consumed as flake input `litellm-cli` = `path:/srv/repo/litellm-cli`
   (`flake = false`), passed to modules via specialArgs `litellmCli`.
   DO NOT git-add it into this repo. Its data contract:
-  `/srv/appdata/litellm/gateway.json` (persistent, admin-owned; holds provider
+  `/srv/appdata/litellm/providers.json` (persistent, admin-owned; holds provider
   config + routing + MANUAL models via `providers add --models`) →
   `/run/litellm-cli/{models.json,config.yaml,health.json}` (ephemeral, rebuilt
   each boot). Never put hand-added models in `models.json` — it's tmpfs.
@@ -117,25 +117,17 @@ Also `failsafe` = minimal recovery profile.
   new service (e.g. `services.bitrouter`), its intrinsic `options` stay in that
   module, but it self-enables with `lib.mkDefault true` so importing turns it on.
   A profile can still override with a plain `services.bitrouter.enable = false`.
-- **Cross-module ordering** (e.g. "gateway waits for DB password sync") belongs
+- **Cross-module ordering** (e.g. "litellm waits for litellm-render") belongs
   in the dependent module via `systemd.services.<unit>.after`, not in the
   dependency's module reading a custom enable option.
 
 ## LiteLLM runtime notes
 
-- **Runs WITH PostgreSQL.** LiteLLM requires **PostgreSQL** for DB features;
-  `sqlite://` is rejected at startup. `common/db` generates
-  `${appdata}/litellm/database.env` (`DATABASE_URL=postgresql://…`), which
-  `litellm.nix` reads as an `environmentFile`. The native service orders after
-  `litellm-db-password.service` so the role password is synced first. API proxying
-  + UI user/key management both work.
-- **Cert:** Caddy serves a valid `*.home.arpa` cert from the Homelab Internal CA. If a
-  browser shows a cert error, install that CA in the client trust store — it is a
+- **Runs WITHOUT PostgreSQL (no-DB mode).** The nixpkgs litellm package has a broken Prisma client generation (upstream issue). LiteLLM runs in pure API proxy mode with no spend tracking or user/key management via UI.
+- **Cert:** Caddy serves a valid *.home.arpa cert from the Homelab Internal CA. If a
+  browser shows a cert error, install that CA in the client trust store -- it is a
   client-side trust issue, not a server config problem.
-- **Config is owned by litellm-cli** and rendered to `/run/litellm-cli/config.yaml`.
-  The native service reads it via `--config` flag. `:main` nightly is broken
-  (hangs on large configs) — do not revert to it.
-
+- **Config is owned by litellm-cli** and rendered to /var/lib/litellm/config.yaml.
 ## Access-point (openNDS) gotchas
 
 - openNDS runs **foreground** (`opennds -f`, `Type = exec`) so systemd tracks it.
