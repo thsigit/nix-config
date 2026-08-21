@@ -31,7 +31,7 @@ in
 
   assertions = [
     {
-      assertion = true; # BISECT: was config.services.litellm-cli.enable
+      assertion = config.services.litellm-cli.enable;
       message = ''
         services.litellm requires services.litellm-cli.enable = true.
 

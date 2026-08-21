@@ -18,7 +18,7 @@ in
   imports = [ (litellmCli + "/module.nix") ];
 
   services.litellm-cli = {
-    enable = false; # BISECT: disabled to isolate no-usable-init (was true)
+    enable = true;
     # Persistent admin-owned data root. providers.json (the source of truth)
     # lives here and survives partition reformat/reinstall.
     dataDir = "${appdata}/litellm";
@@ -36,5 +36,5 @@ in
     '';
   };
 
-# BISECT disabled: system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
+system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
 }
