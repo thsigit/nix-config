@@ -22,6 +22,7 @@ let
     "wallabag.home.arpa"
     "localai.home.arpa"
     "reports.home.arpa"
+    "journal.home.arpa"
   ];
 
   caddyServices = config.services.caddy.services or { };
