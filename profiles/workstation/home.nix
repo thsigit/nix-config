@@ -3,7 +3,6 @@
 { config, lib, pkgs, ... }:
 
 let
-  wallpaper = ../../assets/wallpaper.jpg;
   # Dotfiles working tree (out-of-store symlinks: live edits survive rebuilds;
   # GUI/xfconfd changes land in the repo, commit them from /srv/repo/dotfiles).
   dotfiles = "/srv/repo/dotfiles";
@@ -49,12 +48,7 @@ in
     };
   };
 
-  # Declarative XFCE settings via xfconf.
-  xfconf.settings = {
-    "xfce4-desktop" = {
-      "backdrop/screen0/monitoreDP-1/workspace0/last-image" = "${wallpaper}";
-      "backdrop/screen0/monitoreDP-1/workspace0/image-style" = 4;
-      "backdrop/screen0/monitoreDP-1/workspace0/image-show" = true;
-    };
-  };
+  # XFCE desktop settings (wallpaper, backdrop style) are owned by the
+  # dotfiles repo via the .config/xfce4 symlink - no xfconf.settings here,
+  # so rebuilds never revert GUI changes.
 }
