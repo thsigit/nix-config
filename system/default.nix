@@ -12,9 +12,7 @@
     ./bluetooth.nix
     ./firewall.nix
     ./sudo.nix
-    ./pki.nix
     ./ssh.nix
-    ./sops.nix
   ];
 
   nix = {

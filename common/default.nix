@@ -10,6 +10,7 @@
     ./monitoring
     ./network
     ./packages
+    ./security
     ./storage
     ./web
   ];
