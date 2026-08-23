@@ -35,9 +35,10 @@ in
   # xfce4: whole dir (xfconfd writes through the symlink into the repo).
   home.file = {
     ".config/xfce4".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/xfce4";
-    ".config/gh/config.yml".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/gh/config.yml";
-    ".config/systemd/user/zensical-build.service".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/systemd/user/zensical-build.service";
-    ".config/systemd/user/zensical-build.path".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/systemd/user/zensical-build.path";
+    ".config/gh/config.yml" = {
+      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/gh/config.yml";
+      force = true;
+    };
     ".config/autostart/Deskflow.desktop" = {
       source = ./autostart/Deskflow.desktop;
       force = true;
