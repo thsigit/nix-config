@@ -4,6 +4,9 @@
 
 let
   wallpaper = ../../assets/wallpaper.jpg;
+  # Dotfiles working tree (out-of-store symlinks: live edits survive rebuilds;
+  # GUI/xfconfd changes land in the repo, commit them from /srv/repo/dotfiles).
+  dotfiles = "/srv/repo/dotfiles";
 in
 {
   home = {
@@ -28,28 +31,13 @@ in
     };
   };
 
-  # Save the current XFCE panel config declaratively.
+  # Dotfiles-managed config (out-of-store symlinks into /srv/repo/dotfiles).
+  # xfce4: whole dir (xfconfd writes through the symlink into the repo).
   home.file = {
-    ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml" = {
-      source = ./xfce4-panel.xml;
-      force = true;
-    };
-    ".config/xfce4/panel/launcher-13/17860240691.desktop" = {
-      source = ./panel/launcher-13/17860240691.desktop;
-      force = true;
-    };
-    ".config/xfce4/panel/launcher-14/17860240832.desktop" = {
-      source = ./panel/launcher-14/17860240832.desktop;
-      force = true;
-    };
-    ".config/xfce4/panel/launcher-15/17860241034.desktop" = {
-      source = ./panel/launcher-15/17860241034.desktop;
-      force = true;
-    };
-    ".config/xfce4/panel/launcher-16/17860241426.desktop" = {
-      source = ./panel/launcher-16/17860241426.desktop;
-      force = true;
-    };
+    ".config/xfce4".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/xfce4";
+    ".config/gh/config.yml".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/gh/config.yml";
+    ".config/systemd/user/zensical-build.service".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/systemd/user/zensical-build.service";
+    ".config/systemd/user/zensical-build.path".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/systemd/user/zensical-build.path";
     ".config/autostart/Deskflow.desktop" = {
       source = ./autostart/Deskflow.desktop;
       force = true;
