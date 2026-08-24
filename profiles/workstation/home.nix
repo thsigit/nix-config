@@ -40,7 +40,15 @@ in
     };
     ".config/autostart".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/autostart";
     ".config/mimeapps.list" = {
-      source = ./mimeapps.list;
+      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/mimeapps.list";
+      force = true;
+    };
+    ".config/Thunar" = {
+      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/Thunar";
+      force = true;
+    };
+    ".config/gtk-3.0" = {
+      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/gtk-3.0";
       force = true;
     };
   };
