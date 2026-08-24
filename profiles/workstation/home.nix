@@ -12,7 +12,10 @@ in
     username = "sigit";
     homeDirectory = "/home/sigit";
     stateVersion = "26.05";
-    sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
+    sessionPath = [
+      "${config.home.homeDirectory}/.local/bin"
+      "${config.home.homeDirectory}/bin"
+    ];
   };
 
   programs.home-manager.enable = true;
@@ -51,6 +54,10 @@ in
       source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/gtk-3.0";
       force = true;
     };
+    ".config/wakectl".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/wakectl";
+    ".config/cudatext".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/cudatext";
+    ".config/Deskflow/Deskflow.conf".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/Deskflow.conf";
+    "bin".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin";
   };
 
   # XFCE desktop settings (wallpaper, backdrop style) are owned by the
