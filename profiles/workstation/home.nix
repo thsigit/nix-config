@@ -38,10 +38,7 @@ in
       source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/gh/config.yml";
       force = true;
     };
-    ".config/autostart/Deskflow.desktop" = {
-      source = ./autostart/Deskflow.desktop;
-      force = true;
-    };
+    ".config/autostart".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/autostart";
     ".config/mimeapps.list" = {
       source = ./mimeapps.list;
       force = true;
