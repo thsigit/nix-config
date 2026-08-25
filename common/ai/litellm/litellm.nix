@@ -47,7 +47,8 @@ in
   services.caddy.services.litellm = {
     port = litellmPort;
     preConfig = ''
-      handle / {
+      @frontend path / /litellm.js
+      handle @frontend {
         root * /srv/www/litellm
         file_server
       }
