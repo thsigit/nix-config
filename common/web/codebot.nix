@@ -5,7 +5,8 @@
 # GitHub Pages). /srv/www/codebot is a thin shim that retains the "codebot"
 # author name: it symlinks back to the repo for inputs (docs, overrides,
 # scripts, zensical.toml) and holds the generated output in journal/.
-# Served at journal.home.arpa via Caddy.
+# Served locally at homelab.home.arpa/journal and published to GitHub Pages
+# (project site at /nix-journal/).
 { config, pkgs, ... }:
 let
   defaults = import ../../settings;
@@ -20,9 +21,10 @@ in
   environment.systemPackages = [ pkgs.zensical ];
 
   # NOTE: docs/overrides/scripts/zensical.toml are symlinks into the repo, so we
-  # use `L` (symlink) rules, never `d` (a `d` on a symlink would replace it with
-  # an empty real directory). The output symlink (repo journal -> shim journal)
-  # is also recreated here so zensical's realpath resolution lands in the shim.
+  # use `L` (symlink) tmpfiles rules, never `d` (a `d` on a symlink would
+  # replace it with an empty real directory). The output symlink (repo journal
+  # -> shim journal) is also recreated here so zensical's realpath resolution
+  # lands in the shim.
   systemd.tmpfiles.rules = [
     "d ${shimDir} 0755 sigit users -"
     "L ${shimDir}/docs - - - - ${repoDir}/docs"
@@ -53,12 +55,17 @@ in
     };
   };
 
-  services.caddy.virtualHosts."journal.${domain}" = {
+  # Serve the journal under the homelab.home.arpa host at the /journal path.
+  services.caddy.virtualHosts."homelab.home.arpa" = {
     extraConfig = ''
       tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
-      root * ${journalDir}
-      file_server
-      encode gzip zstd
+      handle_path /journal/* {
+        root * ${journalDir}
+        file_server
+      }
+      handle /journal {
+        redir /journal/ 308
+      }
     '';
   };
 }
