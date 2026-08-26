@@ -89,6 +89,9 @@ in
 
   systemd.services.litellm-render = {
     description = "Render litellm effective config (providers.json + models.json)";
+    # Render installs usage_logger.py into the CLI dataDir and emits the
+    # success_callback block when this flag is set.
+    environment.LITELLM_USAGE_CALLBACK = "1";
     wantedBy = [ "multi-user.target" ];
     before = [ "litellm.service" ];
     after = [ "network.target" ];
@@ -112,9 +115,17 @@ in
     after = [ "litellm-render.service" "network.target" ];
     requires = [ "litellm-render.service" ];
 
+    # usage_logger callback resolves via importlib through PYTHONPATH.
+    environment = {
+      PYTHONPATH = config.services.litellm-cli.dataDir;
+      LITELLM_USAGE_CALLBACK = "1";
+    };
+
     serviceConfig = {
       ExecStart = lib.mkForce
         "${pkgs.litellm}/bin/litellm --host 127.0.0.1 --port ${toString litellmPort} --config ${stateDir}/config.yaml";
+      DynamicUser = lib.mkForce false;
+      PrivateUsers = lib.mkForce false;
     };
-  };
+    };
 }

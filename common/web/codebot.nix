@@ -1,9 +1,9 @@
 # common/web/codebot.nix
 #
 # Zensical static site generator for codebot reports.
-# Markdown in /srv/www/codebot/docs is built into /srv/www/codebot/reports
+# Markdown in /srv/www/codebot/docs is built into /srv/www/codebot/journal
 # by a oneshot systemd service, triggered automatically by a path unit
-# whenever the docs tree changes. Served at reports.home.arpa via Caddy.
+# whenever the docs tree changes. Served at journal.home.arpa via Caddy.
 { config, pkgs, ... }:
 let
   defaults = import ../../settings;
@@ -11,7 +11,7 @@ let
   sslDir = "/etc/ssl/homelab";
   codebotDir = "/srv/www/codebot";
   docsDir = "${codebotDir}/docs";
-  reportsDir = "${codebotDir}/reports";
+  journalDir = "${codebotDir}/journal";
   configFile = "${codebotDir}/zensical.toml";
 in
 {
@@ -19,11 +19,11 @@ in
 
   systemd.tmpfiles.rules = [
     "d ${docsDir} 0755 sigit users -"
-    "d ${reportsDir} 0755 sigit users -"
+    "d ${journalDir} 0755 sigit users -"
   ];
 
   systemd.services.zensical-build = {
-    description = "Build Zensical site (codebot reports)";
+    description = "Build Zensical site (codebot journal)";
     serviceConfig = {
       Type = "oneshot";
       User = "sigit";
@@ -40,10 +40,10 @@ in
     };
   };
 
-  services.caddy.virtualHosts."reports.${domain}" = {
+  services.caddy.virtualHosts."journal.${domain}" = {
     extraConfig = ''
       tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
-      root * ${reportsDir}
+      root * ${journalDir}
       file_server
       encode gzip zstd
     '';

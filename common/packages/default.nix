@@ -80,7 +80,7 @@
     tree file binutils moreutils
     nix-tree
     nodejs_22
-    python3
+    python3 uv
     openssl mkcert sops
     sqlite alejandra
     tlp

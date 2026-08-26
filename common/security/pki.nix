@@ -21,7 +21,6 @@ let
     "bitrouter.home.arpa"
     "wallabag.home.arpa"
     "localai.home.arpa"
-    "reports.home.arpa"
     "journal.home.arpa"
   ];
 
