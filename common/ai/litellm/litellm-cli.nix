@@ -36,5 +36,5 @@ in
     '';
   };
 
-system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
+  system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
 }
