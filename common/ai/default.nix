@@ -8,7 +8,6 @@
     ./llama-cpp.nix
     ./vane-podman.nix
     ./opencode.nix
-    ./bitrouter.nix
     ./litellm
   ];
 }

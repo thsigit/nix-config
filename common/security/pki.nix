@@ -13,12 +13,11 @@ let
   # Domain layanan yang selalu masuk SAN, terlepas dari status enable service.
   # Auto-generate dari services.caddy.services hanya menjaring service yang
   # AKTIF; service yang direferensikan di dnsmasq/hosts tapi nonaktif (mis.
-  # darkstat, litellm, bitrouter) atau di-archive (wallabag, localai) tetap
+  # darkstat, litellm) atau di-archive (wallabag, localai) tetap
   # perlu SAN eksplisit agar TLS valid saat diakses.
   extraDomains = [
     "darkstat.home.arpa"
     "litellm.home.arpa"
-    "bitrouter.home.arpa"
     "wallabag.home.arpa"
     "localai.home.arpa"
   ];

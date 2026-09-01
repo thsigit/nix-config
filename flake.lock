@@ -1,18 +1,5 @@
 {
   "nodes": {
-    "bitrouter": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786904966,
-        "narHash": "sha256-bjdreeWGRV3TeMn7u/X+M6OVxHIKGlM60leu7MR2Guw=",
-        "path": "/srv/repo/bitrouter",
-        "type": "path"
-      },
-      "original": {
-        "path": "/srv/repo/bitrouter",
-        "type": "path"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -37,8 +24,8 @@
     "litellm-cli": {
       "flake": false,
       "locked": {
-        "lastModified": 1788019350,
-        "narHash": "sha256-Xp/5PuwFrX32UL4qmX8gbQurOfvhlbSLCisqM3e28Kg=",
+        "lastModified": 1788267611,
+        "narHash": "sha256-uQzgSVAes8ST9Xd96O3jpeDT/wasZC3/bxAzAO47qXM=",
         "path": "/srv/repo/litellm-cli",
         "type": "path"
       },
@@ -78,7 +65,6 @@
     },
     "root": {
       "inputs": {
-        "bitrouter": "bitrouter",
         "home-manager": "home-manager",
         "litellm-cli": "litellm-cli",
         "nixpkgs": "nixpkgs",
