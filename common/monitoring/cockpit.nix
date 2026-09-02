@@ -4,6 +4,11 @@
 # force-recreate the homelab cert symlinks with tmpfiles L+ (recreated every boot).
 
 { config, lib, pkgs, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) domain;
+  hostName = config.networking.hostName;
+in
 {
   systemd.tmpfiles.rules = [
     "L+ /etc/cockpit/ws-certs.d/50-homelab.cert - - - - /etc/ssl/homelab/homelab.crt"
@@ -16,7 +21,7 @@
       WebService = {
         ClientCertAuthentication = true;
         AllowUnencrypted = false;
-        Origins = lib.mkForce "https://homelab.home.arpa:9090";
+        Origins = lib.mkForce "https://${hostName}.${domain}:9090";
       };
     };
     plugins = [ pkgs.cockpit-files pkgs.cockpit-podman ];
