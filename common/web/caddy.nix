@@ -6,7 +6,7 @@
 let
   defaults = import ../../settings;
   inherit (defaults) tailnet domain;
-  sslDir = "/etc/ssl/homelab";
+  sslDir = defaults.security.sslDir;
   cfg = config.services.caddy;
   svcs = cfg.services;
 

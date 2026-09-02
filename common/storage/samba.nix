@@ -3,7 +3,9 @@
 let
   defaults = import ../../settings;
   inherit (defaults) user;
+  inherit (defaults.network) lanCidr;
   inherit (defaults.directories) appdata media;
+  inherit (config.networking) hostName;
 in
 {
   services.samba = {
@@ -13,11 +15,11 @@ in
       global = {
         "workgroup" = "WORKGROUP";
         "server string" = "smbnix";
-        "netbios name" = "homelab";
+        "netbios name" = hostName;
         "security" = "user";
         "use sendfile" = "yes";
         "bind interfaces only" = "no";
-        "hosts allow" = "192.168.1.0/24 127.0.0.1";
+        "hosts allow" = "${lanCidr} 127.0.0.1";
         "guest account" = "nobody";
         "map to guest" = "bad user";
         "browseable" = "yes";
@@ -41,7 +43,7 @@ in
       videos = { "path" = "${media}/videos"; "writable" = "yes"; "valid users" = user.name; "force user" = user.name; };
     };
   };
-  services.samba-wsdd = { enable = true; openFirewall = true; hostname = "homelab"; };
+  services.samba-wsdd = { enable = true; openFirewall = true; hostname = hostName; };
   systemd.tmpfiles.rules = [
     "d ${media} 0755 ${user.name} ${user.group} -"
     "d ${media}/books 0755 ${user.name} ${user.group} -"

@@ -11,7 +11,8 @@
 let
   defaults = import ../../settings;
   inherit (defaults) domain;
-  sslDir = "/etc/ssl/homelab";
+  inherit (defaults) user;
+  sslDir = defaults.security.sslDir;
   shimDir = "/srv/www/codebot";
   repoDir = "/srv/repo/nix-journal";
   journalDir = "${shimDir}/journal";
@@ -20,26 +21,21 @@ in
 {
   environment.systemPackages = [ pkgs.zensical ];
 
-  # NOTE: docs/overrides/scripts/zensical.toml are symlinks into the repo, so we
-  # use `L` (symlink) tmpfiles rules, never `d` (a `d` on a symlink would
-  # replace it with an empty real directory). The output symlink (repo journal
-  # -> shim journal) is also recreated here so zensical's realpath resolution
-  # lands in the shim.
   systemd.tmpfiles.rules = [
-    "d ${shimDir} 0755 sigit users -"
+    "d ${shimDir} 0755 ${user.name} ${user.group} -"
     "L ${shimDir}/docs - - - - ${repoDir}/docs"
     "L ${shimDir}/overrides - - - - ${repoDir}/overrides"
     "L ${shimDir}/scripts - - - - ${repoDir}/scripts"
     "L ${shimDir}/zensical.toml - - - - ${repoDir}/zensical.toml"
     "L ${repoDir}/journal - - - - ${shimDir}/journal"
-    "d ${journalDir} 0755 sigit users -"
+    "d ${journalDir} 0755 ${user.name} ${user.group} -"
   ];
 
   systemd.services.zensical-build = {
     description = "Build Zensical site (codebot journal)";
     serviceConfig = {
       Type = "oneshot";
-      User = "sigit";
+      User = user.name;
       WorkingDirectory = shimDir;
     };
     script = "${pkgs.zensical}/bin/zensical build -f ${configFile}";
@@ -49,14 +45,12 @@ in
     description = "Watch codebot docs for changes";
     wantedBy = [ "multi-user.target" ];
     pathConfig = {
-      # Watch the real repo docs dir (a symlink's own inode never changes, so
-      # watching the shim symlink would not trigger rebuilds on source edits).
       PathModified = "${repoDir}/docs";
     };
   };
 
   # Serve the journal under the homelab.home.arpa host at the /journal path.
-  services.caddy.virtualHosts."homelab.home.arpa" = {
+  services.caddy.virtualHosts."homelab.${domain}" = {
     extraConfig = ''
       tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
       handle_path /journal/* {

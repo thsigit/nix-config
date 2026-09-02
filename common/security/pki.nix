@@ -3,11 +3,13 @@
 { config, pkgs, lib, ... }:
 
 let
+  defaults = import ../../settings;
+  inherit (defaults) domain;
+  sslDir = defaults.security.sslDir;
 
-  sslDir = "/etc/ssl/homelab";
   baseDomains = [
-    "*.home.arpa"
-    "home.arpa"
+    "*.${domain}"
+    domain
   ];
 
   # Domain layanan yang selalu masuk SAN, terlepas dari status enable service.
@@ -16,20 +18,18 @@ let
   # darkstat, litellm) atau di-archive (wallabag, localai) tetap
   # perlu SAN eksplisit agar TLS valid saat diakses.
   extraDomains = [
-    "darkstat.home.arpa"
-    "litellm.home.arpa"
-    "wallabag.home.arpa"
-    "localai.home.arpa"
+    "darkstat.${domain}"
+    "litellm.${domain}"
+    "wallabag.${domain}"
+    "localai.${domain}"
   ];
 
   caddyServices = config.services.caddy.services or { };
   lanServices = lib.filterAttrs (name: svc: svc.visibility.lan) caddyServices;
-  serviceDomains = [ "homelab.home.arpa" ] ++
-    lib.mapAttrsToList (name: svc: "${name}.home.arpa") lanServices;
+  serviceDomains = [ "homelab.${domain}" ] ++
+    lib.mapAttrsToList (name: svc: "${name}.${domain}") lanServices;
 
   allDomains = lib.unique (baseDomains ++ serviceDomains ++ extraDomains);
-
-  # Dipakai untuk SAN di cert (section [v3_ext] terpisah dari [req_ext])
 
   altNames =
     lib.concatStringsSep "\n"
@@ -54,26 +54,18 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-tmpfiles-setup.service" ];
     path = [ pkgs.openssl pkgs.coreutils pkgs.systemd ];
-    # Tanpa RemainAfterExit: oneshot ini idempotent dan HARUS di-run ulang
-    # tiap `nixos-rebuild switch`/boot. Dengan RemainAfterExit=true, unit yang
-    # sudah "active (exited)" tidak pernah di-run ulang saat switch, sehingga
-    # /etc/ssl/homelab yang terhapus manual tidak ter-regenerate.
     serviceConfig = {
       Type = "oneshot";
     };
     script = ''
       set -euxo pipefail
 
-      # Pastikan dir ada tanpa bergantung pada timing systemd-tmpfiles.
       install -d -m0750 -o root -g caddy ${sslDir}
 
-      # Generate CA key jika belum ada
       if [ ! -f ${sslDir}/homelab-ca.key ]; then
         openssl genrsa -out ${sslDir}/homelab-ca.key 4096
       fi
 
-      # Generate CA cert jika belum ada
-      # Catatan: untuk regenerate, hapus homelab-ca.crt (expire 2036)
       if [ ! -f ${sslDir}/homelab-ca.crt ]; then
         openssl req -x509 -new -nodes \
           -key ${sslDir}/homelab-ca.key \
@@ -81,15 +73,8 @@ in
           -out ${sslDir}/homelab-ca.crt \
           -subj "/CN=Homelab Internal CA"
 
-        # NixOS tidak punya update-ca-certificates (itu Debian/Ubuntu).
-        # Trust CA via security.pki.certificateFiles di configuration.nix.
-        # Copy ke /etc/ssl/certs/ hanya sebagai referensi mudah, bukan trust.
         cp ${sslDir}/homelab-ca.crt /etc/ssl/certs/homelab-ca.pem
 
-        # CA baru dibuat → leaf lama (kalau ada) ditandatangani CA lama dan
-        # rantai kepercayaannya putus. Hapus leaf + hash agar homelab-cert
-        # meng-generate ulang leaf yang ditandatangani CA baru, lalu tandai
-        # perlu reload Caddy (Caddy meng-cache cert di memori).
         rm -f ${sslDir}/homelab.crt ${sslDir}/homelab.cnf.hash
         NEW_CA=1
       fi
@@ -99,8 +84,6 @@ in
       chown root:caddy ${sslDir}/homelab-ca.key
       chown root:root  ${sslDir}/homelab-ca.crt
 
-      # Bila CA baru saja diregenerasi: regen leaf lalu reload Caddy.
-      # homelab-cert idempotent — akan membuat leaf baru karena kita hapus di atas.
       if [ "''${NEW_CA:-0}" = "1" ]; then
         systemctl start homelab-cert.service || true
         if systemctl is-active --quiet caddy.service; then
@@ -111,32 +94,23 @@ in
   };
 
   # ── 2. Trust CA ke system store NixOS (deklaratif) ───────────────────────
-  # Ini pengganti update-ca-certificates yang tidak ada di NixOS.
-  # CA di-commit ke repo sebagai store path (sandbox-safe). Jika CA runtime
-  # diregenerasi (hapus /etc/ssl/homelab/homelab-ca.crt lalu reboot), update
-  # system/homelab-ca.crt agar bundle trust mengikuti.
   security.pki.certificateFiles = [ ./homelab-ca.crt ];
 
   # ── 3. Generate Homelab Wildcard Certificate ──────────────────────────────
   systemd.services.homelab-cert = {
     description = "Generate Homelab Wildcard Certificate";
     wantedBy = [ "multi-user.target" ];
-    # requires + after: cert tidak boleh jalan tanpa CA (After= hanya ordering).
     requires = [ "homelab-ca.service" ];
     after = [ "homelab-ca.service" ];
     path = [ pkgs.openssl pkgs.coreutils pkgs.systemd ];
-    # Tanpa RemainAfterExit — lihat catatan di homelab-ca. Script idempotent:
-    # regen hanya bila cert hilang atau SAN berubah (hash .cnf).
     serviceConfig = {
       Type = "oneshot";
     };
     script = ''
       set -euxo pipefail
 
-      # Pastikan dir ada tanpa bergantung pada timing systemd-tmpfiles.
       install -d -m0750 -o root -g caddy ${sslDir}
 
-      # Tulis config — selalu di-overwrite agar hash bisa dibandingkan
       cat > ${sslDir}/homelab.cnf <<EOF
 [req]
 default_bits       = 4096
@@ -146,14 +120,11 @@ distinguished_name = dn
 req_extensions     = req_ext
 
 [dn]
-CN = *.home.arpa
+CN = *.${domain}
 
 [req_ext]
 subjectAltName = @alt_names
 
-# Section terpisah untuk signing (-extensions v3_ext)
-# req_extensions hanya dibaca saat membuat CSR,
-# bukan saat x509 -req mensign — pakai v3_ext untuk itu.
 [v3_ext]
 subjectAltName = @alt_names
 
@@ -161,7 +132,6 @@ subjectAltName = @alt_names
 ${altNames}
 EOF
 
-      # Deteksi perubahan domain: bandingkan hash .cnf
       CNF_HASH=$(sha256sum ${sslDir}/homelab.cnf | cut -d' ' -f1)
       STORED_HASH=$(cat ${sslDir}/homelab.cnf.hash 2>/dev/null || echo "")
 
@@ -170,19 +140,15 @@ EOF
       [ "$CNF_HASH" != "$STORED_HASH" ] && NEED_REGEN=1
 
       if [ "$NEED_REGEN" = "1" ]; then
-        # Generate key jika belum ada
         if [ ! -f ${sslDir}/homelab.key ]; then
           openssl genrsa -out ${sslDir}/homelab.key 4096
         fi
 
-        # Buat CSR
         openssl req -new \
           -key ${sslDir}/homelab.key \
           -out ${sslDir}/homelab.csr \
           -config ${sslDir}/homelab.cnf
 
-        # Sign cert — pakai -extensions v3_ext (bukan req_ext)
-        # agar SAN benar-benar masuk ke cert yang dihasilkan
         openssl x509 -req \
           -in    ${sslDir}/homelab.csr \
           -CA    ${sslDir}/homelab-ca.crt \
@@ -193,15 +159,10 @@ EOF
           -extensions v3_ext \
           -extfile ${sslDir}/homelab.cnf
 
-        # Simpan hash setelah berhasil
         echo "$CNF_HASH" > ${sslDir}/homelab.cnf.hash
 
-        # Cleanup
         rm -f ${sslDir}/homelab.csr
 
-        # Cert berubah (mis. LAN service baru → SAN bertambah). Caddy meng-cache
-        # cert di memori, jadi harus di-reload agar menyajikan cert baru.
-        # Hanya reload bila caddy sedang jalan (aman saat bootstrap awal).
         if systemctl is-active --quiet caddy.service; then
           systemctl reload-or-restart caddy.service || true
         fi

@@ -1,17 +1,21 @@
-# system/sops.nix
+# common/security/sops.nix
 
 { config, pkgs, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) user;
+in
 
 {
   sops = {
-    age.keyFile = "/home/sigit/.config/sops/age/keys.txt";
+    age.keyFile = "/home/${user.name}/.config/sops/age/keys.txt";
   };
 
   sops.secrets."providers.env" = {
     sopsFile = ../../secrets/providers.env;
     format = "dotenv";
-    owner = "sigit";
-    group = "users";
+    owner = user.name;
+    group = user.group;
     mode = "0440";
   };
 

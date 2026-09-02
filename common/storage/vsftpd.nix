@@ -1,11 +1,15 @@
 # common/storage/vsftpd.nix
 { config, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) user;
+in
 {
   services.vsftpd = {
     enable = true;
     writeEnable = true;
     localUsers = true;
-    userlist = [ "sigit" ];
+    userlist = [ user.name ];
     userlistEnable = true;
     extraConfig = ''
       pasv_enable=Yes
