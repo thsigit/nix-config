@@ -1,0 +1,74 @@
+# Static LiteLLM config.yaml — single source of truth.
+# Hand-maintained, committed to nix-lab. Seeded to
+# /srv/appdata/litellm/config.yaml ONLY on first deployment (see
+# litellm.nix activation script); thereafter it is admin-edited (by hand or
+# litellm-cli) and never re-rendered by a rebuild.
+#
+# API keys injected at runtime via sops providers.env:
+#   os.environ/NVIDIA_API_KEY (only provider — NVIDIA NIM direct)
+#
+# NVIDIA-only: text + vision + embedding + translation models.
+# OpenRouter + freetheai removed; LiteLLM is for other uses, NVIDIA-only.
+# Verified working 2026-09-02 via direct NVIDIA API probing.
+
+model_list:
+  # ── nvidia text (chat completions) ───────────────────────────────
+  - model_name: nvidia/openai/gpt-oss-120b
+    litellm_params:
+      model: openai/openai/gpt-oss-120b
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+  - model_name: nvidia/nvidia/nemotron-3-super-120b-a12b
+    litellm_params:
+      model: openai/nvidia/nemotron-3-super-120b-a12b
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+  - model_name: nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
+    litellm_params:
+      model: openai/nvidia/nemotron-3.5-lightning-30b-a3b
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  # ── nvidia vision (chat completions with image content) ──────────
+  - model_name: nvidia/meta/llama-3.2-11b-vision-instruct
+    litellm_params:
+      model: openai/meta/llama-3.2-11b-vision-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+  # ── nvidia embedding (embeddings endpoint) ───────────────────────
+  - model_name: nvidia/nvidia/nemotron-3-embed-1b
+    litellm_params:
+      model: openai/nvidia/nemotron-3-embed-1b
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      input_type: query
+      encoding_format: float
+  - model_name: nvidia/nvidia/llama-nemotron-embed-vl-1b-v2
+    litellm_params:
+      model: openai/nvidia/llama-nemotron-embed-vl-1b-v2
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+      input_type: query
+      encoding_format: float
+
+  # ── nvidia speech translation ────────────────────────────────────
+  - model_name: nvidia/riva-translate-4b-instruct-v2
+    litellm_params:
+      model: openai/nvidia/riva-translate-4b-instruct-v2
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+
+router_settings:
+  routing_strategy: usage-based-routing
+  num_retries: 2
+  enable_pre_call_checks: true
+
+litellm_settings:
+  json_logs: true
+  drop_params: true
+  success_callback:
+    - usage_logger.usage_callback
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

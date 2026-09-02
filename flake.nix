@@ -9,14 +9,30 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    litellm-cli = {
+      url = "path:/srv/repo/litellm-cli";
+      flake = false;
+    };
+    opennds = {
+      url = "path:/srv/repo/opennds";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, sops-nix, ... }:
+  outputs = { self, nixpkgs, sops-nix, home-manager, ... }:
 
     let
       system = "x86_64-linux";
 
-      commonSpecialArgs = { };
+      commonSpecialArgs = {
+        litellmCli = self.inputs.litellm-cli;
+        opennds = self.inputs.opennds;
+        inherit home-manager;
+      };
 
       mkSystem = machine: profile:
         nixpkgs.lib.nixosSystem {
@@ -41,6 +57,9 @@
 
       failsafe =
         mkSystem "portege-r30c" "failsafe";
+
+      system =
+        mkSystem "portege-r30c" "system";
     };
   };
 }
