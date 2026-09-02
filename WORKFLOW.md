@@ -15,7 +15,7 @@
 - Branches in this repo: `dev` (development) and `main` (release)
 - No `release.sh`, no `stable` remote
 
-**`/srv/repo/nix-config` — now an inert archive**
+**`/srv/repo/nix-lab-snapshot` — an occasional snapshot**
 - Still on disk, clean at `eba912a`
 - Nothing points to it anymore; its history is preserved in `main`. It exists
   purely as a backup snapshot of the old release method.
