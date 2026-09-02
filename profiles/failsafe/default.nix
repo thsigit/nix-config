@@ -8,8 +8,17 @@
 # Contains only: a basic NixOS system, SSH access, static WAN IP, and a
 # small recovery toolkit (expand later). Keeps /srv/repo/nix-orig as
 # reference only.
+#
+# NOTE: this profile deliberately does NOT import ../../system (so a broken
+# system/ does not take down recovery). Network values are read from
+# settings/ (which is standalone and safe) to avoid re-hardcoding them.
 
 { config, lib, pkgs, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) domain;
+  inherit (defaults.network) lanInterface lanIp lanPrefix gateway;
+in
 
 {
   # Bootloader — stock systemd-boot, same as a fresh NixOS install.
@@ -18,19 +27,19 @@
 
   networking = {
     hostName = "homelab";
-    domain = "home.arpa";
+    inherit domain;
     extraHosts = ''
-      192.168.1.3 homelab.home.arpa homelab
+      ${lanIp} homelab.${domain} homelab
     '';
-    # Static WAN IP so the box is always reachable at 192.168.1.3.
+    # Static WAN IP so the box is always reachable at ${lanIp}.
     networkmanager.enable = true;
-    networkmanager.unmanaged = [ "interface-name:enp0s31f6" ];
-    interfaces.enp0s31f6.ipv4.addresses = [{
-      address = "192.168.1.3";
-      prefixLength = 24;
+    networkmanager.unmanaged = [ "interface-name:${lanInterface}" ];
+    interfaces.${lanInterface}.ipv4.addresses = [{
+      address = lanIp;
+      prefixLength = lanPrefix;
     }];
-    defaultGateway = "192.168.1.1";
-    nameservers = [ "192.168.1.1" "1.1.1.1" ];
+    defaultGateway = gateway;
+    nameservers = [ gateway "1.1.1.1" ];
   };
 
   time.timeZone = "Asia/Makassar";
@@ -62,7 +71,7 @@
     vim
     nix-tree
     nix-diff
-  
+
     # Filesystems / disks
     util-linux
     e2fsprogs
@@ -70,15 +79,15 @@
     parted
     dosfstools
     smartmontools
-  
+
     # EFI / boot
     efibootmgr
-  
+
     # Storage
     cryptsetup
     lvm2
     rsync
-  
+
     # Network
     curl
     wget
@@ -88,7 +97,7 @@
     ethtool
     tcpdump
     openssh
-  
+
     # Diagnostics
     btop
     tree
@@ -101,7 +110,7 @@
     dmidecode
     lshw
     lm_sensors
-  
+
     # Troubleshooting
     strace
   ];
