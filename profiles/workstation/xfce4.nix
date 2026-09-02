@@ -1,6 +1,10 @@
 # profiles/workstation/xfce4.nix
 
 { config, pkgs, callPackage, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) user;
+in
 
 {
   nixpkgs.config.pulseaudio = true;
@@ -23,7 +27,7 @@
     };
     autoLogin = {
       enable = true;
-      user = "sigit";
+      user = user.name;
     };
   };
 

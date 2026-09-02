@@ -1,5 +1,9 @@
 # profiles/workstation/default.nix
 { config, lib, pkgs, callPackage, home-manager, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) user;
+in
 {
   imports = [
     ../../system
@@ -12,7 +16,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.sigit = import ./home.nix;
+    users.${user.name} = import ./home.nix;
   };
 
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [

@@ -3,14 +3,18 @@
 { config, lib, pkgs, ... }:
 
 let
+  defaults = import ../../settings;
+  inherit (defaults) user;
+  homeDir = "/home/${user.name}";
+
   # Dotfiles working tree (out-of-store symlinks: live edits survive rebuilds;
   # GUI/xfconfd changes land in the repo, commit them from /srv/repo/dotfiles).
   dotfiles = "/srv/repo/dotfiles";
 in
 {
   home = {
-    username = "sigit";
-    homeDirectory = "/home/sigit";
+    username = user.name;
+    homeDirectory = homeDir;
     stateVersion = "26.05";
     sessionPath = [
       "${config.home.homeDirectory}/.local/bin"
@@ -22,7 +26,6 @@ in
 
   programs.bash = {
     enable = true;
-    enableCompletion = true;
   };
 
   programs.git = {

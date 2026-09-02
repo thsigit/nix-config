@@ -16,7 +16,7 @@
 { config, lib, pkgs, ... }:
 let
   defaults = import ../../settings;
-  inherit (defaults) domain;
+  inherit (defaults) domain user;
   inherit (defaults.network) lanInterface lanIp lanPrefix gateway;
 in
 
@@ -45,7 +45,7 @@ in
   time.timeZone = "Asia/Makassar";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  users.users.sigit = {
+  users.users.${user.name} = {
     isNormalUser = true;
     description = "Sigit Prasetyo";
     extraGroups = [ "networkmanager" "wheel" ];
