@@ -6,18 +6,13 @@
 # API keys injected at runtime via sops providers.env:
 #   os.environ/NVIDIA_API_KEY (only provider — NVIDIA NIM direct)
 #
-# NVIDIA-only: 7 curated text models. Rewritten BY OWNER DECISION 2026-09-02:
+# NVIDIA-only: 4 curated text models. Rewritten BY OWNER DECISION 2026-09-02:
 # OpenRouter + freetheai removed; LiteLLM is for other uses, NVIDIA-only.
 # Non-text (vision/embedding/audio) models TBD separately — endpoints/key scopes
 # on NVIDIA need investigation before adding (phase 2).
 
 model_list:
-  # ── nvidia (direct NIM) · 7 text models ──────────────────────────
-  - model_name: nvidia/google/gemma-4-31b-it
-    litellm_params:
-      model: openai/google/gemma-4-31b-it
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
+  # ── nvidia (direct NIM) · 4 text models ──────────────────────────
   - model_name: nvidia/openai/gpt-oss-120b
     litellm_params:
       model: openai/openai/gpt-oss-120b
@@ -31,16 +26,6 @@ model_list:
   - model_name: nvidia/nvidia/nemotron-3-ultra-550b-a55b
     litellm_params:
       model: openai/nvidia/nemotron-3-ultra-550b-a55b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/moonshotai/kimi-k3
-    litellm_params:
-      model: openai/moonshotai/kimi-k3
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/mistralai/mistral-nemotron
-    litellm_params:
-      model: openai/mistralai/mistral-nemotron
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
   - model_name: nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
