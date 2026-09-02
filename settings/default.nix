@@ -18,9 +18,7 @@ let
   };
 
   ai = {
-    root = "/srv/ai";
     models = "/srv/ai/models";
-    repo = "/srv/repo/nix-config";
   };
 
   tailnet = "basa-komodo";
@@ -42,14 +40,4 @@ in
 
 {
   inherit user timezone directories ai tailnet domain security network;
-
-  baseEnv = {
-    PUID = user.uid;
-    PGID = user.gid;
-    TZ   = timezone;
-  };
-
-  qbittorrentEnv = {
-    WEBUI_PORT = "8080";
-  };
 }
