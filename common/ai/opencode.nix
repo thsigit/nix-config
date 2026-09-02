@@ -5,7 +5,8 @@
 
 let
   defaults = import ../../settings;
-  inherit (defaults) domain tailnet;
+  inherit (defaults) user domain tailnet;
+  inherit (defaults.directories) appdata;
   port = 3000;
 in
 {
@@ -24,16 +25,16 @@ in
       ExecStart = "${pkgs.opencode}/bin/opencode serve --hostname 127.0.0.1 --port ${toString port} --cors *.${domain} --cors *.${tailnet}.ts.net";
       Restart = "on-failure";
       RestartSec = "5s";
-      User = "sigit";
-      Group = "users";
+      User = user.name;
+      Group = user.group;
       StateDirectory = "opencode";
       StateDirectoryMode = "0755";
     };
-    environment.HOME = "/srv/appdata/opencode";
+    environment.HOME = "${appdata}/opencode";
   };
 
   systemd.tmpfiles.rules = [
-    "d /srv/appdata/opencode 0755 sigit users -"
+    "d ${appdata}/opencode 0755 ${user.name} ${user.group} -"
   ];
 
   environment.systemPackages = [ pkgs.opencode ];

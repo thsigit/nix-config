@@ -6,7 +6,6 @@
 {
   imports = [
     ./llama-cpp.nix
-    ./vane-podman.nix
     ./opencode.nix
     ./litellm
   ];

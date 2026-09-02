@@ -78,23 +78,13 @@ in
     stateDir = stateDir;
     environmentFile = config.sops.secrets."providers.env".path;
 
-    settings = {
-      general_settings = {
-        master_key = "os.environ/LITELLM_MASTER_KEY";
-      };
-      litellm_settings = {
-        json_logs = true;
-        drop_params = true;
-      };
-      router_settings = {
-        routing_strategy = "usage-based-routing";
-        num_retries = 2;
-        enable_pre_call_checks = true;
-      };
-      # model_list / model_alias / fallbacks live in the admin-edited
-      # ${configFile} (seeded once, then handled at the persistence layer).
-      model_list = [];
-    };
+    # All runtime settings (model_list, router_settings, litellm_settings,
+    # general_settings) live in the admin-edited ${configFile}, seeded from the
+    # committed config.yaml and never re-rendered. The upstream module's
+    # `settings` generates an unused config.yaml because ExecStart is overridden
+    # below to point at ${configFile}; keep this empty to avoid dead duplication
+    # (single source of truth = config.yaml).
+    settings = { };
   };
 
   ##########################################################################

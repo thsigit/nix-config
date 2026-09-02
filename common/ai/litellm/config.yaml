@@ -1,7 +1,8 @@
 # Static LiteLLM config.yaml — single source of truth.
-# Hand-maintained, committed to nix-lab. Copied to /var/lib/litellm/config.yaml
-# at activation. litellm-cli edits this file directly (manual only); it is NOT
-# generated at build time.
+# Hand-maintained, committed to nix-lab. Seeded to
+# /srv/appdata/litellm/config.yaml ONLY on first deployment (see
+# litellm.nix activation script); thereafter it is admin-edited (by hand or
+# litellm-cli) and never re-rendered by a rebuild.
 #
 # API keys injected at runtime via sops providers.env:
 #   os.environ/NVIDIA_API_KEY (only provider — NVIDIA NIM direct)
