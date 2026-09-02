@@ -3,39 +3,24 @@
 # at activation. litellm-cli edits this file directly (manual only); it is NOT
 # generated at build time.
 #
-# API keys are injected at runtime via the environment file (sops providers.env):
-#   os.environ/NVIDIA_API_KEY, os.environ/OPENROUTER_API_KEY, os.environ/FREETHEAI_API_KEY
+# API keys injected at runtime via sops providers.env:
+#   os.environ/NVIDIA_API_KEY (only provider — NVIDIA NIM direct)
+#
+# NVIDIA-only: 7 curated text models. Rewritten BY OWNER DECISION 2026-09-02:
+# OpenRouter + freetheai removed; LiteLLM is for other uses, NVIDIA-only.
+# Non-text (vision/embedding/audio) models TBD separately — endpoints/key scopes
+# on NVIDIA need investigation before adding (phase 2).
 
 model_list:
-  # ── nvidia (direct NIM, whitelist) ─────────────────────────────────────────
+  # ── nvidia (direct NIM) · 7 text models ──────────────────────────
   - model_name: nvidia/google/gemma-4-31b-it
     litellm_params:
       model: openai/google/gemma-4-31b-it
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/minimaxai/minimax-m3
+  - model_name: nvidia/openai/gpt-oss-120b
     litellm_params:
-      model: openai/minimaxai/minimax-m3
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/mistralai/mistral-nemotron
-    litellm_params:
-      model: openai/mistralai/mistral-nemotron
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/moonshotai/kimi-k3
-    litellm_params:
-      model: openai/moonshotai/kimi-k3
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/nvidia/nemotron-3-nano-30b-a3b
-    litellm_params:
-      model: openai/nvidia/nemotron-3-nano-30b-a3b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
-    litellm_params:
-      model: openai/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+      model: openai/openai/gpt-oss-120b
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
   - model_name: nvidia/nvidia/nemotron-3-super-120b-a12b
@@ -48,141 +33,21 @@ model_list:
       model: openai/nvidia/nemotron-3-ultra-550b-a55b
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
+  - model_name: nvidia/moonshotai/kimi-k3
+    litellm_params:
+      model: openai/moonshotai/kimi-k3
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+  - model_name: nvidia/mistralai/mistral-nemotron
+    litellm_params:
+      model: openai/mistralai/mistral-nemotron
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
   - model_name: nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
     litellm_params:
       model: openai/nvidia/nemotron-3.5-lightning-30b-a3b
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/openai/gpt-oss-120b
-    litellm_params:
-      model: openai/openai/gpt-oss-120b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/openai/gpt-oss-20b
-    litellm_params:
-      model: openai/openai/gpt-oss-20b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-
-  # ── openrouter (free tier only) ────────────────────────────────────────────
-  - model_name: openrouter/dots-studio/dots-3-note-preview:free
-    litellm_params:
-      model: openrouter/dots-studio/dots-3-note-preview:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/google/gemma-4-26b-a4b-it:free
-    litellm_params:
-      model: openrouter/google/gemma-4-26b-a4b-it:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/google/gemma-4-31b-it:free
-    litellm_params:
-      model: openrouter/google/gemma-4-31b-it:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/liquid/lfm-2.5-2.6b:free
-    litellm_params:
-      model: openrouter/liquid/lfm-2.5-2.6b:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/minimax/minimax-m2.7:free
-    litellm_params:
-      model: openrouter/minimax/minimax-m2.7:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/minimax/minimax-m3:free
-    litellm_params:
-      model: openrouter/minimax/minimax-m3:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
-    litellm_params:
-      model: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/nvidia/nemotron-3-super-120b-a12b:free
-    litellm_params:
-      model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
-    litellm_params:
-      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/nvidia/nemotron-3.5-content-safety:free
-    litellm_params:
-      model: openrouter/nvidia/nemotron-3.5-content-safety:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/nvidia/nemotron-3.5-lightning:free
-    litellm_params:
-      model: openrouter/nvidia/nemotron-3.5-lightning:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/openrouter/free
-    litellm_params:
-      model: openrouter/openrouter/free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/poolside/laguna-s-2.1:free
-    litellm_params:
-      model: openrouter/poolside/laguna-s-2.1:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/poolside/laguna-xs-2.1:free
-    litellm_params:
-      model: openrouter/poolside/laguna-xs-2.1:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/thinkingmachines/inkling-small:free
-    litellm_params:
-      model: openrouter/thinkingmachines/inkling-small:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/thinkingmachines/inkling:free
-    litellm_params:
-      model: openrouter/thinkingmachines/inkling:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-  - model_name: openrouter/z-ai/glm-5.2:free
-    litellm_params:
-      model: openrouter/z-ai/glm-5.2:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-
-  # ── freetheai (manual) ─────────────────────────────────────────────────────
-  - model_name: freetheai/glm/glm-4.5
-    litellm_params:
-      model: openai/glm/glm-4.5
-      api_base: https://api.freetheai.xyz/v1
-      api_key: os.environ/FREETHEAI_API_KEY
-  - model_name: freetheai/glm/glm-4.5-air
-    litellm_params:
-      model: openai/glm/glm-4.5-air
-      api_base: https://api.freetheai.xyz/v1
-      api_key: os.environ/FREETHEAI_API_KEY
-  - model_name: freetheai/glm/glm-5.3
-    litellm_params:
-      model: openai/glm/glm-5.3
-      api_base: https://api.freetheai.xyz/v1
-      api_key: os.environ/FREETHEAI_API_KEY
-  - model_name: freetheai/glm/glm-5.3-flash
-    litellm_params:
-      model: openai/glm/glm-5.3-flash
-      api_base: https://api.freetheai.xyz/v1
-      api_key: os.environ/FREETHEAI_API_KEY
-
-model_alias:
-  local-chat: ollama/llama3.2
-  cloud-chat: openrouter/openrouter/free
-  deep-reasoning: openrouter/openrouter/free
-  coding-agent: openrouter/openrouter/free
-
-fallbacks:
-  - ollama/llama3.2: [openrouter/openrouter/free]
-  - openrouter/openrouter/free: [freetheai/glm/glm-4.5]
-
 router_settings:
   routing_strategy: usage-based-routing
   num_retries: 2
@@ -196,3 +61,4 @@ litellm_settings:
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
+
