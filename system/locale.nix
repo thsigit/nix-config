@@ -1,8 +1,11 @@
-# common/core/locale.nix
+# system/locale.nix
 
 { config, lib, pkgs, ... }:
+let
+  inherit (import ../settings) timezone;
+in
 {
-  time.timeZone = "Asia/Makassar";
+  time.timeZone = timezone;
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "id_ID.UTF-8";
