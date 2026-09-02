@@ -4,29 +4,37 @@
 #
 # Static config architecture (no runtime render, no litellm-cli at build):
 #
-#   committed source                    activation                    runtime
-#   -----------------                   ----------                    -------
-#   common/ai/litellm/config.yaml  ->   copy to                            litellm --config
-#   (single source of truth,              /var/lib/litellm/config.yaml     /var/lib/litellm/config.yaml
-#    hand-maintained)              +    install usage_logger.py
-#                                      -> /srv/appdata/litellm/
+#   committed seed                    first activation                 runtime
+#   ----------------                  ----------------                 -------
+#   common/ai/litellm/config.yaml ->  copy ONLY if missing        ->   litellm --config
+#   (first boot default)               /srv/appdata/litellm/config.yaml /srv/appdata/litellm/config.yaml
+#                                +   install usage_logger.py
+#                                     -> /srv/appdata/litellm/
+#
+# The runtime config.yaml is ADMIN-EDITABLE and lives in /srv/appdata/litellm,
+# the persistent replacement dir (survives /var deletion). It does NOT
+# participate in nixos-rebuild: once seeded, rebuilds never overwrite it.
+# The committed copy in this repo is only a first-boot default.
 #
 # Ownership:
-#   Nix owns: service definition + activation copy of the committed config.yaml
-#   Repo owns: common/ai/litellm/config.yaml (the model list, aliases, fallbacks)
+#   Nix owns: service definition + first-boot seed of the committed config.yaml
+#   Repo owns: common/ai/litellm/config.yaml (model list, aliases, fallbacks)
+#   Admin owns: /srv/appdata/litellm/config.yaml (the live, editable config)
 #   SOPS owns: providers.env (API keys / master key)
 #
-# litellm-cli is a purely MANUAL tool that edits the committed config.yaml. It is
-# NOT invoked during nixos-rebuild or by any systemd unit.
+# litellm-cli is a purely MANUAL tool that edits /srv/appdata/litellm/config.yaml.
+# It is NOT invoked during nixos-rebuild or by any systemd unit.
 #
 { config, lib, pkgs, ... }:
 
 let
   litellmPort = 4000;
   stateDir = "/var/lib/litellm";
-  # Committed static config — the single source of truth, copied at activation.
+  # Committed first-boot seed.
   staticConfig = ./config.yaml;
   cliDataDir = config.services.litellm-cli.dataDir;
+  # Effective runtime config: admin-editable, persistent, in the replacement dir.
+  configFile = "${cliDataDir}/config.yaml";
 in
 {
   ##########################################################################
@@ -83,8 +91,8 @@ in
         num_retries = 2;
         enable_pre_call_checks = true;
       };
-      # model_list / model_alias / fallbacks live in the committed static
-      # config.yaml copied to ${stateDir}/config.yaml (see activation below).
+      # model_list / model_alias / fallbacks live in the admin-edited
+      # ${configFile} (seeded once, then handled at the persistence layer).
       model_list = [];
     };
   };
@@ -95,22 +103,23 @@ in
 
   system.activationScripts.litellm-static-config = lib.stringAfter [ "users" ] ''
     set -euo pipefail
-    mkdir -p ${stateDir} ${cliDataDir}
+    mkdir -p ${cliDataDir}
 
-    # Handle dangling symlink /var/lib/litellm -> private/litellm (StateDirectory)
-    if [ -L ${stateDir} ]; then
-      mkdir -p /var/lib/private/litellm
+    # Seed the admin-editable config.yaml from the committed copy ONLY on first
+    # deployment. Once present it is edited by hand / litellm-cli and must
+    # survive rebuilds untouched.
+    if [ ! -f ${configFile} ]; then
+      install -m0644 ${staticConfig} ${configFile}
     fi
-    mkdir -p ${stateDir}
 
-    # Copy the committed static config.yaml into the runtime location.
-    cp -f ${staticConfig} ${stateDir}/config.yaml
+    # usage_logger callback: always (re)install from the package.
+    install -m0644 ${config.services.litellm-cli.package}/data/usage_logger.py ${cliDataDir}/usage_logger.py
 
-    # usage_logger callback: ensure usage_logger.py lands in the PYTHONPATH dir.
-    install -m644 ${config.services.litellm-cli.package}/data/usage_logger.py ${cliDataDir}/usage_logger.py
+    chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${configFile} ${cliDataDir}/usage_logger.py
+    chmod 0644 ${configFile} ${cliDataDir}/usage_logger.py
 
-    chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${stateDir}/config.yaml ${cliDataDir}/usage_logger.py
-    chmod 0644 ${stateDir}/config.yaml ${cliDataDir}/usage_logger.py
+    # Drop the obsolete pre-refactor copy (config now lives in cliDataDir).
+    rm -f ${stateDir}/config.yaml
   '';
 
   ##########################################################################
@@ -128,7 +137,7 @@ in
 
     serviceConfig = {
       ExecStart = lib.mkForce
-        "${pkgs.litellm}/bin/litellm --host 127.0.0.1 --port ${toString litellmPort} --config ${stateDir}/config.yaml";
+        "${pkgs.litellm}/bin/litellm --host 127.0.0.1 --port ${toString litellmPort} --config ${configFile}";
       DynamicUser = lib.mkForce false;
       PrivateUsers = lib.mkForce false;
     };
