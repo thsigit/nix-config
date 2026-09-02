@@ -13,6 +13,8 @@
     ./firewall.nix
     ./sudo.nix
     ./ssh.nix
+    ./shell.nix
+    ./power.nix
   ];
 
   nix = {

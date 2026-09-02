@@ -26,10 +26,17 @@ let
   tailnet = "basa-komodo";
   domain = "home.arpa";
 
+  network = {
+    lanInterface = "enp0s31f6";
+    lanIp = "192.168.1.3";
+    lanPrefix = 24;
+    gateway = "192.168.1.1";
+  };
+
 in
 
 {
-  inherit user timezone directories ai tailnet domain;
+  inherit user timezone directories ai tailnet domain network;
 
   baseEnv = {
     PUID = user.uid;

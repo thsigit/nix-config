@@ -1,19 +1,9 @@
 # common/packages/default.nix
-# All interactive applications (user-invoked) and installed packages.
+# Installed packages and enableable programs. Shell config and power tuning
+# live in system/ (shell.nix, power.nix) — this module is software only.
 
 { config, lib, pkgs, ... }:
-
 {
-  programs.bash = {
-    promptInit = ''
-      export PS1="\[\e[1;36m\]🏠 HOMELAB \[\e[0m\]\w (\u) \$ "
-    '';
-    completion = {
-      enable = true;
-      package = pkgs.bash-completion;
-    };
-  };
-
   programs.fzf = {
     keybindings = true;
     fuzzyCompletion = true;
@@ -66,8 +56,6 @@
   programs.tcpdump.enable = true;
   programs.traceroute.enable = true;
   programs.ydotool.enable = true;
-
-  powerManagement.cpuFreqGovernor = "performance";
 
   environment.systemPackages = with pkgs; [
     bc rink

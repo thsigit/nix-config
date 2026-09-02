@@ -1,24 +1,31 @@
-# common/core/networking.nix
+# system/networking.nix
+# Machine networking: hostname, domain, LAN static IP on the wired NIC.
+# Machine-specific values come from settings/network (single source of truth).
 
 { config, lib, pkgs, ... }:
+let
+  defaults = import ../settings;
+  inherit (defaults) domain;
+  inherit (defaults.network) lanInterface lanIp lanPrefix gateway;
+in
 {
   networking = {
     hostName = "homelab";
-    domain = "home.arpa";
+    inherit domain;
     extraHosts = ''
-      192.168.1.3 homelab.home.arpa homelab
+      ${lanIp} homelab.${domain} homelab
     '';
   };
 
   networking.networkmanager.enable = true;
 
-  # WAN is the wired ethernet NIC. Pin it to the static address (192.168.1.3);
+  # WAN is the wired ethernet NIC. Pin it to the static address (${lanIp});
   # DHCP is only used until this config is applied.
-  networking.networkmanager.unmanaged = [ "interface-name:enp0s31f6" ];
-  networking.interfaces.enp0s31f6.ipv4.addresses = [{
-    address = "192.168.1.3";
-    prefixLength = 24;
+  networking.networkmanager.unmanaged = [ "interface-name:${lanInterface}" ];
+  networking.interfaces.${lanInterface}.ipv4.addresses = [{
+    address = lanIp;
+    prefixLength = lanPrefix;
   }];
-  networking.defaultGateway = "192.168.1.1";
-  networking.nameservers = [ "192.168.1.1" "1.1.1.1" ];
+  networking.defaultGateway = gateway;
+  networking.nameservers = [ gateway "1.1.1.1" ];
 }

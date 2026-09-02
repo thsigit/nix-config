@@ -1,14 +1,22 @@
 # common/network/dnsmasq.nix
+# LAN DNS/DHCP via dnsmasq, bound to the machine's LAN interface/address.
+# Values come from settings/network (single source of truth).
+
 { config, pkgs, ... }:
+let
+  defaults = import ../../settings;
+  inherit (defaults) domain;
+  inherit (defaults.network) lanInterface lanIp;
+in
 {
   services.dnsmasq = {
     enable = true;
     settings = {
-      interface = [ "enp0s31f6" ];
+      interface = [ lanInterface ];
       bind-interfaces = true;
-      listen-address = [ "127.0.0.1" "192.168.1.3" ];
+      listen-address = [ "127.0.0.1" lanIp ];
       address = [
-        "/home.arpa/192.168.1.3"
+        "/${domain}/${lanIp}"
       ];
     };
   };
