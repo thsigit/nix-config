@@ -2,12 +2,17 @@
 #
 # Local wiring for the independent `services.litellm-cli` module (imported
 # from the litellm-cli repo). Self-enabling leaf: importing this file enables
-# the config layer + admin CLI. The native runtime (./litellm.nix)
-# consumes its rendered config via config.services.litellm-cli.configFile.
+# the admin CLI + config editor layer.
+#
+# Static config contract:
+#   The LiteLLM config.yaml is a STATIC, hand-maintained file living at
+#   common/ai/litellm/config.yaml and copied to ${config.services.litellm-cli.configFile}
+#   at activation by the native runtime module (./litellm.nix). litellm-cli
+#   only EDITS that static file manually; it never renders or seeds anything.
 #
 # Persistence contract:
-#   dataDir (persistent) → providers.json (admin-owned, survives reinstall)
-#   /run/litellm-cli     → models.json, config.yaml, health.json (rebuilt each boot)
+#   dataDir (persistent) → usage_logger.py (callback module), survives reinstall
+#   /run/litellm-cli     → health.json (ephemeral, rebuilt each boot)
 { config, lib, litellmCli, ... }:
 
 let
@@ -19,22 +24,10 @@ in
 
   services.litellm-cli = {
     enable = true;
-    # Persistent admin-owned data root. providers.json (the source of truth)
-    # lives here and survives partition reformat/reinstall.
+    # runs as the regular user so `litellm-cli` works without sudo
     dataDir = "${appdata}/litellm";
-    # State files are owned by the regular user so `litellm-cli` works without sudo.
     user = defaults.user.name;
     group = defaults.user.group;
     providersEnvFile = config.sops.secrets."providers.env".path;
   };
-
-  system.activationScripts.litellm-healthjson-prep = {
-    deps = [ "users" ];
-    text = ''
-      mkdir -p /run/litellm-cli
-      [ -e /run/litellm-cli/health.json ] || echo '{}' > /run/litellm-cli/health.json
-    '';
-  };
-
-  system.activationScripts.litellm-cli-config.deps = [ "users" "litellm-healthjson-prep" ];
 }

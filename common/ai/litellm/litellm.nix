@@ -2,27 +2,31 @@
 #
 # LiteLLM gateway runtime using the native services.litellm module.
 #
-# Architecture (three-layer config):
+# Static config architecture (no runtime render, no litellm-cli at build):
 #
-#   Nix (eval time)              CLI (runtime)              Merge (startup)
-#   ───────────────              ───────────────            ────────────────
-#   services.litellm.settings    providers.json               litellm-cli render
-#     ↓                           ↓                           ↓
-#   /nix/store/config.yaml      data/models.json     →    /var/lib/litellm/config.yaml
-#   (static defaults)            (discovered models)        (effective config)
-#                                                                ↓
-#                                                          litellm --config
+#   committed source                    activation                    runtime
+#   -----------------                   ----------                    -------
+#   common/ai/litellm/config.yaml  ->   copy to                            litellm --config
+#   (single source of truth,              /var/lib/litellm/config.yaml     /var/lib/litellm/config.yaml
+#    hand-maintained)              +    install usage_logger.py
+#                                      -> /srv/appdata/litellm/
 #
 # Ownership:
-#   Nix owns: service definition, general_settings, litellm_settings, router_settings
-#   CLI owns: model_list, model_alias, fallbacks
-#   SOPS owns: providers.env (API keys)
+#   Nix owns: service definition + activation copy of the committed config.yaml
+#   Repo owns: common/ai/litellm/config.yaml (the model list, aliases, fallbacks)
+#   SOPS owns: providers.env (API keys / master key)
+#
+# litellm-cli is a purely MANUAL tool that edits the committed config.yaml. It is
+# NOT invoked during nixos-rebuild or by any systemd unit.
 #
 { config, lib, pkgs, ... }:
 
 let
   litellmPort = 4000;
   stateDir = "/var/lib/litellm";
+  # Committed static config — the single source of truth, copied at activation.
+  staticConfig = ./config.yaml;
+  cliDataDir = config.services.litellm-cli.dataDir;
 in
 {
   ##########################################################################
@@ -79,45 +83,46 @@ in
         num_retries = 2;
         enable_pre_call_checks = true;
       };
+      # model_list / model_alias / fallbacks live in the committed static
+      # config.yaml copied to ${stateDir}/config.yaml (see activation below).
       model_list = [];
     };
   };
 
   ##########################################################################
-  # Config render service (runs before litellm starts)
+  # Static config deployment (replaces litellm-cli render completely)
   ##########################################################################
 
-  systemd.services.litellm-render = {
-    description = "Render litellm effective config (providers.json + models.json)";
-    # Render installs usage_logger.py into the CLI dataDir and emits the
-    # success_callback block when this flag is set.
-    environment.LITELLM_USAGE_CALLBACK = "1";
-    wantedBy = [ "multi-user.target" ];
-    before = [ "litellm.service" ];
-    after = [ "network.target" ];
+  system.activationScripts.litellm-static-config = lib.stringAfter [ "users" ] ''
+    set -euo pipefail
+    mkdir -p ${stateDir} ${cliDataDir}
 
-    path = [ pkgs.coreutils pkgs.jq pkgs.bash ];
+    # Handle dangling symlink /var/lib/litellm -> private/litellm (StateDirectory)
+    if [ -L ${stateDir} ]; then
+      mkdir -p /var/lib/private/litellm
+    fi
+    mkdir -p ${stateDir}
 
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash -c '${config.services.litellm-cli.package}/bin/litellm-cli debug render'";
-      StateDirectory = "litellm-render";
-      RuntimeDirectory = "litellm-render";
-      RuntimeDirectoryMode = "0755";
-    };
-  };
+    # Copy the committed static config.yaml into the runtime location.
+    cp -f ${staticConfig} ${stateDir}/config.yaml
+
+    # usage_logger callback: ensure usage_logger.py lands in the PYTHONPATH dir.
+    install -m644 ${config.services.litellm-cli.package}/data/usage_logger.py ${cliDataDir}/usage_logger.py
+
+    chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${stateDir}/config.yaml ${cliDataDir}/usage_logger.py
+    chmod 0644 ${stateDir}/config.yaml ${cliDataDir}/usage_logger.py
+  '';
 
   ##########################################################################
-  # LiteLLM service ordering + ExecStart override
+  # LiteLLM service ordering + ExecStart
   ##########################################################################
 
   systemd.services.litellm = {
-    after = [ "litellm-render.service" "network.target" ];
-    requires = [ "litellm-render.service" ];
+    after = [ "network.target" ];
 
     # usage_logger callback resolves via importlib through PYTHONPATH.
     environment = {
-      PYTHONPATH = config.services.litellm-cli.dataDir;
+      PYTHONPATH = cliDataDir;
       LITELLM_USAGE_CALLBACK = "1";
     };
 
@@ -127,5 +132,5 @@ in
       DynamicUser = lib.mkForce false;
       PrivateUsers = lib.mkForce false;
     };
-    };
+  };
 }
