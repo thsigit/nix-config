@@ -23,7 +23,7 @@ Also `failsafe` = minimal recovery profile.
 - `#server` and `#workstation` are the SAME hardware. The only divergence today
   is headless vs desktop GUI. **Keep it that way** — do not add meaningful
   differences between the two profiles beyond that.
-- `/srv/repo/nix-lab` is the **active** repo (branch `main`). `/srv/repo/nix-config` is the **stable** repo. GitHub's nix-config is the **rolling release**.
+- One repo, two branches in `/srv/repo/nix-lab`: branch `dev` = active development, branch `main` = public release (the deployed end product). `/srv/repo/nix-lab-snapshot` is an occasional snapshot. See `WORKFLOW.md`. GitHub's nix-config is the **rolling release** (`main`).
 
 ## Operating constraints (hard rules — do not "fix" them away)
 

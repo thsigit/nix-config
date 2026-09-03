@@ -50,25 +50,11 @@
         "type": "github"
       }
     },
-    "opennds": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786608843,
-        "narHash": "sha256-n8VWcTpvLUQaoxpVTwoiuz5pKuPFue2bFnLhCNnzWUE=",
-        "path": "/srv/repo/opennds",
-        "type": "path"
-      },
-      "original": {
-        "path": "/srv/repo/opennds",
-        "type": "path"
-      }
-    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "litellm-cli": "litellm-cli",
         "nixpkgs": "nixpkgs",
-        "opennds": "opennds",
         "sops-nix": "sops-nix"
       }
     },
