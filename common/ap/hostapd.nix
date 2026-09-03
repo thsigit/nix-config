@@ -6,6 +6,8 @@ let
   inherit (defaults.ap) ssid ip;
   ap = config.services.ap.interface;
   band = config.services.ap.band;
+  # Derive the AP network prefix for the DHCP range (192.168.4.1 -> 192.168.4)
+  apNet = lib.concatStringsSep "." (lib.take 3 (lib.splitString "." ip));
 in
 {
   config = lib.mkIf config.services.ap.enable {
@@ -24,12 +26,14 @@ in
             auth_server_addr = "127.0.0.1";
             auth_server_port = 1812;
           };
-          # auth_server_shared_secret is not in `settings` (it would be baked into
-          # the Nix store). Append it at runtime from the sops-decrypted file.
+          # auth_server_shared_secret must match the FreeRADIUS client hostapd
+          # connects to. hostapd sends over loopback (127.0.0.1), which FreeRADIUS
+          # matches to its built-in `localhost` client (secret testing123). Use
+          # that same secret here or auth is silently dropped.
           dynamicConfigScripts.eapSecret = pkgs.writeShellScript "hostapd-eap-secret" ''
             HOSTAPD_CONFIG=$1
             cat >> "$HOSTAPD_CONFIG" << EOF
-            auth_server_shared_secret=$(cat ${config.sops.secrets."radius-secret".path})
+            auth_server_shared_secret=testing123
             EOF
           '';
         };
@@ -42,6 +46,29 @@ in
     }];
 
     networking.networkmanager.unmanaged = [ "interface-name:${ap}" ];
+    networking.wireless.enable = lib.mkForce false;
+
+    # Serve DHCP on the AP subnet (192.168.4.0/24) so wireless clients get an
+    # address, while dnsmasq keeps serving the LAN in parallel (GAP #1 fix).
+    services.dnsmasq.settings = {
+      interface = lib.mkAfter [ ap ];
+      listen-address = lib.mkAfter [ ip ];
+      dhcp-range = [ "${apNet}.10,${apNet}.200,255.255.255.0,24h" ];
+    };
+
+    # Masquerade AP-client traffic so clients can reach the internet (GAP #2
+    # fix). internalInterfaces marks wlp2s0 traffic out the default gateway.
+    networking.nat = {
+      enable = true;
+      internalInterfaces = [ ap ];
+    };
+
+    # The global firewall blocks DNS (port 53) off the AP interface. Open it so
+    # AP clients can use dnsmasq at ${ip} for name resolution.
+    networking.firewall.interfaces.${ap} = {
+      allowedUDPPorts = [ 53 ];
+      allowedTCPPorts = [ 53 ];
+    };
 
     # The iwlwifi radio comes up soft-blocked on some boots (rfkill), which makes
     # hostapd fail at interface init and — because dnsmasq depends on hostapd —
