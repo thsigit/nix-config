@@ -53,8 +53,8 @@
     "opennds": {
       "flake": false,
       "locked": {
-        "lastModified": 1786608843,
-        "narHash": "sha256-n8VWcTpvLUQaoxpVTwoiuz5pKuPFue2bFnLhCNnzWUE=",
+        "lastModified": 1787933765,
+        "narHash": "sha256-uFOXtTR6UlFfhNtVn8F3Q6GLwabO7gu3cYZavggfo0U=",
         "path": "/srv/repo/opennds",
         "type": "path"
       },

@@ -38,7 +38,7 @@ in
   imports = [
     ./hostapd.nix
     ./freeradius.nix
-    # ./opennds.nix  # disabled: suspected cause of boot failure
+    ./opennds.nix
   ];
 
   # Profiles (workstation, server) set services.ap.enable = true to activate

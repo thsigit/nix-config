@@ -1,17 +1,24 @@
 # common/ap/opennds.nix
-{ config, pkgs, lib, openndsPackage, ... }:
+{ config, pkgs, lib, opennds, ... }:
 
 let
   defaults = import ../../settings;
   inherit (defaults.ap) interface gatewayName;
 
-  opennds = pkgs.callPackage openndsPackage { };
+  openndsPkg = pkgs.callPackage opennds { };
 
   cfg = config.services.opennds;
 
+  # NOTE: fwhook_enabled is '0' (captive portal BYPASSED). openNDS 11 nft client-
+  # tracking (nds_mangle/ndsOUT) conflicts with the base system iptables-compat
+  # NAT (networking.nat), leaving mangle empty and rejecting all pre-auth traffic.
+  # fwhook_enabled '0' makes openNDS transparent and delegates firewall/NAT to
+  # NixOS so AP clients get internet. Set '1' only after the hybrid nft/iptables
+  # issue is fixed (see OPENNDS-DEBUG-NOTE.md).
+
   # Generate the UCI-style config file. faskey is omitted here and appended at
-  # runtime from the sops secret (see activationScripts.opennds) so it is never
-  # baked into the Nix store.
+  # runtime (see systemd.services.opennds.preStart) so it is never baked into
+  # the Nix store.
   configFile = pkgs.writeText "opennds" ''
     config opennds 'setup'
         option enabled '1'
@@ -30,7 +37,7 @@ let
         option webroot '/etc/opennds/htdocs'
         option binauth '/usr/lib/opennds/binauth_log.sh'
         option custombinauth '/srv/appdata/opennds/binauth-voucher.sh'
-        option fwhook_enabled '1'
+        option fwhook_enabled '0'
         option dhcp_default_url_enable '1'
         option enable_serial_number_suffix '1'
         option dhcp_leases_file '/var/lib/dnsmasq/dnsmasq.leases'
@@ -72,50 +79,15 @@ in
 
   # Gated on the bundle switch (services.ap.enable) like the other ap modules,
   # so removing/commenting any one module leaves the rest building. Runtime data
-  # lives under /srv/appdata/opennds; secrets come from sops at activation.
+  # lives under /srv/appdata/opennds; secrets come from sops.
+  #
+  # NOTE: this must NOT use system.activationScripts — that was the confirmed
+  # trigger of the "no usable init" boot failure (see freeradius.nix history).
+  # Instead, all setup (resource copy + config write with faskey) runs in the
+  # opennds.service preStart, which executes after boot and after sops secrets
+  # are decrypted.
   config = lib.mkIf config.services.ap.enable {
-    environment.systemPackages = [ opennds ];
-
-    # Copy static resources once at activation (each boot / rebuild), not on
-    # every service start. sops secrets are already decrypted at this point
-    # (sops-nix's setupSecrets runs earlier in the activation chain).
-    system.activationScripts.opennds = lib.stringAfter [ "users" "setupSecrets" ] ''
-      mkdir -p /tmp/opennds /tmp/ndslog
-      mkdir -p /etc/opennds/htdocs/images
-      mkdir -p /usr/lib/opennds
-      mkdir -p /etc/config
-      mkdir -p /run/ndscids
-
-      # Copy custom binauth script (may not exist yet -> tolerate)
-      cp -f /srv/appdata/opennds/binauth-voucher.sh /usr/lib/opennds/binauth-voucher.sh 2>/dev/null || true
-      chmod +x /usr/lib/opennds/binauth-voucher.sh 2>/dev/null || true
-
-      # Copy custom voucher theme (may not exist yet -> tolerate)
-      cp -f /srv/appdata/opennds/theme_voucher.sh /usr/lib/opennds/theme_voucher.sh 2>/dev/null || true
-      chmod +x /usr/lib/opennds/theme_voucher.sh 2>/dev/null || true
-
-      # Copy splash resources
-      cp -f ${opennds}/etc/opennds/htdocs/splash.css /etc/opennds/htdocs/ 2>/dev/null || true
-      cp -f ${opennds}/etc/opennds/htdocs/images/splash.jpg /etc/opennds/htdocs/images/ 2>/dev/null || true
-
-      # Copy shell scripts
-      for script in ${opennds}/lib/opennds/*; do
-        cp -f "$script" /usr/lib/opennds/
-        chmod +x "/usr/lib/opennds/$(basename "$script")"
-      done
-
-      # Create symlinks for theme scripts the C binary expects.
-      # ndscfg/ndsctl are already on PATH via the package (bin/ndsctl wrapper
-      # + ndscfg in lib/opennds); do NOT symlink into /usr/local/bin — NixOS
-      # has no /usr/local/bin and it aborted the whole activation script.
-      ln -sf theme_click-to-continue-basic.sh /usr/lib/opennds/theme_click-to-continue.sh
-
-      # Write config with the runtime faskey from sops
-      cat ${configFile} > /etc/config/opennds
-      cat >> /etc/config/opennds << FASKY
-          option faskey '$(cat ${config.sops.secrets."opennds-faskey".path})'
-      FASKY
-    '';
+    environment.systemPackages = [ openndsPkg ];
 
     systemd.services.opennds = {
       description = "openNDS Captive Portal";
@@ -139,13 +111,59 @@ in
         curl
         wget
         dnsmasq
-      ]) ++ [ "${opennds}/lib/opennds" ];
+      ]) ++ [ "${openndsPkg}/lib/opennds" ];
+
+      # PreStart does all runtime setup that used to live in an activation
+      # script: copy static splash/theme/shell resources into place and write
+      # /etc/config/opennds with the sops-decrypted faskey. Runs as root right
+      # before the daemon starts (after boot + sops activation), is idempotent
+      # (re-copy/rewrite are harmless), and avoids touching the activation path
+      # that caused the boot failure.
+      preStart = ''
+        set -euo pipefail
+
+        mkdir -p /tmp/opennds /tmp/ndslog
+        mkdir -p /etc/opennds/htdocs/images
+        mkdir -p /usr/lib/opennds
+        mkdir -p /etc/config
+        mkdir -p /run/ndscids
+
+        # Copy custom binauth script (may not exist yet -> tolerate)
+        cp -f /srv/appdata/opennds/binauth-voucher.sh /usr/lib/opennds/binauth-voucher.sh 2>/dev/null || true
+        chmod +x /usr/lib/opennds/binauth-voucher.sh 2>/dev/null || true
+
+        # Copy custom voucher theme (may not exist yet -> tolerate)
+        cp -f /srv/appdata/opennds/theme_voucher.sh /usr/lib/opennds/theme_voucher.sh 2>/dev/null || true
+        chmod +x /usr/lib/opennds/theme_voucher.sh 2>/dev/null || true
+
+        # Copy splash resources
+        cp -f ${openndsPkg}/etc/opennds/htdocs/splash.css /etc/opennds/htdocs/ 2>/dev/null || true
+        cp -f ${openndsPkg}/etc/opennds/htdocs/images/splash.jpg /etc/opennds/htdocs/images/ 2>/dev/null || true
+
+        # Copy shell scripts
+        for script in ${openndsPkg}/lib/opennds/*; do
+          cp -f "$script" /usr/lib/opennds/
+          chmod +x "/usr/lib/opennds/$(basename "$script")"
+        done
+
+        # Create symlink for theme script the C binary expects.
+        # ndscfg/ndsctl are already on PATH via the package (bin/ndsctl wrapper
+        # + ndscfg in lib/opennds); do NOT symlink into /usr/local/bin — NixOS
+        # has no /usr/local/bin and it aborted the whole activation script.
+        ln -sf theme_click-to-continue-basic.sh /usr/lib/opennds/theme_click-to-continue.sh
+
+        # Write config with the runtime faskey from sops
+        cat ${configFile} > /etc/config/opennds
+        cat >> /etc/config/opennds << FASKY
+            option faskey '$(cat ${config.sops.secrets."opennds-faskey".path})'
+FASKY
+      '';
 
       serviceConfig = {
         # Run in foreground (-f); systemd tracks the process directly.
         Type = "exec";
-        ExecStart = "${opennds}/bin/opennds -f";
-        ExecStop = "${opennds}/bin/ndsctl stop";
+        ExecStart = "${openndsPkg}/bin/opennds -f";
+        ExecStop = "${openndsPkg}/bin/ndsctl stop";
         Restart = "on-failure";
         RestartSec = 20;
         StartLimitIntervalSec = 30;
