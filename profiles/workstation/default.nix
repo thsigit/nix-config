@@ -19,7 +19,7 @@ in
     users.${user.name} = import ./home.nix;
   };
 
-  services.ap.enable = true;
+  services.ap.enable = false;
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "google-chrome"
   ];
