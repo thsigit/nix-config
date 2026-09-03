@@ -17,10 +17,6 @@
       url = "path:/srv/repo/litellm-cli";
       flake = false;
     };
-    opennds = {
-      url = "path:/srv/repo/opennds";
-      flake = false;
-    };
   };
 
   outputs = { self, nixpkgs, sops-nix, home-manager, ... }:
@@ -30,7 +26,6 @@
 
       commonSpecialArgs = {
         litellmCli = self.inputs.litellm-cli;
-        opennds = self.inputs.opennds;
         inherit home-manager;
       };
 

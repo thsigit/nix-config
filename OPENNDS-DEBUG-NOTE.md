@@ -1,6 +1,6 @@
 # OPENNDS DEBUG NOTE — guest splash never registers clients (Aug 2026 → Sep 2026 update)
 
-**Status:** INVESTIGATION PAUSED. Root cause of nft/iptables hybrid client-tracking failure identified. Workaround: `fwhook_enabled '0'` → AP works, internet flows, openNDS runs as transparent no-op. Handoff for next agent.
+**Status:** RESOLVED 2026-09-03 — openNDS DROPPED from the AP bundle. AP is now a plain open hotspot (hostapd + freeradius + dnsmasq/DHCP, NAT via networking.nat) with verified working internet for AP clients (3CPO). Captive portal abandoned for now. The earlier `fwhook_enabled '0'` 'bypass' was a red herring (it is an OpenWrt-only option and does NOT disable openNDS's nft firewall).
 
 ---
 
@@ -39,12 +39,28 @@ counter packets 1295 bytes 113853 reject   # ALL pre-auth traffic rejected
 - openNDS restart → `ndsOUT` still empty.
 - Verified: 3CPO connects, gets IP 192.168.4.196, DNS resolves, MHD on :2050 responds locally (403 for / without session).
 
-### WORKAROUND APPLIED (Pending switch)
-Set `fwhook_enabled '0'` in openNDS config (`common/ap/opennds.nix:33`).
-- Effect: openNDS skips firewall management entirely → no `nds_*` nft tables.
-- Traffic flows through existing hostapd/NAT (proven working pre-openNDS).
-- openNDS daemon stays running (satisfies "enabled"), just transparent no-op.
-- Matches user goal: "bypass login/validation on openNDS enable".
+### RESOLUTION (2026-09-03) — openNDS dropped; open AP restored
+`fwhook_enabled '0'` was tried (commit `34adad3`) but is a **false bypass**: it is an
+OpenWrt-only option (`fwhook_enabled` re-inserts openNDS nftables on OpenWrt FW4 restart)
+and has NO effect on NixOS. openNDS 11 still `Initializing firewall rules` on every start
+and re-created its `nds_*` tables regardless.
+
+Decision: **drop openNDS from the AP bundle** and run a plain open hotspot. Changes:
+- `common/ap/default.nix`: removed `./opennds.nix` import; bundle now hostapd + freeradius
+  only (NAT/DHCP/DNS via `networking.nat` + dnsmasq on `192.168.4.1`).
+- Deleted `common/ap/opennds.nix` and `secrets/opennds.yaml`; removed `opennds-faskey`
+  sops secret (`common/security/sops.nix`) and the `opennds` flake input (`flake.nix`).
+- `networking.nat` provides the same mark-0x1 -> masquerade-out-`enp0s31f6` NAT the old
+  pre-openNDS `common/ap/router.nix` did (that file was removed at commit `9b40809`).
+
+Critical gotcha: **openNDS nft tables outlive the service.** After the switch removed
+`opennds.service`, the stale kernel tables (`nds_filter`, `nds_mangle`, `nds_nat`) were
+still wired into the FORWARD hook (priority -100) and rejected ALL AP traffic — so 3CPO
+had no internet even after the switch. Fix: `nft delete table inet nds_{filter,mangle,nat}`.
+Once deleted they cannot regenerate (openNDS fully out of the build).
+
+Verified on 3CPO: NAT masquerade counter increments live (196->204->209 pkts), DNS
+resolves via `192.168.4.1`, forward chain accepts `wlp2s0`. Internet works.
 
 ---
 
@@ -89,34 +105,26 @@ Guest phone "3CPO" (MAC `ea:0a:02:8a:8f:08`) connects to openNDS SSID but never 
 
 ## NEXT STEPS (for next agent)
 
-### Immediate (unblock AP for real use)
-1. **Apply `fwhook_enabled '0'`** edit to `common/ap/opennds.nix:33`.
-2. `nixos-rebuild build --flake .#workstation` → verify eval.
-3. User runs `sudo nixos-rebuild switch --flake .#workstation`.
-4. 3CPO gets internet immediately (no splash, no auth).
+### Done — 2026-09-03
+1. `fwhook_enabled '0'` tried, proven ineffective (OpenWrt-only; openNDS still inits nft).
+2. openNDS dropped from the bundle; open AP verified working for 3CPO.
+3. Stale `nds_*` nft tables flushed (the real blocker after the switch).
 
-### Later (real captive portal)
-1. **Diagnose nft/iptables hybrid** — why `ndsOUT` mangle chain stays empty.
-   - Check if openNDS's `fw_nftables.c` populates chains correctly.
-   - Compare with iptables-backend mode (`useNft=0` in config?).
-2. **Test with second device** + open SSID to rule out iwlwifi/3CPO-specific path.
-3. **FWmark trap check** — capture reply fwmark, flush rule 5250 temporarily.
-4. **Netns isolation** — verify MHD not in podman netns.
-5. **Driver-level** — `iw dev wlp2s0 set power_save off`, check `iwlwifi` fw logs.
-6. **Fix `/bin/bash` shebang** in openNDS scripts (still referenced).
-
----
+### If a captive portal is ever wanted again
+1. Do NOT re-add openNDS blindly — its nft client-tracking assumes it owns the firewall
+   and fails silently under iptables-compat NAT (`ndsOUT` mangle stays empty).
+2. Options to evaluate: fix the nft/iptables hybrid (real work), or use a different
+   portal solution that works with NixOS `networking.nat`.
+3. If openNDS is re-added: remember its nft tables persist after the service stops; a
+   clean removal must delete `nds_filter` / `nds_mangle` / `nds_nat`.
 
 ## Files / Artifacts (Current)
 
 | File | Role |
 |------|------|
 | `/srv/repo/nix-lab/common/ap/freeradius.nix` | Refactored (oneshot cert-init) |
-| `/srv/repo/nix-lab/common/ap/opennds.nix` | Refactored (preStart), needs fwhook_enabled=0 |
 | `/srv/repo/nix-lab/common/ap/hostapd.nix` | Hostapd + DHCP + NAT + DNS firewall |
-| `/srv/repo/nix-lab/common/ap/default.nix` | Imports all three |
-| `/srv/repo/nix-lab/flake.nix` | opennds input = path:/srv/repo/opennds |
-| `/srv/repo/opennds/default.nix` | openNDS 11.0.0 package |
+| `/srv/repo/nix-lab/common/ap/default.nix` | Imports hostapd + freeradius (no openNDS) |
 
 ---
 
@@ -124,8 +132,9 @@ Guest phone "3CPO" (MAC `ea:0a:02:8a:8f:08`) connects to openNDS SSID but never 
 
 - **Never put long-running crypto in `system.activationScripts`** — breaks initrd pivot. Use oneshot service with marker file.
 - **openNDS nftables mode assumes it owns the firewall** — when base system uses iptables-compat NAT, client tracking fails silently.
-- **`fwhook_enabled '0'` is a valid bypass** — keeps daemon running, delegates firewall to NixOS.
-- **The AP bundle is now boot-safe and internet-functional**. Captive portal is the only deferred piece.
+- **`fwhook_enabled '0'` is NOT a bypass** — it is OpenWrt-only and does not stop openNDS's nft firewall.
+- **openNDS nft tables persist after the service stops**; removing openNDS requires deleting `nds_*` tables.
+- **The AP bundle is now boot-safe and internet-functional** as a plain open hotspot. Captive portal abandoned (2026-09-03).
 
 ---
 
