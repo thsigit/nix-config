@@ -4,6 +4,8 @@
 with lib;
 
 let
+  defaults = import ../../settings;
+  inherit (defaults.ap) ip;
   cfg = config.services.freeradius;
   ap = config.services.ap.interface;
   certsDir = "/srv/appdata/freeradius/certs";
@@ -83,7 +85,7 @@ in
       if [ ! -f /srv/appdata/freeradius/clients.conf ]; then
         cat > /srv/appdata/freeradius/clients.conf << EOF
 client ap-${ap} {
-  ipaddr = 192.168.4.1
+  ipaddr = ${ip}
   secret = $(cat ${config.sops.secrets."radius-secret".path})
   shortname = kebabtamalate-ap
   nas_type = other

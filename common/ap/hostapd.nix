@@ -2,6 +2,8 @@
 { config, pkgs, lib, ... }:
 
 let
+  defaults = import ../../settings;
+  inherit (defaults.ap) ssid ip;
   ap = config.services.ap.interface;
   band = config.services.ap.band;
 in
@@ -13,7 +15,7 @@ in
         inherit band;
         channel = 6;
         networks.${ap} = {
-          ssid = "kebabtamalate";
+          ssid = ssid;
           authentication.mode = "none";
           settings = {
             wpa = 2;
@@ -35,7 +37,7 @@ in
     };
 
     networking.interfaces.${ap}.ipv4.addresses = [{
-      address = "192.168.4.1";
+      address = ip;
       prefixLength = 24;
     }];
 

@@ -4,8 +4,8 @@
 #
 # Single switch for the whole bundle:
 #
-#   services.ap.enable = true;   # hostapd + freeradius + opennds (default when this dir is imported)
-#   services.ap.enable = false;  # none of them
+#   services.ap.enable = true;   # hostapd + freeradius + opennds
+#   services.ap.enable = false;  # none of them (default — profiles set this)
 #
 # Sub-modules are imported unconditionally but every one of them gates its
 # config on `services.ap.enable`, so when disabled no AP service, interface
@@ -16,17 +16,21 @@
 
 { config, lib, ... }:
 
+let
+  defaults = import ../../settings;
+  inherit (defaults.ap) interface band;
+in
 {
   options.services.ap = {
     enable = lib.mkEnableOption "the access-point stack (hostapd + freeradius + opennds)";
     interface = lib.mkOption {
       type = lib.types.str;
-      default = "wlp2s0";
+      default = interface;
       description = "Wireless access point network interface";
     };
     band = lib.mkOption {
       type = lib.types.str;
-      default = "2g";
+      default = band;
       description = "Wireless band for the access point (2g or 5g)";
     };
   };
@@ -34,11 +38,10 @@
   imports = [
     ./hostapd.nix
     ./freeradius.nix
-    ./opennds.nix
+    # ./opennds.nix  # disabled: suspected cause of boot failure
   ];
 
-  # Importing this directory enables the whole bundle. A profile can still
-  # override with services.ap.enable = false to keep the modules imported but
-  # inert.
-  config.services.ap.enable = true;
+  # Profiles (workstation, server) set services.ap.enable = true to activate
+  # the bundle. When disabled (the default), no AP service, interface address,
+  # firewall rule, or systemd unit from this bundle exists.
 }

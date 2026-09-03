@@ -36,8 +36,18 @@ let
     gateway = "192.168.1.1";
   };
 
+  ap = {
+    interface    = "wlp2s0";
+    ip           = "192.168.4.1";
+    cidr         = 24;
+    ssid         = "kebabtamalate";
+    channel      = 6;
+    band         = "2g";
+    gatewayName  = "KebabTamalate";
+  };
+
 in
 
 {
-  inherit user timezone directories ai tailnet domain security network;
+  inherit user timezone directories ai tailnet domain security network ap;
 }

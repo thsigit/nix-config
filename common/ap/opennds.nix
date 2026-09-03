@@ -1,11 +1,11 @@
 # common/ap/opennds.nix
-{ config, pkgs, lib, opennds, ... }:
+{ config, pkgs, lib, openndsPackage, ... }:
 
 let
   defaults = import ../../settings;
-  inherit (defaults) user;
+  inherit (defaults.ap) interface gatewayName;
 
-  opennds = pkgs.callPackage opennds { };
+  opennds = pkgs.callPackage openndsPackage { };
 
   cfg = config.services.opennds;
 
@@ -40,12 +40,12 @@ in
   options.services.opennds = {
     interface = lib.mkOption {
       type = lib.types.str;
-      default = "wlp2s0";
+      default = interface;
       description = "Network interface for the captive portal";
     };
     gatewayName = lib.mkOption {
       type = lib.types.str;
-      default = "KebabTamalate";
+      default = gatewayName;
       description = "Name displayed on the captive portal";
     };
     debugLevel = lib.mkOption {
