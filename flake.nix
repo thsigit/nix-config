@@ -35,22 +35,6 @@
           specialArgs = commonSpecialArgs;
 
           modules = [
-            {
-              nixpkgs.overlays = [
-                (final: prev: {
-                  llama-cpp = prev.llama-cpp.overrideAttrs (old: {
-                    version = "10809";
-                    src = final.fetchFromGitHub {
-                      owner = "ggml-org";
-                      repo = "llama.cpp";
-                      rev = "v0.4.0";
-                      hash = "sha256-WImZjO3U9EXZUNP/FMpxo8PaTjQW8X2SBTfGwwFlZIM=";
-                    };
-                    npmDepsHash = "sha256-2Q7XhaLAArmviOLdQsNbYTfdyDE5pW9lR26cRHEVl9k=";
-                  });
-                })
-              ];
-            }
             sops-nix.nixosModules.sops
             (./machines + "/${machine}")
             (./profiles + "/${profile}")

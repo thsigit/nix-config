@@ -7,6 +7,7 @@
   imports = [
     ./llama-cpp.nix
     ./opencode.nix
+    ./open-webui.nix
     ./litellm
   ];
 }

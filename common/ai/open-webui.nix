@@ -1,0 +1,41 @@
+# common/ai/open-webui.nix
+# Open WebUI — nixpkgs service + Caddy vhost (8081 -> open-webui.home.arpa).
+# Always-on leaf (no enable toggle) following mrtg-style standard.
+# Upstream module: services.open-webui (nixpkgs). Unfree license — predicate
+# is handled in system/default.nix + profiles/workstation/default.nix.
+
+{ config, lib, pkgs, ... }:
+
+let
+  port = 8081;
+in
+{
+  services.caddy.services.open-webui = {
+    inherit port;
+    visibility = { lan = true; tailscale = true; };
+  };
+
+  services.open-webui = {
+    enable = true;
+    host = "127.0.0.1";
+    port = port;
+    environment = {
+      SCARF_NO_ANALYTICS = "True";
+      DO_NOT_TRACK = "True";
+      ANONYMIZED_TELEMETRY = "False";
+      # Pre-wire to the local LiteLLM gateway (OpenAI-compatible). Admin adds
+      # the LITELLM_MASTER_KEY in the WebUI Settings -> Connections if needed;
+      # keeping the key out of the store avoids baking secrets into the closure.
+      OPENAI_API_BASE_URL = "http://127.0.0.1:4000/v1";
+      WEBUI_NAME = "Homelab";
+      WEBUI_URL = "http://127.0.0.1:${toString port}";
+      DEFAULT_USER_ROLE = "admin";
+      ENABLE_SIGNUP = "True";
+      ENABLE_COMMUNITY_SHARING = "False";
+    };
+  };
+
+  # Ensure Open WebUI starts after the LiteLLM gateway so the default
+  # OPENAI_API_BASE_URL is reachable on first boot.
+  systemd.services.open-webui.after = [ "litellm.service" "network.target" ];
+}

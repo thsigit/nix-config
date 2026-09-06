@@ -22,5 +22,6 @@ in
   services.ap.enable = false;
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "google-chrome"
+    "open-webui"
   ];
 }
