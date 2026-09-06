@@ -10,6 +10,7 @@
 # NVIDIA-only: text + vision + embedding + translation models.
 # OpenRouter + freetheai removed; LiteLLM is for other uses, NVIDIA-only.
 # Verified working 2026-09-02 via direct NVIDIA API probing.
+# Local llama.cpp router (http://127.0.0.1:8080/v1) added 2026-09-06.
 
 model_list:
   # ── nvidia text (chat completions) ───────────────────────────────
@@ -58,6 +59,43 @@ model_list:
       model: openai/nvidia/riva-translate-4b-instruct-v2
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
+
+  # ── local llama.cpp router (http://127.0.0.1:8080/v1) ─────────────
+  - model_name: local/tinyllama
+    litellm_params:
+      model: openai/tinyllama
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
+  - model_name: local/gemma3n
+    litellm_params:
+      model: openai/gemma3n
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
+  - model_name: local/mxbai-embed-large
+    litellm_params:
+      model: openai/mxbai-embed-large
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
+  - model_name: local/qwen2.5-coder
+    litellm_params:
+      model: openai/qwen2.5-coder
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
+  - model_name: local/qwen3
+    litellm_params:
+      model: openai/qwen3
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
+  - model_name: local/qwen3-vl
+    litellm_params:
+      model: openai/qwen3-vl
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
+  - model_name: local/translategemma
+    litellm_params:
+      model: openai/translategemma
+      api_base: http://127.0.0.1:8080/v1
+      api_key: sk-local
 
 router_settings:
   routing_strategy: usage-based-routing
