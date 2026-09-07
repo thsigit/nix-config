@@ -47,8 +47,7 @@ in
         embedding = "on";
       };
       "qwen2.5-vl-3b" = {
-        hf-repo = "unsloth/Qwen2.5-VL-3B-Instruct-GGUF";
-        hf-file = "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf";
+        model = "${defaults.ai.models}/qwen2.5-vl-3b/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf";
         mmproj = "${defaults.ai.models}/qwen2.5-vl-3b/mmproj-F16.gguf";
         alias = "qwen2.5-vl-3b";
         ctx-size = "4096";
