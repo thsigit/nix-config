@@ -1,5 +1,5 @@
 # common/ai/llama-cpp.nix
-# llama.cpp server — multi-model router with Caddy + tuned presets (global pkgs.llama-cpp 0.4.0 via flake.nix overlay).
+# llama.cpp server — 3-chat + 1-embed + 1-vision router (tinyllama, qwen3, qwen2.5-coder, mxbai, qwen2.5-vl-3b) + Caddy, global pkgs.llama-cpp b9190.
 
 { config, lib, pkgs, ... }:
 
@@ -26,17 +26,6 @@ in
         top-p = "0.9";
         jinja = "on";
       };
-      gemma3n = {
-        model = "${defaults.ai.models}/gemma3n/gemma3n.gguf";
-        alias = "gemma3n";
-        ctx-size = "4096";
-        jinja = "on";
-      };
-      "mxbai-embed-large" = {
-        model = "${defaults.ai.models}/mxbai-embed-large/mxbai-embed-large.gguf";
-        alias = "mxbai-embed-large";
-        embedding = "on";
-      };
       "qwen2.5-coder" = {
         model = "${defaults.ai.models}/qwen2.5-coder/qwen2.5-coder.gguf";
         alias = "qwen2.5-coder";
@@ -52,16 +41,15 @@ in
         top-k = "20";
         jinja = "on";
       };
-      "qwen3-vl" = {
-        model = "${defaults.ai.models}/qwen3-vl/qwen3-vl.gguf";
-        alias = "qwen3-vl";
-        ctx-size = "4096";
-        temp = "1.0";
-        jinja = "on";
+      "mxbai-embed-large" = {
+        model = "${defaults.ai.models}/mxbai-embed-large/mxbai-embed-large.gguf";
+        alias = "mxbai-embed-large";
+        embedding = "on";
       };
-      translategemma = {
-        model = "${defaults.ai.models}/translategemma/translategemma.gguf";
-        alias = "translategemma";
+      "qwen2.5-vl-3b" = {
+        hf-repo = "unsloth/Qwen2.5-VL-3B-Instruct-GGUF";
+        hf-file = "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf";
+        alias = "qwen2.5-vl-3b";
         ctx-size = "4096";
         jinja = "on";
       };

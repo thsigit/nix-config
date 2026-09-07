@@ -66,16 +66,7 @@ model_list:
       model: openai/tinyllama
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
-  - model_name: local/gemma3n
-    litellm_params:
-      model: openai/gemma3n
-      api_base: http://127.0.0.1:8080/v1
-      api_key: sk-local
-  - model_name: local/mxbai-embed-large
-    litellm_params:
-      model: openai/mxbai-embed-large
-      api_base: http://127.0.0.1:8080/v1
-      api_key: sk-local
+
   - model_name: local/qwen2.5-coder
     litellm_params:
       model: openai/qwen2.5-coder
@@ -86,14 +77,14 @@ model_list:
       model: openai/qwen3
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
-  - model_name: local/qwen3-vl
+  - model_name: local/mxbai-embed-large
     litellm_params:
-      model: openai/qwen3-vl
+      model: openai/mxbai-embed-large
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
-  - model_name: local/translategemma
+  - model_name: local/qwen2.5-vl-3b
     litellm_params:
-      model: openai/translategemma
+      model: openai/qwen2.5-vl-3b
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
 
