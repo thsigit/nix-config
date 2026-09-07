@@ -1,5 +1,5 @@
 # common/ai/llama-cpp.nix
-# llama.cpp server — 3-chat + 1-embed + 1-vision router (tinyllama, qwen3, qwen2.5-coder, mxbai, qwen2.5-vl-3b) + Caddy, global pkgs.llama-cpp b9190.
+# llama.cpp server — 3-chat + 1-embed + 2-vision router (tinyllama, qwen3, qwen2.5-coder, mxbai, qwen2.5-vl-3b, gemma-4-E4B) + Caddy, global pkgs.llama-cpp b9190.
 
 { config, lib, pkgs, ... }:
 
@@ -50,6 +50,13 @@ in
         hf-repo = "unsloth/Qwen2.5-VL-3B-Instruct-GGUF";
         hf-file = "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf";
         alias = "qwen2.5-vl-3b";
+        ctx-size = "4096";
+        jinja = "on";
+      };
+      "gemma-4-E4B" = {
+        model = "${defaults.ai.models}/gemma-4-E4B/gemma-4-E4B-it-OBLITERATED-Q4_K_M.gguf";
+        mmproj = "${defaults.ai.models}/gemma-4-E4B/gemma-4-E4B-it-OBLITERATED-mmproj-f16.gguf";
+        alias = "gemma-4-E4B";
         ctx-size = "4096";
         jinja = "on";
       };
