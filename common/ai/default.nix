@@ -8,6 +8,7 @@
     ./llama-cpp.nix
     ./opencode.nix
     ./open-webui.nix
+    ./whisper.nix
     ./litellm
   ];
 }
