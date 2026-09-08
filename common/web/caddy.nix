@@ -63,9 +63,6 @@ let
       root * /srv/www
       file_server
     }
-    handle /lidarr* {
-      reverse_proxy 127.0.0.1:8686
-    }
   '';
 in
 
