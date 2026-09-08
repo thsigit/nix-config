@@ -84,13 +84,6 @@ model_list:
       api_key: sk-local
     model_info:
       disable_background_health_check: true
-  - model_name: local/qwen2.5-1.5b
-    litellm_params:
-      model: openai/qwen2.5-1.5b
-      api_base: http://127.0.0.1:8080/v1
-      api_key: sk-local
-    model_info:
-      disable_background_health_check: true
   - model_name: local/sailor2-1b
     litellm_params:
       model: openai/sailor2-1b
