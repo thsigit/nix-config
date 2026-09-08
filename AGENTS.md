@@ -33,6 +33,7 @@ Also `failsafe` = minimal recovery profile.
   is headless vs desktop GUI. **Keep it that way** — do not add meaningful
   differences between the two profiles beyond that.
 - One repo in `/srv/repo/nix-lab`: branch `dev` = active development (local-only), branch `main` = public release (the deployed end product, the only branch pushed to GitHub). See `WORKFLOW.md`. GitHub's nix-config is the **rolling release** (`main`).
+  - **Publish (dev → GitHub):** `git checkout main && git merge dev && git push origin main && git checkout dev`
 
 ## Operating constraints (hard rules — do not "fix" them away)
 
