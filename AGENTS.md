@@ -2,6 +2,15 @@
 
 Instructions for coding agents working in this repo. Read this first.
 
+## Architecture conventions (read before editing)
+
+Before making changes to any Nix module in this repo, read and conform to:
+
+- `/mnt/c/users/sigit/.config/opencode/application_architecture/principles.md` — general engineering principles (modularity, explicit interfaces, declarative-first, single source of truth, boring infrastructure, etc.).
+- `/mnt/c/users/sigit/.config/opencode/application_architecture/nix.md` — Nix-specific guidelines (declarative over imperative, modules over monolith, options as public APIs, machine-specific config at the edge, etc.).
+
+These define the "why" behind the structure of this flake. When the two conflict with a local rule in this file, the hard operating constraints below win; otherwise prefer the shared principles.
+
 ## Project
 
 Personal NixOS flake for two hosts that are the **same physical machine**:
