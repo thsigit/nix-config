@@ -1,4 +1,4 @@
-# common/core/boot.nix
+# system/boot.nix
 
 { config, lib, pkgs, ... }:
 

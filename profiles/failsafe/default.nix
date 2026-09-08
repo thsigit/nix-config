@@ -6,8 +6,7 @@
 #   sudo nixos-rebuild switch --flake .#failsafe
 #
 # Contains only: a basic NixOS system, SSH access, static WAN IP, and a
-# small recovery toolkit (expand later). Keeps /srv/repo/nix-orig as
-# reference only.
+# small recovery toolkit (expand later).
 #
 # NOTE: this profile deliberately does NOT import ../../system (so a broken
 # system/ does not take down recovery). Network values are read from

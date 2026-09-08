@@ -1,4 +1,4 @@
-# common/security/firewall.nix 
+# system/firewall.nix
 
 { config, ... }:
 

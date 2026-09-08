@@ -1,4 +1,4 @@
-# common/media/bluetooth.nix 
+# system/bluetooth.nix
 
 { config, ... }:
 
