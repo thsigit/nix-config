@@ -62,6 +62,15 @@ in
       handle /api/* {
         reverse_proxy 127.0.0.1:8091
       }
+      # Read-only LiteLLM endpoints: Caddy injects the master key so they are
+      # callable WITHOUT a key on this private host (browser/curl navigation).
+      # Admin/write endpoints remain key-gated (see :8091 above + :4000 below).
+      @readonly path /health /health/liveness /health/readiness /health/services /v1/models /models /v1/model/info /model/info
+      handle @readonly {
+        reverse_proxy 127.0.0.1:4000 {
+          header_up Authorization "Bearer {env.LITELLM_MASTER_KEY}"
+        }
+      }
       @frontend path / /litellm.js /ui/playground/* /stats.json
       handle @frontend {
         root * /srv/www/ai
@@ -118,6 +127,13 @@ in
     # Drop the obsolete pre-refactor copy (config now lives in cliDataDir).
     rm -f ${stateDir}/config.yaml
   '';
+
+  ##########################################################################
+  # Caddy: expose LITELLM_MASTER_KEY so read-only routes can inject it
+  ##########################################################################
+
+  systemd.services.caddy.serviceConfig.EnvironmentFile =
+    [ config.sops.secrets."providers.env".path ];
 
   ##########################################################################
   # LiteLLM service ordering + ExecStart
