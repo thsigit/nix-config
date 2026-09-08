@@ -66,27 +66,38 @@ model_list:
       model: openai/tinyllama
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
+    model_info:
+      # local llama.cpp: skip from background health probing so /health is fast
+      disable_background_health_check: true
 
   - model_name: local/qwen2.5-coder
     litellm_params:
       model: openai/qwen2.5-coder
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
+    model_info:
+      disable_background_health_check: true
   - model_name: local/qwen3
     litellm_params:
       model: openai/qwen3
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
+    model_info:
+      disable_background_health_check: true
   - model_name: local/mxbai-embed-large
     litellm_params:
       model: openai/mxbai-embed-large
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
+    model_info:
+      disable_background_health_check: true
   - model_name: local/gemma-4-E4B
     litellm_params:
       model: openai/gemma-4-E4B
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
+    model_info:
+      disable_background_health_check: true
 
 router_settings:
   routing_strategy: usage-based-routing
@@ -101,3 +112,7 @@ litellm_settings:
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
+  # Run health checks in the background so /health serves cached results fast.
+  # Per-model disable_background_health_check (on local llama.cpp) keeps the
+  # background probe quick while local models stay offered for routing.
+  background_health_checks: true
