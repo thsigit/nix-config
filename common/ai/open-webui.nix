@@ -32,6 +32,8 @@ in
       DEFAULT_USER_ROLE = "admin";
       ENABLE_SIGNUP = "True";
       ENABLE_COMMUNITY_SHARING = "False";
+      DEFAULT_MODELS = "nvidia/openai/gpt-oss-120b";
+      WHISPER_API_BASE_URL = "http://127.0.0.1:8090/v1";
     };
   };
 
