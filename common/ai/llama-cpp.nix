@@ -41,6 +41,22 @@ in
         top-k = "20";
         jinja = "on";
       };
+      "qwen2.5-1.5b" = {
+        model = "${defaults.ai.models}/qwen2.5-1.5b/qwen2.5-1.5b.gguf";
+        alias = "qwen2.5-1.5b";
+        ctx-size = "4096";
+        temp = "0.7";
+        top-p = "0.9";
+        jinja = "on";
+      };
+      "sailor2-1b" = {
+        model = "${defaults.ai.models}/sailor2-1b/sailor2-1b-chat-q4_k_m.gguf";
+        alias = "sailor2-1b";
+        ctx-size = "4096";
+        temp = "0.7";
+        top-p = "0.9";
+        jinja = "on";
+      };
       "mxbai-embed-large" = {
         model = "${defaults.ai.models}/mxbai-embed-large/mxbai-embed-large.gguf";
         alias = "mxbai-embed-large";
