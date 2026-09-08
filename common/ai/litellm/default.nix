@@ -8,5 +8,7 @@
   imports = [
     ./litellm-cli.nix
     ./litellm.nix
+    ./stats.nix
+    ./admin.nix
   ];
 }

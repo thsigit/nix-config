@@ -1,5 +1,5 @@
 # common/ai/open-webui.nix
-# Open WebUI — nixpkgs service + Caddy vhost (8081 -> open-webui.home.arpa).
+# Open WebUI — nixpkgs service + Caddy vhost (8081 -> chat.home.arpa).
 # Always-on leaf (no enable toggle) following mrtg-style standard.
 # Upstream module: services.open-webui (nixpkgs). Unfree license — predicate
 # is handled in system/default.nix + profiles/workstation/default.nix.
@@ -10,7 +10,7 @@ let
   port = 8081;
 in
 {
-  services.caddy.services.open-webui = {
+  services.caddy.services.chat = {
     inherit port;
     visibility = { lan = true; tailscale = true; };
   };

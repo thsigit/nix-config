@@ -56,13 +56,20 @@ in
   # Caddy reverse proxy
   ##########################################################################
 
-  services.caddy.services.litellm = {
+  services.caddy.services.ai = {
     port = litellmPort;
     preConfig = ''
-      @frontend path / /litellm.js /ui/playground/*
+      handle /api/* {
+        reverse_proxy 127.0.0.1:8091
+      }
+      @frontend path / /litellm.js /ui/playground/* /stats.json
       handle @frontend {
-        root * /srv/www/litellm
+        root * /srv/www/ai
         file_server
+      }
+      @litellmUI path /docs* /openapi.json /litellm-asset-prefix/* /swagger/*
+      handle @litellmUI {
+        respond "Not Found" 404
       }
     '';
   };
