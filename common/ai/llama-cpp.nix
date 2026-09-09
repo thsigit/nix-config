@@ -1,5 +1,5 @@
 # common/ai/llama-cpp.nix
-# llama.cpp server — 3-chat + 1-embed + 1-vision router (tinyllama, qwen3, qwen2.5-coder, mxbai, gemma-4-E4B) + Caddy, global pkgs.llama-cpp b9190.
+# llama.cpp server — 4-chat + 1-embed router (tinyllama, qwen3, qwen2.5-coder, mxbai, sailor2-1b) + Caddy, global pkgs.llama-cpp b9190.
 
 { config, lib, pkgs, ... }:
 
@@ -53,13 +53,6 @@ in
         model = "${defaults.ai.models}/mxbai-embed-large/mxbai-embed-large.gguf";
         alias = "mxbai-embed-large";
         embedding = "on";
-      };
-      "gemma-4-E4B" = {
-        model = "${defaults.ai.models}/gemma-4-E4B/gemma-4-E4B-it-OBLITERATED-Q4_K_M.gguf";
-        mmproj = "${defaults.ai.models}/gemma-4-E4B/gemma-4-E4B-it-OBLITERATED-mmproj-f16.gguf";
-        alias = "gemma-4-E4B";
-        ctx-size = "4096";
-        jinja = "on";
       };
     };
     extraFlags = [
