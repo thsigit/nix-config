@@ -6,7 +6,7 @@
 #
 #   committed seed                    first activation                 runtime
 #   ----------------                  ----------------                 -------
-#   common/ai/litellm/config.yaml ->  copy ONLY if missing        ->   litellm --config
+#   common/ai/litellm/config.yaml ->  copy if missing/empty       ->   litellm --config
 #   (first boot default)               /srv/appdata/litellm/config.yaml /srv/appdata/litellm/config.yaml
 #                                +   install usage_logger.py
 #                                     -> /srv/appdata/litellm/
@@ -15,6 +15,10 @@
 # the persistent replacement dir (survives /var deletion). It does NOT
 # participate in nixos-rebuild: once seeded, rebuilds never overwrite it.
 # The committed copy in this repo is only a first-boot default.
+#
+# Seed guard: the committed copy is installed when the live file is MISSING or
+# ZERO-BYTE (empty config = litellm crash "Config cannot be None or Empty").
+# An empty-but-present file used to dodge the seed (proof: 2026-09-12 outage).
 #
 # Ownership:
 #   Nix owns: service definition + first-boot seed of the committed config.yaml
@@ -111,10 +115,12 @@ in
     set -euo pipefail
     mkdir -p ${cliDataDir}
 
-    # Seed the admin-editable config.yaml from the committed copy ONLY on first
-    # deployment. Once present it is edited by hand / litellm-cli and must
+    # Seed the admin-editable config.yaml from the committed copy on first
+    # deployment, AND anytime the live copy is empty (zero bytes = broken
+    # config; litellm aborts with "Config cannot be None or Empty"). Once
+    # present as valid content it is edited by hand / litellm-cli and must
     # survive rebuilds untouched.
-    if [ ! -f ${configFile} ]; then
+    if [ ! -f ${configFile} ] || [ ! -s ${configFile} ]; then
       install -m0644 ${staticConfig} ${configFile}
     fi
 
