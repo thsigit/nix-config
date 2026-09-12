@@ -5,18 +5,18 @@
 # litellm-cli) and never re-rendered by a rebuild.
 #
 # API keys injected at runtime via sops providers.env:
-#   os.environ/NVIDIA_API_KEY (only provider — NVIDIA NIM direct)
+#   os.environ/NVIDIA_API_KEY
 #
-# NVIDIA-only: text + vision + embedding + translation models.
-# OpenRouter + freetheai removed; LiteLLM is for other uses, NVIDIA-only.
-# Verified working 2026-09-02 via direct NVIDIA API probing.
-# Local llama.cpp router (http://127.0.0.1:8080/v1) added 2026-09-06.
+# 2026-09-12: nvidia text models = verified-working set (litellm-nvidia-discovery
+# round-trips). EOL dropped: gpt-oss-120b, nemotron-3-ultra-550b. Vision +
+# embedding NIM models kept for Open WebUI. Local llama.cpp router (127.0.0.1:8080)
+# kept for local usage.
 
 model_list:
-  # ── nvidia text (chat completions) ───────────────────────────────
-  - model_name: nvidia/openai/gpt-oss-120b
+  # ── nvidia text (chat completions, PASS 2026-09-12) ──────────────
+  - model_name: nvidia/meta/muse-glimmer-30b
     litellm_params:
-      model: openai/openai/gpt-oss-120b
+      model: openai/meta/muse-glimmer-30b
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
   - model_name: nvidia/nvidia/nemotron-3-super-120b-a12b
@@ -29,6 +29,11 @@ model_list:
       model: openai/nvidia/nemotron-3.5-lightning-30b-a3b
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
+  - model_name: nvidia/openai/gpt-oss-20b
+    litellm_params:
+      model: openai/openai/gpt-oss-20b
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
 
   # ── nvidia vision (chat completions with image content) ──────────
   - model_name: nvidia/meta/llama-3.2-11b-vision-instruct
@@ -37,14 +42,7 @@ model_list:
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
 
-  # ── nvidia embedding (embeddings endpoint) ───────────────────────
-  - model_name: nvidia/nvidia/nemotron-3-embed-1b
-    litellm_params:
-      model: openai/nvidia/nemotron-3-embed-1b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-      input_type: query
-      encoding_format: float
+  # ── nvidia embedding (multimodal VL: images + text) ──────────────
   - model_name: nvidia/nvidia/llama-nemotron-embed-vl-1b-v2
     litellm_params:
       model: openai/nvidia/llama-nemotron-embed-vl-1b-v2
@@ -53,13 +51,6 @@ model_list:
       input_type: query
       encoding_format: float
 
-  # ── nvidia speech translation ────────────────────────────────────
-  - model_name: nvidia/riva-translate-4b-instruct-v2
-    litellm_params:
-      model: openai/nvidia/riva-translate-4b-instruct-v2
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-
   # ── local llama.cpp router (http://127.0.0.1:8080/v1) ─────────────
   - model_name: local/tinyllama
     litellm_params:
@@ -67,7 +58,6 @@ model_list:
       api_base: http://127.0.0.1:8080/v1
       api_key: sk-local
     model_info:
-      # local llama.cpp: skip from background health probing so /health is fast
       disable_background_health_check: true
 
   - model_name: local/qwen2.5-coder
@@ -112,7 +102,4 @@ litellm_settings:
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
-  # Run health checks in the background so /health serves cached results fast.
-  # Per-model disable_background_health_check (on local llama.cpp) keeps the
-  # background probe quick while local models stay offered for routing.
   background_health_checks: true
