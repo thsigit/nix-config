@@ -38,7 +38,18 @@ in
       User = user.name;
       WorkingDirectory = shimDir;
     };
-    script = "${pkgs.zensical}/bin/zensical build -f ${configFile}";
+    # Stage docs with series frontmatter before building, mirroring
+    # scripts/publish.sh. The staged copy lives under the shim (not in the
+    # watched repo docs/) so this service does not retrigger its own path unit.
+    script = ''
+      set -euo pipefail
+      stage="${shimDir}/build_docs"
+      conf="${shimDir}/zensical.build.toml"
+      ${pkgs.python3}/bin/python3 ${repoDir}/scripts/gen_home.py --stage "$stage"
+      ${pkgs.gnused}/bin/sed -e "s#^docs_dir = .*#docs_dir = \"build_docs\"#" "${configFile}" > "$conf"
+      ${pkgs.zensical}/bin/zensical build -f "$conf"
+      rm -f "$conf"
+    '';
   };
 
   systemd.paths.zensical-build = {
