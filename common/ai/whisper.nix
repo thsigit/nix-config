@@ -24,7 +24,12 @@ in
 
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.whisper-cpp}/bin/whisper-server --host 127.0.0.1 --port ${toString port} --model ${modelFile} --convert --inference-path /inference --request-path /";
+      # Route must match what Open WebUI calls: {WHISPER_API_BASE_URL}/audio/transcriptions
+      # (= http://127.0.0.1:8090/v1/audio/transcriptions). whisper.cpp registers the
+      # inference route as request_path + inference_path, so we drop the bogus
+      # --request-path / (which shadowed every route) and align inference_path to the
+      # OpenAI-compatible path Open WebUI expects.
+      ExecStart = "${pkgs.whisper-cpp}/bin/whisper-server --host 127.0.0.1 --port ${toString port} --model ${modelFile} --convert --inference-path /v1/audio/transcriptions";
       Restart = "on-failure";
       RestartSec = "5s";
       DynamicUser = false;
