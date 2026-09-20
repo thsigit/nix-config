@@ -7,7 +7,7 @@
     after = [ "network.target" "litellm.service" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.python3}/bin/python3 /srv/appdata/litellm/admin_api.py";
+      ExecStart = "${pkgs.python3}/bin/python3 ${config.services.litellm-cli.package}/data/admin_api.py";
       Restart = "always";
       RestartSec = 5;
       User = "sigit";

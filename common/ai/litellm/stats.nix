@@ -13,7 +13,7 @@ in
     after = [ "litellm.service" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.python3}/bin/python3 /srv/appdata/litellm/stats_writer.py";
+      ExecStart = "${pkgs.python3}/bin/python3 ${config.services.litellm-cli.package}/data/stats_writer.py";
       Restart = "always";
       RestartSec = 5;
       User = "sigit";
@@ -25,7 +25,7 @@ in
     after = [ "network.target" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.python3}/bin/python3 /srv/appdata/litellm/stats_api.py";
+      ExecStart = "${pkgs.python3}/bin/python3 ${config.services.litellm-cli.package}/data/stats_api.py";
       Restart = "always";
       RestartSec = 5;
       User = "sigit";

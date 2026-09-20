@@ -126,9 +126,14 @@ in
 
     # usage_logger callback: always (re)install from the package.
     install -m0644 ${config.services.litellm-cli.package}/data/usage_logger.py ${cliDataDir}/usage_logger.py
+    # Frontend helper scripts (admin_api.py / stats_api.py / stats_writer.py):
+    # always (re)install from the package into the data dir.
+    for f in admin_api.py stats_api.py stats_writer.py; do
+      install -m0644 ${config.services.litellm-cli.package}/data/$f ${cliDataDir}/$f
+    done
 
-    chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${configFile} ${cliDataDir}/usage_logger.py
-    chmod 0644 ${configFile} ${cliDataDir}/usage_logger.py
+    chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${configFile} ${cliDataDir}/usage_logger.py ${cliDataDir}/admin_api.py ${cliDataDir}/stats_api.py ${cliDataDir}/stats_writer.py
+    chmod 0644 ${configFile} ${cliDataDir}/usage_logger.py ${cliDataDir}/admin_api.py ${cliDataDir}/stats_api.py ${cliDataDir}/stats_writer.py
 
     # Drop the obsolete pre-refactor copy (config now lives in cliDataDir).
     rm -f ${stateDir}/config.yaml
