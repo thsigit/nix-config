@@ -29,6 +29,10 @@
 # litellm-cli is a purely MANUAL tool that edits /srv/appdata/litellm/config.yaml.
 # It is NOT invoked during nixos-rebuild or by any systemd unit.
 #
+# Frontend static files (index.html, litellm.js, admin.js, ui/playground/*)
+# are deployed from the litellm-cli package on every rebuild to ensure
+# reproducibility — no manual sync required.
+#
 { config, lib, pkgs, ... }:
 
 let
@@ -137,6 +141,24 @@ in
 
     # Drop the obsolete pre-refactor copy (config now lives in cliDataDir).
     rm -f ${stateDir}/config.yaml
+  '';
+
+  ##########################################################################
+  # Frontend static files deployment (from litellm-cli package)
+  ##########################################################################
+
+  system.activationScripts.litellm-frontend = lib.stringAfter [ "users" ] ''
+    set -euo pipefail
+    mkdir -p /srv/www/ai/ui/playground
+
+    # Deploy frontend static files from the package (always overwrite for reproducibility)
+    for f in index.html litellm.js admin.js; do
+      install -m0644 ${config.services.litellm-cli.package}/data/$f /srv/www/ai/$f
+    done
+    install -m0644 ${config.services.litellm-cli.package}/data/ui/playground/stats.json /srv/www/ai/ui/playground/stats.json
+
+    chown -R ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} /srv/www/ai
+    chmod 0644 /srv/www/ai/index.html /srv/www/ai/litellm.js /srv/www/ai/admin.js /srv/www/ai/ui/playground/stats.json
   '';
 
   ##########################################################################
