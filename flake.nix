@@ -62,6 +62,9 @@
 
       system =
         mkSystem "portege-r30c" "system";
+
+      ai-gateway =
+        mkSystem "portege-r30c" "ai-gateway";
     };
   };
 }

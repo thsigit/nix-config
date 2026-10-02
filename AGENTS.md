@@ -84,7 +84,7 @@ Also `failsafe` = minimal recovery profile.
   (its own `default.nix` importer + leaf files); other leaves stay flat in
   `common/ai/`. No per-leaf `enable` toggles.
   - `litellm.nix` — LiteLLM native systemd service (port 4000), DynamicUser.
-    Consumes litellm-cli rendered config.yaml. Always-on.
+    Consumes static config.yaml from /srv/appdata/litellm. Always-on.
   - `litellm-cli.nix` — wires the external `services.litellm-cli` module
     (config layer + admin CLI from the litellm-cli repo).
   - `bitrouter.nix` — BitRouter LLM gateway, `services.bitrouter` (bespoke
@@ -99,10 +99,10 @@ Also `failsafe` = minimal recovery profile.
   Consumed as flake input `litellm-cli` = `path:/srv/repo/litellm-cli`
   (`flake = false`), passed to modules via specialArgs `litellmCli`.
   DO NOT git-add it into this repo. Its data contract:
-  `/srv/appdata/litellm/providers.json` (persistent, admin-owned; holds provider
-  config + routing + MANUAL models via `providers add --models`) →
-  `/run/litellm-cli/{models.json,config.yaml,health.json}` (ephemeral, rebuilt
-  each boot). Never put hand-added models in `models.json` — it's tmpfs.
+  `/srv/appdata/litellm/config.yaml` (persistent, admin-owned; static model_list
+  seeded from `common/ai/litellm/config.yaml` on first boot, then edited by
+  `litellm-cli config add/remove` -- never re-rendered by rebuild) ->
+  `/run/litellm-cli/health.json` (ephemeral, rebuilt each boot).
 - `pkgs/opennds/` — openNDS 11.0.0 package (unwrapped binaries in `libexec`,
   PATH wrappers in `bin`).
 - `secrets/` + `.sops.yaml` — sops secrets: `litellm.env`, `providers.env`,
@@ -137,7 +137,7 @@ Also `failsafe` = minimal recovery profile.
 - **Cert:** Caddy serves a valid *.home.arpa cert from the Homelab Internal CA. If a
   browser shows a cert error, install that CA in the client trust store -- it is a
   client-side trust issue, not a server config problem.
-- **Config is owned by litellm-cli** and rendered to /var/lib/litellm/config.yaml.
+- **Config is owned by litellm-cli** and lives at /srv/appdata/litellm/config.yaml (seeded from common/ai/litellm/config.yaml on first boot, then edited manually -- never re-rendered by rebuild).
 ## Access-point (openNDS) gotchas
 
 - openNDS runs **foreground** (`opennds -f`, `Type = exec`) so systemd tracks it.

@@ -16,13 +16,13 @@ let
 in
 {
   ##########################################################################
-  # Base system + network (minimal, no desktop)
+  # Base system + AI modules + Caddy (for services.caddy.services option)
   ##########################################################################
 
   imports = [
     ../../system
-    # AI modules only — not the full common/ (no media, mail, ap, etc.)
     ../../common/ai
+    ../../common/web/caddy.nix
   ];
 
   ##########################################################################
@@ -80,57 +80,11 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   ##########################################################################
-  # Time & locale
+  # Time & locale (system module also sets these, but we override for clarity)
   ##########################################################################
 
   time.timeZone = defaults.timezone;
   i18n.defaultLocale = "en_US.UTF-8";
-
-  ##########################################################################
-  # Caddy — AI vhosts only (no homepage, no godmod3, etc.)
-  ##########################################################################
-
-  services.caddy = {
-    enable = true;
-    virtualHosts = {
-      "ai.${domain}".extraConfig = ''
-        tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
-        # Read-only LiteLLM endpoints: inject master key for keyless browser access
-        @readonly path /health /health/liveness /health/readiness /health/services /v1/models /models /v1/model/info /model/info
-        handle @readonly {
-          reverse_proxy 127.0.0.1:4000 {
-            header_up Authorization "Bearer {env.LITELLM_MASTER_KEY}"
-          }
-        }
-        # Admin/write endpoints go to :8091 (requires key)
-        handle /api/* {
-          reverse_proxy 127.0.0.1:8091
-        }
-        # Frontend
-        @frontend path / /litellm.js /ui/playground/* /stats.json
-        handle @frontend {
-          root * ${www}/ai
-          file_server
-        }
-      '';
-      "chat.${domain}".extraConfig = ''
-        tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
-        reverse_proxy 127.0.0.1:8081
-      '';
-      "llama.${domain}".extraConfig = ''
-        tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
-        reverse_proxy 127.0.0.1:8080
-      '';
-      "whisper.${domain}".extraConfig = ''
-        tls ${sslDir}/homelab.crt ${sslDir}/homelab.key
-        reverse_proxy 127.0.0.1:8090
-      '';
-    };
-    environment.systemPackages = [ pkgs.caddy ];
-  };
-
-  systemd.services.caddy.serviceConfig.EnvironmentFile =
-    [ config.sops.secrets."providers.env".path ];
 
   ##########################################################################
   # System packages — minimal toolkit
@@ -139,19 +93,31 @@ in
   environment.systemPackages = with pkgs; [
     git vim curl wget btop jq yq
     util-linux smartmontools rsync
+    caddy
   ];
+
+  ##########################################################################
+  # Caddy — use generated vhosts from services.caddy.services (AI modules)
+  # The homelab homepage vhosts will also be generated but that's fine for build.
+  ##########################################################################
+
+  services.caddy = {
+    enable = true;
+  };
+
+  systemd.services.caddy.serviceConfig.EnvironmentFile =
+    [ config.sops.secrets."providers.env".path ];
 
   ##########################################################################
   # Clean up: no desktop, no media, no mail, no AP
   ##########################################################################
 
-  services.ap.enable = false;
   services.xserver.enable = false;
   services.printing.enable = false;
 
   ##########################################################################
-  # System version
+  # System version — inherited from system module (25.11)
   ##########################################################################
 
-  system.stateVersion = "26.05";
+  # system.stateVersion = "25.11";  # defined in ../../system
 }
