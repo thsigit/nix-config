@@ -1,56 +1,13 @@
-# Static LiteLLM config.yaml — single source of truth.
-# Hand-maintained, committed to nix-lab. Seeded to
-# /srv/appdata/litellm/config.yaml ONLY on first deployment (see
-# litellm.nix activation script); thereafter it is admin-edited (by hand or
-# litellm-cli) and never re-rendered by a rebuild.
+# Static LiteLLM config.yaml — FIRST-BOOT SEED ONLY.
+# This file is copied to /srv/appdata/litellm/config.yaml ONLY on first deployment
+# (or if the live file is missing/empty). After that, the live config is
+# admin-edited (by hand or litellm-cli) and NEVER re-rendered by rebuilds.
 #
-# API keys injected at runtime via sops providers.env:
-#   os.environ/NVIDIA_API_KEY
-#
-# 2026-09-12: nvidia text models = verified-working set (litellm-nvidia-discovery
-# round-trips). EOL dropped: gpt-oss-120b, nemotron-3-ultra-550b. Vision +
-# embedding NIM models kept for Open WebUI. Local llama.cpp router (127.0.0.1:8080)
-# kept for local usage.
+# Remote providers (NVIDIA NIM, Cloudflare Workers AI) are managed in the live
+# config at /srv/appdata/litellm/config.yaml and persist across rebuilds.
+# This seed ONLY includes local llama.cpp models.
 
 model_list:
-  # ── nvidia text (chat completions, PASS 2026-09-12) ──────────────
-  - model_name: nvidia/meta/muse-glimmer-30b
-    litellm_params:
-      model: openai/meta/muse-glimmer-30b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/nvidia/nemotron-3-super-120b-a12b
-    litellm_params:
-      model: openai/nvidia/nemotron-3-super-120b-a12b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
-    litellm_params:
-      model: openai/nvidia/nemotron-3.5-lightning-30b-a3b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-  - model_name: nvidia/openai/gpt-oss-20b
-    litellm_params:
-      model: openai/openai/gpt-oss-20b
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-
-  # ── nvidia vision (chat completions with image content) ──────────
-  - model_name: nvidia/meta/llama-3.2-11b-vision-instruct
-    litellm_params:
-      model: openai/meta/llama-3.2-11b-vision-instruct
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-
-  # ── nvidia embedding (multimodal VL: images + text) ──────────────
-  - model_name: nvidia/nvidia/llama-nemotron-embed-vl-1b-v2
-    litellm_params:
-      model: openai/nvidia/llama-nemotron-embed-vl-1b-v2
-      api_base: https://integrate.api.nvidia.com/v1
-      api_key: os.environ/NVIDIA_API_KEY
-      input_type: query
-      encoding_format: float
-
   # ── local llama.cpp router (http://127.0.0.1:8080/v1) ─────────────
   - model_name: local/tinyllama
     litellm_params:
