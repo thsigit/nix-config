@@ -3,8 +3,8 @@
 {
   imports = [
     ./navidrome.nix
-    ./karakeep.nix
-    ./trilium.nix
+    #./karakeep.nix
+    #./trilium.nix
     ./calibre-web.nix
     ./mpd.nix
     ./linkding-podman.nix

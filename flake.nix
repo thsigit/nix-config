@@ -31,24 +31,9 @@
     let
       system = "x86_64-linux";
 
-      pkgs = import nixpkgs {
-        inherit system;
-        config = {
-          permittedInsecurePackages = [
-            "pnpm-9.15.9"
-          ];
-          allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
-            "google-chrome"
-            "open-webui"
-            "trilium-server"
-          ];
-        };
-      };
-
       commonSpecialArgs = {
         litellmCli = self.inputs.litellm-cli;
         inherit home-manager opencode;
-        inherit pkgs;
       };
 
       mkSystem = machine: profile:
@@ -57,6 +42,21 @@
           specialArgs = commonSpecialArgs;
 
           modules = [
+            {
+              nixpkgs.config = {
+                permittedInsecurePackages = [
+                  "pnpm-9.15.9"
+                ];
+            
+                allowUnfreePredicate = pkg:
+                  builtins.elem (nixpkgs.lib.getName pkg) [
+                    "google-chrome"
+                    "open-webui"
+                    "trilium-server"
+                  ];
+              };
+            }
+
             sops-nix.nixosModules.sops
             (./machines + "/${machine}")
             (./profiles + "/${profile}")

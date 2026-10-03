@@ -24,10 +24,6 @@ in
 
   programs.home-manager.enable = true;
 
-  programs.bash = {
-    enable = true;
-  };
-
   programs.git = {
     enable = true;
     settings = {
@@ -61,6 +57,11 @@ in
     ".config/cudatext".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/cudatext";
     ".config/Deskflow/Deskflow.conf".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.config/Deskflow.conf";
     "bin".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/bin";
+    # Manage .bashrc directly to avoid conflict with programs.bash
+    ".bashrc" = {
+      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/.bashrc";
+      force = true;
+    };
   };
 
   # XFCE desktop settings (wallpaper, backdrop style) are owned by the
