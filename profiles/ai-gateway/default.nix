@@ -21,6 +21,7 @@ in
 
   imports = [
     ../../system
+    ../../common/security
     ../../common/ai
     ../../common/web/caddy.nix
   ];
@@ -30,7 +31,7 @@ in
   ##########################################################################
 
   networking = {
-    hostName = "ai-gateway";
+    hostName = lib.mkForce "ai-gateway";
     inherit domain;
     extraHosts = ''
       ${defaults.network.lanIp} ai-gateway.${domain} ai-gateway
