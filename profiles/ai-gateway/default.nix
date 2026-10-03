@@ -31,7 +31,6 @@ in
   ##########################################################################
 
   networking = {
-    hostName = lib.mkForce "ai-gateway";
     inherit domain;
     extraHosts = ''
       ${defaults.network.lanIp} ai-gateway.${domain} ai-gateway
