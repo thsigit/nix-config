@@ -27,8 +27,14 @@ differences between roles are intentional and minimal.
 
 ### Module layering
 
+The roles cascade; the code does not. Each profile names the layers it wants:
+
 ```nix
-system/ + common/  ->  <profile>
+#system      ->  system/
+#server      ->  system/ + common/
+#ai-gateway  ->  system/ + common/ + ai-common/
+#workstation ->  system/ + common/ + ai-common/   + desktop delta
+#failsafe    ->  nothing at all (independent recovery profile)
 ```
 
 - `system/` — the base OS layer: boot, kernel, locale, networking, users, ssh,
@@ -43,12 +49,30 @@ system/ + common/  ->  <profile>
   nothing.)
 - `ai-common/` — the AI gateway stack, at the repo root since 2026-10-04 so a
   profile can list it explicitly instead of inheriting it through `common/`.
+  Its `default.nix` is an index of the leaf modules plus one piece of shared
+  wiring: the `networking.extraHosts` block giving name resolution to the AI
+  vhosts (`ai.`, `chat.`, `llama.`, `whisper.`, `ai-gateway.`). That block moved
+  here from `profiles/ai-gateway` on 2026-10-05 — those hostnames are the names
+  the AI services are *published under*, so they belong to the stack rather than
+  to whichever profile is named `ai-gateway`. `services.caddy.enable` and the
+  Caddy package also come from `common/web/caddy.nix`; the AI modules only
+  publish their vhosts.
 
-**Profiles do NOT import each other.** `ai-gateway` aggregates
-`../../system + ../../common + ../../ai-common` itself; it does not import
-`../server`. Profiles are alternatives you choose between, not layers to
-inherit. `workstation` is the one deliberate exception — it imports
-`../ai-gateway` so the desktop inherits the AI stack.
+**Profiles do NOT import each other. No exceptions.** `server`, `ai-gateway`
+and `workstation` each aggregate `../../system + ../../common` (plus
+`../../ai-common` for the last two) themselves rather than reaching the base
+through a sibling. Profiles are alternatives you choose between, not layers to
+inherit — and inheriting drags along whatever policy the sibling happens to
+carry. An early attempt had `ai-gateway` import `../server` and `workstation`
+import `../ai-gateway`; that produced a hard `services.xserver.enable` conflict
+that only survived via an `lib.mkDefault` hack. A `mkDefault` needed to
+tolerate your own import graph means the graph is wrong.
+
+Cascading is how to *read* the roles: `#server` is `#system` as a headless box,
+`#ai-gateway` is `#server` plus the AI stack, `#workstation` is that plus a
+desktop. Flat is how it is *written*. `workstation` stopped importing
+`../ai-gateway` on 2026-10-05, which was the last thing making that exception
+real rather than merely documented.
 
 Note the name overlap: the `system/` directory and the `system` flake output
 (profile) are unrelated to NixOS's `config.system.*` option namespace.
@@ -58,10 +82,11 @@ Note the name overlap: the `system/` directory and the `system` flake output
 - **Owner is currently on `#workstation`** → always target/rebuild the
   `workstation` profile (flake: `.#workstation`) by default unless told otherwise.
 - `#server` and `#workstation` are the SAME hardware. `#server` is headless and
-  carries NO AI stack; `#workstation` is the desktop and DOES carry it (it
-  imports `../ai-gateway`). That divergence is deliberate: the AI stack was
-  graduated out of `common/` into `ai-common/` precisely so `server` could shed
-  it. Do not re-add `ai-common` to `server`'s import list.
+  carries NO AI stack; `#workstation` is the desktop and DOES carry it (it lists
+  `../../ai-common` itself, alongside `../../system` and `../../common`). That
+  divergence is deliberate: the AI stack was graduated out of `common/` into
+  `ai-common/` precisely so `server` could shed it. Do not re-add `ai-common` to
+  `server`'s import list.
 - **The live system runs `#workstation`.** Verified 2026-10-04 by probing the
   activated toplevel, not by assumption: `google-chrome` and the `xfce4-*` /
   `sddm` binaries are present in `/run/current-system/sw/bin`, and the AI
@@ -73,6 +98,21 @@ Note the name overlap: the `system/` directory and the `system` flake output
 - Only `#workstation` is ever `switch`ed. To validate the other profiles, use
   `nixos-rebuild build`, not `switch`: switching to `#server` would tear down
   XFCE, Chrome and the whole AI stack from the live machine.
+- **Chrome will not start after a rebuild, and it is not the rebuild's fault.**
+  Symptom: `google-chrome` refuses to launch. Cause: a stale singleton from a
+  previous Chrome process (`SingletonLock` is a symlink to a hostname+PID that no
+  longer resolves, which Chrome treats as "another instance is running").
+  Cure, in this order — `switch` first, then chase:
+  1. `nixos-rebuild switch` to `#workstation` — get the new system activated.
+  2. `rm -f ~/.config/google-chrome/Singleton{Lock,Cookie,Socket}`
+  3. `rm -rf /tmp/com.google.Chrome.*`
+  Do not diagnose the Chrome symptom *before* switching; the two look identical
+  from the outside and switching first removes one whole branch of guessing.
+- A `dbus-1` store-path change is not automatically a bug. After a nixpkgs or
+  flake-input bump, `dbus` picks up a different hash because it depends on the
+  system package set transitively. The symptom seen on 2026-10-05 was Chrome
+  failing to start (the singleton problem above), not dbus misbehaving. Verify
+  `dbus` is healthy before treating its hash change as the cause of anything.
 - One repo in `/srv/repo/nix-lab`: branch `dev` = active development (local-only), branch `main` = public release (the deployed end product, the only branch pushed to GitHub). See `WORKFLOW.md`. GitHub's nix-config is the **rolling release** (`main`).
   - **Publish (dev → GitHub):** `git checkout main && git merge dev && git push origin main && git checkout dev`
 
@@ -164,8 +204,16 @@ Note the name overlap: the `system/` directory and the `system` flake output
   is what keeps recovery working when this tree is broken.
 - These keys are **live**, not decorative. nixpkgs renders
   `users.users.<name>.openssh.authorizedKeys` to
-  `/etc/ssh/authorized_keys.d/<user>` via `authKeysFiles` in
-  `nixos/modules/services/networking/ssh/sshd.nix`, and sshd reads that path.
+  `/etc/ssh/authorized_keys.d/<user>` (mode `0444`) and sshd reads that path.
+  Precisely how, since it is easy to probe wrongly: in
+  `nixos/modules/services/networking/ssh/sshd.nix`, `authKeysFiles` is **not an
+  option** — it is an internal `let`-binding that builds one `environment.etc`
+  entry per user that has non-empty keys, and is consumed by
+  `environment.etc = authKeysFiles // authPrincipalsFiles // { ... }`.
+  So `config.services.openssh.authKeysFiles` evaluates to `[]` and will mislead
+  you into thinking no keys are rendered. Probe
+  `environment.etc."ssh/authorized_keys.d/<user>"` instead; confirmed present in
+  all five profiles.
   All three keys (`vantage`, `FedoraWSL`, `V2333`) were dead config from
   2026-08-06 (`628336f`) until they were uncommented on 2026-10-04.
 - A hand-placed `~/.ssh/authorized_keys` (2 keys, missing `V2333`) still exists
@@ -173,11 +221,20 @@ Note the name overlap: the `system/` directory and the `system` flake output
   Do not delete it until after one successful `switch` to a key-bearing profile,
   verified by logging in from a **second terminal** with the manual file moved
   aside. Keeping a tested escape hatch is the whole point.
-- The hardening block (`services.openssh.settings` with
-  `PasswordAuthentication = false`, `PermitRootLogin = "no"`) is commented out in
-  `system/ssh.nix` and enabled only in `ai-gateway`. Password auth is therefore
-  still accepted on `server` and `workstation`. Changing that is a separate
-  decision — verify key-only login before enabling it anywhere else.
+- The hardening (`services.openssh.settings`: `PasswordAuthentication = false`,
+  `PermitRootLogin = "no"`) lives in `system/ssh.nix` and is **active**. It moved
+  there from `profiles/ai-gateway` on 2026-10-05, because SSH posture is host
+  policy, not gateway policy: leaving it in `ai-gateway` meant `server` and
+  `workstation` silently kept password auth ON while the gateway did not — three
+  profiles, three postures, none of them deliberate. Verified: `system`,
+  `server`, `ai-gateway` and `workstation` all evaluate to
+  `PasswordAuthentication = false`.
+- `failsafe` deliberately still evaluates to `PasswordAuthentication = true`. It
+  does not import `../../system`, and its own block says why: "Password auth
+  stays enabled as a fallback in case SSH keys are lost." That is the escape
+  hatch, and it survives in the one profile whose entire job is being the way
+  back in. Do not "fix" that asymmetry by importing `../../system` into
+  `failsafe` or by adding the hardening to its copy.
 
 ## Module conventions (coding standard)
 
