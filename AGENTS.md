@@ -62,8 +62,17 @@ Note the name overlap: the `system/` directory and the `system` flake output
   imports `../ai-gateway`). That divergence is deliberate: the AI stack was
   graduated out of `common/` into `ai-common/` precisely so `server` could shed
   it. Do not re-add `ai-common` to `server`'s import list.
-- The live system currently runs `#server`. The owner switches to `#workstation`
-  for daily desktop use.
+- **The live system runs `#workstation`.** Verified 2026-10-04 by probing the
+  activated toplevel, not by assumption: `google-chrome` and the `xfce4-*` /
+  `sddm` binaries are present in `/run/current-system/sw/bin`, and the AI
+  services (`litellm`, `open-webui`, `whisper`, `llama-cpp`, `opencode`) plus
+  media/mail containers (`navidrome`, `mailpit`, `linkding`) are running.
+  `hostapd` is absent because `workstation` sets `services.ap.enable = false`.
+  So `#workstation` — desktop **and** AI — is what is actually deployed, and
+  `#server` is the headless-no-AI alternative, not the current state.
+- Only `#workstation` is ever `switch`ed. To validate the other profiles, use
+  `nixos-rebuild build`, not `switch`: switching to `#server` would tear down
+  XFCE, Chrome and the whole AI stack from the live machine.
 - One repo in `/srv/repo/nix-lab`: branch `dev` = active development (local-only), branch `main` = public release (the deployed end product, the only branch pushed to GitHub). See `WORKFLOW.md`. GitHub's nix-config is the **rolling release** (`main`).
   - **Publish (dev → GitHub):** `git checkout main && git merge dev && git push origin main && git checkout dev`
 
