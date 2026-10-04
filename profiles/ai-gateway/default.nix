@@ -15,51 +15,23 @@
 #
 # Headless-ness needs no declaration here: `services.xserver.enable` and
 # `services.printing.enable` both default to false in nixpkgs, and this profile
-# does not touch them. That also keeps the door open for a desktop profile to
-# build on this one without a module-priority conflict.
+# does not touch them.
+#
+# This profile is now nothing but its import list. Everything that used to make it
+# distinguishable from `server` has been pushed down to the layer that owns it:
+#   - the AI vhost name resolution moved to `ai-common/default.nix` (2026-10-05),
+#     because those hostnames belong to the AI services, not to this profile;
+#   - the Caddy provider-env moved to `ai-common/litellm/litellm.nix`;
+#   - `services.openssh.settings` moved to `system/ssh.nix`;
+#   - `util-linux rsync` and the `docker` group were dropped as redundant.
+# The AI stack itself is entirely inside `ai-common/`. That is the whole reason
+# `server` can be the same system minus AI rather than a different system.
 
-{ config, pkgs, ... }:
-let
-  defaults = import ../../settings;
-  inherit (defaults) user domain;
-  inherit (defaults.network) lanIp;
-in
+{ ... }:
 {
-  ##########################################################################
-  # Base system + AI modules
-  ##########################################################################
-
   imports = [
     ../../system
     ../../common
     ../../ai-common
-  ];
-
-  ##########################################################################
-  # Networking — AI vhost name resolution
-  #
-  # `networking.extraHosts` is a plain list option, so this CONCATENATES with
-  # the `homelab` entry from `system/networking.nix` rather than replacing it.
-  # The static address, domain, gateway and nameservers all come from
-  # `system/networking.nix` — do not repeat them here.
-  ##########################################################################
-
-  networking.extraHosts = ''
-    ${lanIp} ai-gateway.${domain} ai-gateway
-    ${lanIp} ai.${domain} ai
-    ${lanIp} chat.${domain} chat
-    ${lanIp} llama.${domain} llama
-    ${lanIp} whisper.${domain} whisper
-  '';
-
-  ##########################################################################
-  # System packages — delta only
-  #
-  # `common/packages` already provides curl, wget, jq, yq, btop,
-  # smartmontools, git, vim, nix-tree and friends. These two are the gap.
-  ##########################################################################
-
-  environment.systemPackages = with pkgs; [
-    util-linux rsync
   ];
 }

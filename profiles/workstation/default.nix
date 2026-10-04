@@ -1,22 +1,30 @@
 # profiles/workstation/default.nix
 # Desktop front-end for the same physical machine as `server`
-# (Toshiba Portege R30-C). Composition (2026-10-04 refactor):
+# (Toshiba Portege R30-C).
 #
-#   system/  ->  common/  ->  server  ->  ai-common/  ->  ai-gateway  ->  workstation
+# Composition: `system/` + `common/` + `ai-common/` + the desktop delta
+# (XFCE, home-manager, desktop packages). As of 2026-10-05 it names those
+# three directories itself rather than reaching them through `../ai-gateway`,
+# so no profile in this repo imports another profile.
 #
-# This profile therefore inherits the whole server + AI stack and adds only the
-# desktop delta: XFCE, home-manager and the desktop package set. It must NOT
-# re-import `system/` or `common/` — that would duplicate every module and, for
-# list options, silently concatenate duplicates.
+#   system/  +  common/  +  ai-common/  +  desktop
+#     └───────────── shared ─────────────┘
+#
+# The roles still cascade — #system is the base, #server is that base as a
+# headless box, #ai-gateway adds the AI stack, #workstation adds a desktop —
+# but the *code* does not. Each profile lists the layers it wants. See
+# AGENTS.md, "Layering".
 
-{ pkgs, home-manager, ... }:
+{ home-manager, ... }:
 let
   defaults = import ../../settings;
   inherit (defaults) user;
 in
 {
   imports = [
-    ../ai-gateway
+    ../../system
+    ../../common
+    ../../ai-common
     home-manager.nixosModules.home-manager
     ./xfce4.nix
     ./packages.nix
@@ -28,8 +36,8 @@ in
     users.${user.name} = import ./home.nix;
   };
 
-  # The AP bundle is inherited from `server` via `common/ap`, which is what
-  # declares `services.ap` in the first place. Disabled here so the desktop
+  # The AP bundle is declared by `common/ap`, which is what defines the
+  # `services.ap` option in the first place. Disabled here so the desktop
   # does not fight `system/networking.nix` over the wireless NIC.
   services.ap.enable = false;
 }
