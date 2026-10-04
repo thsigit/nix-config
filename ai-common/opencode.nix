@@ -1,10 +1,10 @@
-# common/ai/opencode.nix
+# ai-common/opencode.nix
 # opencode headless server — enable + config only.
 
 { config, lib, pkgs, opencode, ... }:
 
 let
-  defaults = import ../../settings;
+  defaults = import ../settings;
   inherit (defaults) user domain tailnet;
   inherit (defaults.directories) appdata;
   port = 3000;

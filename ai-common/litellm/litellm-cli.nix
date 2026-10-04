@@ -1,4 +1,4 @@
-# common/ai/litellm/litellm-cli.nix
+# ai-common/litellm/litellm-cli.nix
 #
 # Local wiring for the independent `services.litellm-cli` module (imported
 # from the litellm-cli repo). Self-enabling leaf: importing this file enables
@@ -6,7 +6,7 @@
 #
 # Static config contract:
 #   The LiteLLM config.yaml is a STATIC, hand-maintained file living at
-#   common/ai/litellm/config.yaml and copied to ${config.services.litellm-cli.configFile}
+#   ai-common/litellm/config.yaml and copied to ${config.services.litellm-cli.configFile}
 #   at activation by the native runtime module (./litellm.nix). litellm-cli
 #   only EDITS that static file manually; it never renders or seeds anything.
 #
@@ -16,7 +16,7 @@
 { config, lib, litellmCli, ... }:
 
 let
-  defaults = import ../../../settings;
+  defaults = import ../../settings;
   inherit (defaults.directories) appdata;
 in
 {

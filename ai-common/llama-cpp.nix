@@ -1,10 +1,10 @@
-# common/ai/llama-cpp.nix
+# ai-common/llama-cpp.nix
 # llama.cpp server — 4-chat + 1-embed router (tinyllama, qwen3, qwen2.5-coder, mxbai, sailor2-1b) + Caddy, global pkgs.llama-cpp b9190.
 
 { config, lib, pkgs, ... }:
 
 let
-  defaults = import ../../settings;
+  defaults = import ../settings;
 in
 {
   services.caddy.services.llama = {

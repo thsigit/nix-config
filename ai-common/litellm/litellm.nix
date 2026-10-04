@@ -1,4 +1,4 @@
-# common/ai/litellm/litellm.nix
+# ai-common/litellm/litellm.nix
 #
 # LiteLLM gateway runtime using the native services.litellm module.
 #
@@ -6,7 +6,7 @@
 #
 #   committed seed                    first activation                 runtime
 #   ----------------                  ----------------                 -------
-#   common/ai/litellm/config.yaml ->  copy if missing/empty       ->   litellm --config
+#   ai-common/litellm/config.yaml ->  copy if missing/empty       ->   litellm --config
 #   (first boot default)               /srv/appdata/litellm/config.yaml /srv/appdata/litellm/config.yaml
 #                                +   install usage_logger.py
 #                                     -> /srv/appdata/litellm/
@@ -22,7 +22,7 @@
 #
 # Ownership:
 #   Nix owns: service definition + first-boot seed of the committed config.yaml
-#   Repo owns: common/ai/litellm/config.yaml (model list, aliases, fallbacks)
+#   Repo owns: ai-common/litellm/config.yaml (model list, aliases, fallbacks)
 #   Admin owns: /srv/appdata/litellm/config.yaml (the live, editable config)
 #   SOPS owns: providers.env (API keys / master key)
 #
@@ -55,7 +55,7 @@ in
       message = ''
         services.litellm requires services.litellm-cli.enable = true.
 
-        Import common/ai/litellm/litellm-cli.nix before enabling this module.
+        Import ai-common/litellm/litellm-cli.nix before enabling this module.
       '';
     }
   ];

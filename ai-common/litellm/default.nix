@@ -1,4 +1,4 @@
-# common/ai/litellm/default.nix
+# ai-common/litellm/default.nix
 #
 # LiteLLM gateway stack. This leaf imports the config layer (litellm-cli)
 # and the native runtime (litellm). Runs in no-DB mode — no PostgreSQL,

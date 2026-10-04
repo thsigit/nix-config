@@ -1,4 +1,4 @@
-# common/ai/open-webui.nix
+# ai-common/open-webui.nix
 # Open WebUI — nixpkgs service + Caddy vhost (8081 -> chat.home.arpa).
 # Always-on leaf (no enable toggle) following mrtg-style standard.
 # Upstream module: services.open-webui (nixpkgs). Unfree license — predicate

@@ -1,4 +1,4 @@
-# common/ai/whisper.nix
+# ai-common/whisper.nix
 # whisper.cpp server — STT via whisper-server (8082 -> whisper.home.arpa).
 # Always-on leaf, similar to llama-cpp/open-webui.
 # Model: ggml-base (~142MB) in /srv/ai/models/whisper, auto-downloaded on activation.
@@ -6,7 +6,7 @@
 
 { config, lib, pkgs, ... }:
 let
-  defaults = import ../../settings;
+  defaults = import ../settings;
   port = 8090;
   modelDir = "${defaults.ai.models}/whisper";
   modelFile = "${modelDir}/ggml-base.bin";

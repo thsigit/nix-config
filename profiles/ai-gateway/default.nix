@@ -1,62 +1,71 @@
 # profiles/ai-gateway/default.nix
-# Dedicated AI-Gateway profile — minimal system running only the AI stack:
+# Dedicated AI-Gateway profile — the base system plus the AI stack:
 # LiteLLM proxy (ai.home.arpa), Open WebUI (chat.home.arpa), llama.cpp (llama.home.arpa),
 # whisper.cpp (whisper.home.arpa), opencode agent.
 #
-# This profile is ADDITIVE — it does not modify server/workstation/failsafe.
+# Composition (2026-10-04 refactor): the base modules (`system/` + `common/`) plus
+# `ai-common/`, which graduated out of `common/ai/` to the repo root so it can be
+# listed here directly instead of being dragged in by the `common/` barrel.
 # Use: sudo nixos-rebuild switch --flake /srv/repo/nix-lab#ai-gateway
+#
+# Deliberately NOT importing `../server`: this profile aggregates the base modules
+# itself rather than depending on a sibling profile. Profiles are meant to be
+# alternatives you pick between, not layers to inherit, and importing one would
+# also drag in whatever headless/desktop policy that profile happens to carry.
+#
+# Headless-ness needs no declaration here: `services.xserver.enable` and
+# `services.printing.enable` both default to false in nixpkgs, and this profile
+# does not touch them. That also keeps the door open for a desktop profile to
+# build on this one without a module-priority conflict.
 
-{ config, lib, pkgs, callPackage, home-manager, ... }:
+{ config, pkgs, ... }:
 let
   defaults = import ../../settings;
   inherit (defaults) user domain;
-  inherit (defaults.directories) appdata www;
-  inherit (defaults.ai) models;
-  inherit (defaults.security) sslDir;
+  inherit (defaults.network) lanIp;
 in
 {
   ##########################################################################
-  # Base system + AI modules + Caddy (for services.caddy.services option)
+  # Base system + AI modules
   ##########################################################################
 
   imports = [
     ../../system
-    ../../common/security
-    ../../common/ai
-    ../../common/web/caddy.nix
+    ../../common
+    ../../ai-common
   ];
 
   ##########################################################################
-  # Networking — static LAN IP so DNS (home.arpa) resolves reliably
+  # Networking — AI vhost name resolution
+  #
+  # `networking.extraHosts` is a plain list option, so this CONCATENATES with
+  # the `homelab` entry from `system/networking.nix` rather than replacing it.
+  # The static address, domain, gateway and nameservers all come from
+  # `system/networking.nix` — do not repeat them here.
   ##########################################################################
 
-  networking = {
-    inherit domain;
-    extraHosts = ''
-      ${defaults.network.lanIp} ai-gateway.${domain} ai-gateway
-      ${defaults.network.lanIp} ai.${domain} ai
-      ${defaults.network.lanIp} chat.${domain} chat
-      ${defaults.network.lanIp} llama.${domain} llama
-      ${defaults.network.lanIp} whisper.${domain} whisper
-    '';
-    networkmanager.enable = true;
-    networkmanager.unmanaged = [ "interface-name:${defaults.network.lanInterface}" ];
-    interfaces.${defaults.network.lanInterface}.ipv4.addresses = [{
-      address = defaults.network.lanIp;
-      prefixLength = defaults.network.lanPrefix;
-    }];
-    defaultGateway = defaults.network.gateway;
-    nameservers = [ defaults.network.gateway "1.1.1.1" ];
-  };
+  networking.extraHosts = ''
+    ${lanIp} ai-gateway.${domain} ai-gateway
+    ${lanIp} ai.${domain} ai
+    ${lanIp} chat.${domain} chat
+    ${lanIp} llama.${domain} llama
+    ${lanIp} whisper.${domain} whisper
+  '';
 
   ##########################################################################
   # SSH access for admin
+  #
+  # The keys stay here for now: `system/ssh.nix` keeps its own copy commented
+  # out. `isNormalUser`, `description` and the base `extraGroups` come from
+  # `system/users.nix`.
   ##########################################################################
 
   users.users.${user.name} = {
-    isNormalUser = true;
-    description = "Sigit Prasetyo";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    # Only the delta. `system/users.nix` already grants
+    # networkmanager/wheel/audio/video/podman/ydotool; listing them again
+    # here would concatenate duplicates.
+    extraGroups = [ "docker" ];
+
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN4bBvw5pcH+7rwNWAHCxNrioPjyn66rVmEHPtS5U5eQ sigit@vantage"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHRqLBFFpPTyOvk8+YxfE5NeG8pqO/kEHJMHxLjS3doA sigit@FedoraWSL"
@@ -64,60 +73,30 @@ in
     ];
   };
 
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-    };
+  services.openssh.settings = {
+    PermitRootLogin = "no";
+    PasswordAuthentication = false;
   };
 
   ##########################################################################
-  # Bootloader
+  # Caddy — feed the sops-provided provider env to the unit
+  #
+  # `services.caddy.enable` and the `pkgs.caddy` package both come from
+  # `common/web/caddy.nix`; the AI modules publish their vhosts through
+  # `services.caddy.services`.
   ##########################################################################
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  ##########################################################################
-  # Time & locale (system module also sets these, but we override for clarity)
-  ##########################################################################
-
-  time.timeZone = defaults.timezone;
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  ##########################################################################
-  # System packages — minimal toolkit
-  ##########################################################################
-
-  environment.systemPackages = with pkgs; [
-    git vim curl wget btop jq yq
-    util-linux smartmontools rsync
-    caddy
-  ];
-
-  ##########################################################################
-  # Caddy — use generated vhosts from services.caddy.services (AI modules)
-  # The homelab homepage vhosts will also be generated but that's fine for build.
-  ##########################################################################
-
-  services.caddy = {
-    enable = true;
-  };
 
   systemd.services.caddy.serviceConfig.EnvironmentFile =
     [ config.sops.secrets."providers.env".path ];
 
   ##########################################################################
-  # Clean up: no desktop, no media, no mail, no AP
+  # System packages — delta only
+  #
+  # `common/packages` already provides curl, wget, jq, yq, btop,
+  # smartmontools, git, vim, nix-tree and friends. These two are the gap.
   ##########################################################################
 
-  services.xserver.enable = false;
-  services.printing.enable = false;
-
-  ##########################################################################
-  # System version — inherited from system module (25.11)
-  ##########################################################################
-
-  # system.stateVersion = "25.11";  # defined in ../../system
+  environment.systemPackages = with pkgs; [
+    util-linux rsync
+  ];
 }
