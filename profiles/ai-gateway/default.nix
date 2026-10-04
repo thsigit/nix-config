@@ -55,23 +55,16 @@ in
   ##########################################################################
   # SSH access for admin
   #
-  # The keys stay here for now: `system/ssh.nix` keeps its own copy commented
-  # out. `isNormalUser`, `description` and the base `extraGroups` come from
-  # `system/users.nix`.
+  # Keys and base groups come from `system/ssh.nix` and `system/users.nix`.
+  # Only the extra group below is local.
   ##########################################################################
 
-  users.users.${user.name} = {
-    # Only the delta. `system/users.nix` already grants
-    # networkmanager/wheel/audio/video/podman/ydotool; listing them again
-    # here would concatenate duplicates.
-    extraGroups = [ "docker" ];
-
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN4bBvw5pcH+7rwNWAHCxNrioPjyn66rVmEHPtS5U5eQ sigit@vantage"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHRqLBFFpPTyOvk8+YxfE5NeG8pqO/kEHJMHxLjS3doA sigit@FedoraWSL"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIIvSm/xr14Xb0Epv2bqnjgASZJmeavgC/QJGan45aE6 V2333"
-    ];
-  };
+  # The SSH authorized keys moved to `system/ssh.nix` on 2026-10-04; they used
+  # to be duplicated here. `extraGroups` is a concatenating list option, so this
+  # must stay a delta -- `system/users.nix` already grants
+  # networkmanager/wheel/audio/video/podman/ydotool and repeating them here
+  # would produce literal duplicates.
+  users.users.${user.name}.extraGroups = [ "docker" ];
 
   services.openssh.settings = {
     PermitRootLogin = "no";
