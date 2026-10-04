@@ -8,10 +8,10 @@ in
 {
   services.openssh = {
     enable = true;
-    # settings = {
-    #  PasswordAuthentication = false;
-    #  PermitRootLogin = "no";
-    # };
+    settings = {
+     PasswordAuthentication = false;
+     PermitRootLogin = "no";
+    };
   };
 
   # Register user SSH keys. nixpkgs renders these via `authKeysFiles` in

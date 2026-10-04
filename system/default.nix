@@ -17,11 +17,6 @@
     ./power.nix
   ];
 
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    "google-chrome"
-    "open-webui"
-  ];
-
   nix = {
     settings = {
       auto-optimise-store = true;

@@ -53,36 +53,6 @@ in
   '';
 
   ##########################################################################
-  # SSH access for admin
-  #
-  # Keys and base groups come from `system/ssh.nix` and `system/users.nix`.
-  # Only the extra group below is local.
-  ##########################################################################
-
-  # The SSH authorized keys moved to `system/ssh.nix` on 2026-10-04; they used
-  # to be duplicated here. `extraGroups` is a concatenating list option, so this
-  # must stay a delta -- `system/users.nix` already grants
-  # networkmanager/wheel/audio/video/podman/ydotool and repeating them here
-  # would produce literal duplicates.
-  users.users.${user.name}.extraGroups = [ "docker" ];
-
-  services.openssh.settings = {
-    PermitRootLogin = "no";
-    PasswordAuthentication = false;
-  };
-
-  ##########################################################################
-  # Caddy — feed the sops-provided provider env to the unit
-  #
-  # `services.caddy.enable` and the `pkgs.caddy` package both come from
-  # `common/web/caddy.nix`; the AI modules publish their vhosts through
-  # `services.caddy.services`.
-  ##########################################################################
-
-  systemd.services.caddy.serviceConfig.EnvironmentFile =
-    [ config.sops.secrets."providers.env".path ];
-
-  ##########################################################################
   # System packages — delta only
   #
   # `common/packages` already provides curl, wget, jq, yq, btop,
