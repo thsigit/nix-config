@@ -13,25 +13,57 @@ These define the "why" behind the structure of this flake. When the two conflict
 
 ## Project
 
-Personal NixOS flake for two hosts that are the **same physical machine**:
-Toshiba Portege R30-C. Differences are intentional and minimal:
+Personal NixOS flake for ONE physical machine -- a Toshiba Portege R30-C --
+used in several roles. Every flake output builds that same machine; the
+differences between roles are intentional and minimal.
 
-| Host         | Profile      | Distinction            |
-|--------------|--------------|------------------------|
-| `server`     | `server`     | headless (server)      |
-| `workstation`| `workstation`| desktop (XFCE + SDDM)  |
+| Flake output  | Profile       | Distinction                          |
+|---------------|---------------|--------------------------------------|
+| `server`      | `server`      | headless, base daemons, **no AI**    |
+| `ai-gateway`  | `ai-gateway`  | headless + AI stack (litellm, webui) |
+| `workstation` | `workstation` | desktop (XFCE) + AI stack            |
+| `system`      | `system`      | base layer only (`../../system`)     |
+| `failsafe`    | `failsafe`    | minimal recovery, independent        |
 
-Flake outputs: `server` = `portege-r30c` machine + `server` profile;
-`workstation` = `portege-r30c` machine + `workstation` profile.
-Also `failsafe` = minimal recovery profile.
+### Module layering
+
+```nix
+system/ + common/  ->  <profile>
+```
+
+- `system/` — the base OS layer: boot, kernel, locale, networking, users, ssh,
+  firewall, power, bluetooth, shell, sudo. Leaves: `boot.nix`, `kernel.nix`,
+  `locale.nix`, `networking.nix`, `users.nix`, `ssh.nix`, `sudo.nix`,
+  `firewall.nix`, `power.nix`, `bluetooth.nix`, `shell.nix`,
+  `grub-failsafe.nix`. (`default.nix` is a pure importer.)
+- `common/` — long-running daemons. `default.nix` imports `ap`, `mail`,
+  `media`, `monitoring`, `network`, `packages`, `security`, `storage`, `web`.
+  It deliberately does **not** import `ai` — the AI stack graduated to
+  `ai-common/`. (`common/db/` holds only `default.nix.old` and is imported by
+  nothing.)
+- `ai-common/` — the AI gateway stack, at the repo root since 2026-10-04 so a
+  profile can list it explicitly instead of inheriting it through `common/`.
+
+**Profiles do NOT import each other.** `ai-gateway` aggregates
+`../../system + ../../common + ../../ai-common` itself; it does not import
+`../server`. Profiles are alternatives you choose between, not layers to
+inherit. `workstation` is the one deliberate exception — it imports
+`../ai-gateway` so the desktop inherits the AI stack.
+
+Note the name overlap: the `system/` directory and the `system` flake output
+(profile) are unrelated to NixOS's `config.system.*` option namespace.
 
 ## Standing facts (do not ask each session)
 
 - **Owner is currently on `#workstation`** → always target/rebuild the
   `workstation` profile (flake: `.#workstation`) by default unless told otherwise.
-- `#server` and `#workstation` are the SAME hardware. The only divergence today
-  is headless vs desktop GUI. **Keep it that way** — do not add meaningful
-  differences between the two profiles beyond that.
+- `#server` and `#workstation` are the SAME hardware. `#server` is headless and
+  carries NO AI stack; `#workstation` is the desktop and DOES carry it (it
+  imports `../ai-gateway`). That divergence is deliberate: the AI stack was
+  graduated out of `common/` into `ai-common/` precisely so `server` could shed
+  it. Do not re-add `ai-common` to `server`'s import list.
+- The live system currently runs `#server`. The owner switches to `#workstation`
+  for daily desktop use.
 - One repo in `/srv/repo/nix-lab`: branch `dev` = active development (local-only), branch `main` = public release (the deployed end product, the only branch pushed to GitHub). See `WORKFLOW.md`. GitHub's nix-config is the **rolling release** (`main`).
   - **Publish (dev → GitHub):** `git checkout main && git merge dev && git push origin main && git checkout dev`
 
@@ -39,7 +71,7 @@ Also `failsafe` = minimal recovery profile.
 
 ### NEVER run `sudo nixos-rebuild` (switch/build/boot/test)
 - Passwordless sudo is allowed for everything EXCEPT `nixos-rebuild`.
-  `common/security/sudo.nix` requires a password for
+  `system/sudo.nix` requires a password for
   `/run/current-system/sw/bin/nixos-rebuild`.
 - This rule was wrongly dropped in `3a474af` (to unblock an activation script)
   and restored in `4a7b55e`. Do not remove it again.
@@ -78,37 +110,65 @@ Also `failsafe` = minimal recovery profile.
 
 - `settings/` — canonical `user`, `ai`, `directories` (incl. `appdata`).
 - `flake.nix` — defines which machine + profile builds what.
-- `common/ai/` — AI gateway stack; leaf modules are self-contained and
+- `ai-common/` — AI gateway stack; leaf modules are self-contained and
   always-on when imported (mrtg-style standard); the directory `default.nix`
-  is a pure importer. The LiteLLM stack is grouped under `common/ai/litellm/`
+  is a pure importer. The LiteLLM stack is grouped under `ai-common/litellm/`
   (its own `default.nix` importer + leaf files); other leaves stay flat in
-  `common/ai/`. No per-leaf `enable` toggles.
-  - `litellm.nix` — LiteLLM native systemd service (port 4000), DynamicUser.
+  `ai-common/`. No per-leaf `enable` toggles.
+  - `ai-common/litellm/litellm.nix` — LiteLLM native systemd service (port 4000), DynamicUser.
     Consumes static config.yaml from /srv/appdata/litellm. Always-on.
-  - `litellm-cli.nix` — wires the external `services.litellm-cli` module
+  - `ai-common/litellm/litellm-cli.nix` — wires the external `services.litellm-cli` module
     (config layer + admin CLI from the litellm-cli repo).
-  - `bitrouter.nix` — BitRouter LLM gateway, `services.bitrouter` (bespoke
-    module, self-enabled via `mkDefault true`), mode `native`/`container`.
-  - `llama-cpp.nix`, `opencode.nix`, `vane-podman.nix` — other AI services.
-- `common/network/` — network services. Access-point bundle lives in
-  `common/network/ap/` (hostapd, router/NAT, freeradius, opennds), toggled by a
-  single `services.ap.enable` flag. dnsmasq is imported directly by
-  `common/network/default.nix` (LAN DNS must survive the AP bundle being off).
+  - `llama-cpp.nix`, `open-webui.nix`, `opencode.nix`, `whisper.nix` — the
+    other AI services. (A `bitrouter.nix` and a `vane-podman.nix` were
+    documented here historically; neither exists in the tree any more.)
+- `common/network/` — network services (tailscale, zerotier, dnsmasq).
+  dnsmasq is imported directly by `common/network/default.nix` so LAN DNS
+  survives independently of the AP bundle.
+- `common/ap/` — the access-point bundle (hostapd + freeradius), gated by a
+  single `services.ap.enable` flag. This option is *declared* in
+  `common/ap/default.nix`, so anything setting `services.ap.enable` must have
+  `common/ap` in its import closure — `profiles/workstation` gets it via
+  `common/`. openNDS used to live here and was dropped 2026-09-03 (its nft
+  client-tracking never registered in this nft/iptables hybrid env and its
+  reject tables blocked all AP internet).
 - `/srv/repo/litellm-cli/` (separate git repo, NOT part of nix-lab) — the
   `services.litellm-cli` module: inventory, policy, renderer, admin CLIs.
   Consumed as flake input `litellm-cli` = `path:/srv/repo/litellm-cli`
   (`flake = false`), passed to modules via specialArgs `litellmCli`.
   DO NOT git-add it into this repo. Its data contract:
   `/srv/appdata/litellm/config.yaml` (persistent, admin-owned; static model_list
-  seeded from `common/ai/litellm/config.yaml` on first boot, then edited by
+  seeded from `ai-common/litellm/config.yaml` on first boot, then edited by
   `litellm-cli config add/remove` -- never re-rendered by rebuild) ->
   `/run/litellm-cli/health.json` (ephemeral, rebuilt each boot).
-- `pkgs/opennds/` — openNDS 11.0.0 package (unwrapped binaries in `libexec`,
-  PATH wrappers in `bin`).
-- `secrets/` + `.sops.yaml` — sops secrets: `litellm.env`, `providers.env`,
-  `opennds.yaml` (faskey), `radius.yaml` (radius-secret, radius-users).
-  All AP secrets are read at runtime from sops, never baked into the store.
-- `common/security/sops.nix` — declares the sops secrets.
+- `secrets/` + `.sops.yaml` — sops secrets. Files actually present:
+  `providers.env`, `radius.yaml` (radius-secret + radius-users), `infra.yaml`.
+  `litellm.env` and `opennds.yaml` are documented historically and no longer
+  exist (openNDS was dropped 2026-09-03). All secrets are read at runtime from
+  sops, never baked into the store. Declared in `common/security/sops.nix`.
+
+## SSH access
+
+- Authorized keys are declared in `system/ssh.nix`, so `server`, `ai-gateway`
+  and `workstation` all get them. `profiles/failsafe` does NOT import
+  `../../system` — by design — so it keeps its own inline copy; that duplication
+  is what keeps recovery working when this tree is broken.
+- These keys are **live**, not decorative. nixpkgs renders
+  `users.users.<name>.openssh.authorizedKeys` to
+  `/etc/ssh/authorized_keys.d/<user>` via `authKeysFiles` in
+  `nixos/modules/services/networking/ssh/sshd.nix`, and sshd reads that path.
+  All three keys (`vantage`, `FedoraWSL`, `V2333`) were dead config from
+  2026-08-06 (`628336f`) until they were uncommented on 2026-10-04.
+- A hand-placed `~/.ssh/authorized_keys` (2 keys, missing `V2333`) still exists
+  and, on `#server` before that rebuild, was the thing actually granting access.
+  Do not delete it until after one successful `switch` to a key-bearing profile,
+  verified by logging in from a **second terminal** with the manual file moved
+  aside. Keeping a tested escape hatch is the whole point.
+- The hardening block (`services.openssh.settings` with
+  `PasswordAuthentication = false`, `PermitRootLogin = "no"`) is commented out in
+  `system/ssh.nix` and enabled only in `ai-gateway`. Password auth is therefore
+  still accepted on `server` and `workstation`. Changing that is a separate
+  decision — verify key-only login before enabling it anywhere else.
 
 ## Module conventions (coding standard)
 
@@ -137,14 +197,22 @@ Also `failsafe` = minimal recovery profile.
 - **Cert:** Caddy serves a valid *.home.arpa cert from the Homelab Internal CA. If a
   browser shows a cert error, install that CA in the client trust store -- it is a
   client-side trust issue, not a server config problem.
-- **Config is owned by litellm-cli** and lives at /srv/appdata/litellm/config.yaml (seeded from common/ai/litellm/config.yaml on first boot, then edited manually -- never re-rendered by rebuild).
-## Access-point (openNDS) gotchas
+- **Config is owned by litellm-cli** and lives at /srv/appdata/litellm/config.yaml (seeded from ai-common/litellm/config.yaml on first boot, then edited manually -- never re-rendered by rebuild).
+## Access-point gotchas
 
-- openNDS runs **foreground** (`opennds -f`, `Type = exec`) so systemd tracks it.
-  Do not revert to `-b`/forking.
-- faskey + RADIUS secrets come from sops at runtime/activation; never hardcode them.
-- Do NOT symlink into `/usr/local/bin` — NixOS has no such path and it aborts the
-  activation script. ndscfg/ndsctl are already on PATH via the package.
-- NAT uses dedicated `opennds-pre`/`opennds-post` chains; never flush the shared
-  `nixos-nat-*` chains (that destroys other modules' rules).
-- openNDS needs dnsmasq as a hard runtime dependency (reads its leases file).
+- The AP bundle is `common/ap/` — hostapd + freeradius, an **open** AP with no
+  captive portal. Gated by one flag: `services.ap.enable`, which is *declared*
+  in `common/ap/default.nix`. Anything that sets it must have `common/ap` in its
+  import closure; profiles get it transitively via `common/`.
+- **openNDS was removed 2026-09-03** (`7961f47` and after). Its nft
+  client-tracking (`ndsOUT` mangle) never registered clients in this
+  nft/iptables hybrid environment, and its reject tables blocked all AP
+  internet. If you are reading older notes about `ndscfg`/`ndsctl`, foreground
+  `opennds -f`, or the `opennds-pre`/`opennds-post` nft chains, they are
+  obsolete — none of that code exists in the tree any more.
+- FreeRADIUS certificate generation moved to a **oneshot** service
+  (`7961f47`, fixing a `no-usable-init` boot failure). Do not move it back into
+  the main unit.
+- RADIUS secrets (`radius-secret`, `radius-users`) come from sops at activation
+  and are never hardcoded. Never flush the shared `nixos-nat-*` chains to debug
+  routing — that destroys other modules' rules.
