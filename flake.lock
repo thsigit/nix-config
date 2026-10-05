@@ -24,8 +24,8 @@
     "litellm-cli": {
       "flake": false,
       "locked": {
-        "lastModified": 1790927301,
-        "narHash": "sha256-KRFSUHGYW59oFj7MIzwruYZ2YaFRpemplbYZOY1tw58=",
+        "lastModified": 1791194566,
+        "narHash": "sha256-sruaGxI1T1WUZ7FPSeX6SuVdZOVt5qsa3JJxdFYjBDw=",
         "path": "/srv/repo/litellm-cli",
         "type": "path"
       },
