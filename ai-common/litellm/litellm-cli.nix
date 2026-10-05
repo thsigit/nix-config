@@ -29,5 +29,18 @@ in
     user = defaults.user.name;
     group = defaults.user.group;
     providersEnvFile = config.sops.secrets."providers.env".path;
+
+    # No scheduled provider health check. The upstream module defaults
+    # doctor.enable to true, which installs an hourly systemd timer
+    # (Persistent=true, so it also fires after downtime). That contradicts
+    # this tool's own documented contract -- litellm-cli's header states it
+    # "is never invoked by a rebuild, systemd unit, or activation script".
+    # It also sat permanently in `systemctl --failed`: from 2026-09-02 to
+    # 2026-10-05 it ran 849 times with 595 failures and 0 successes, because
+    # doctor.sh called `yq -o=json` against kislyuk's yq and died under
+    # `set -euo pipefail` before checking anything. The underlying yq bug is
+    # fixed upstream in litellm-cli 682415d, so `litellm-cli debug doctor`
+    # works when run by hand; we simply do not want it on a timer.
+    doctor.enable = false;
   };
 }
