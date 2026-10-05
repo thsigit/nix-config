@@ -1,9 +1,9 @@
 # common/monitoring/darkstat.nix
 #
-# Self-contained, always-on leaf (mrtg-style): no custom options — just a
+# Self-contained, always-on leaf: no custom options — just a
 # systemd unit under the built-in systemd.services namespace. Importing this
 # file enables darkstat on the default interface. This is the standard shape
-# for leaf service modules in this repo (see mrtg.nix).
+# for leaf service modules in this repo.
 { config, pkgs, ... }:
 let
   interface = "enp0s31f6";
