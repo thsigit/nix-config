@@ -10,7 +10,7 @@ let
 in
 {
   networking = {
-    # hostName = "homelab";  # profile overrides
+    hostName = "homelab";
     inherit domain;
     extraHosts = ''
       ${lanIp} homelab.${domain} homelab
