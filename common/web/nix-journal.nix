@@ -1,4 +1,4 @@
-# common/web/codebot.nix
+# common/web/nix-journal.nix
 #
 # Zensical static site generator for codebot reports.
 # Source content lives in /srv/repo/nix-journal (git repo, publishable to
