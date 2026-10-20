@@ -24,6 +24,7 @@ in
   users.users.${user.name}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN4bBvw5pcH+7rwNWAHCxNrioPjyn66rVmEHPtS5U5eQ sigit@vantage"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHRqLBFFpPTyOvk8+YxfE5NeG8pqO/kEHJMHxLjS3doA sigit@FedoraWSL"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOFkE+9RTn5MDNxWQgL57a8gIOswGq1eKf0Wd87rKEzv sigit@debianWSL"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIIvSm/xr14Xb0Epv2bqnjgASZJmeavgC/QJGan45aE6 V2333"
   ];
 }
