@@ -1,4 +1,6 @@
-# nix-lab branch workflow (2026-09-08)
+# nix-lab branch workflow
+
+*State snapshot updated: 2026-11-09.*
 
 ## The question
 
@@ -9,9 +11,14 @@
 ### Current state
 
 **`/srv/repo/nix-lab` — the ONE working repo**
-- On branch **`dev`**, HEAD `228da7d` (clean)
+- On branch **`dev`**, HEAD `53cf343` (`update opencode to latest`, 2026-10-22)
+- Working tree has uncommitted local changes: `flake.lock`, `flake.nix`,
+  `secrets/providers.env` (treat as in-progress; review before committing)
 - Remotes: `origin` = `git@github.com:thsigit/nix-config.git` (SSH)
 - Local branches: `dev` (development, **local-only**) and `main` (release)
+- `main` is at `8f400da` (`Add debianWSL SSH authorized key`, 2026-10-20),
+  tracking `origin/main`; `dev` is 1 commit ahead of `main` (plus the local
+  uncommitted changes above)
 - `/srv/repo/nix-lab-snapshot` was removed (no longer needed)
 
 **GitHub (`thsigit/nix-config`)**

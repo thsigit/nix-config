@@ -214,8 +214,14 @@ Note the name overlap: the `system/` directory and the `system` flake output
   you into thinking no keys are rendered. Probe
   `environment.etc."ssh/authorized_keys.d/<user>"` instead; confirmed present in
   all five profiles.
-  All three keys (`vantage`, `FedoraWSL`, `V2333`) were dead config from
-  2026-08-06 (`628336f`) until they were uncommented on 2026-10-04.
+  Four keys (`vantage`, `FedoraWSL`, `debianWSL`, `V2333`) are declared in
+  `system/ssh.nix`. The first three pre-2026-10 entries were dead config from
+  2026-08-06 (`628336f`) until uncommented 2026-10-04; `debianWSL` was added
+  2026-10-20 (`8f400da`). **Current divergence:** `profiles/failsafe/default.nix`
+  still carries only `vantage`, `FedoraWSL`, and `V2333` (it has not been updated
+  with `debianWSL`). Reconcile that copy deliberately — after a successful
+  `switch` and a verified login from a second terminal — so recovery keeps an
+  escape hatch while matching intended access.
 - A hand-placed `~/.ssh/authorized_keys` (2 keys, missing `V2333`) still exists
   and, on `#server` before that rebuild, was the thing actually granting access.
   Do not delete it until after one successful `switch` to a key-bearing profile,
@@ -264,6 +270,7 @@ Note the name overlap: the `system/` directory and the `system` flake output
   browser shows a cert error, install that CA in the client trust store -- it is a
   client-side trust issue, not a server config problem.
 - **Config is owned by litellm-cli** and lives at /srv/appdata/litellm/config.yaml (seeded from ai-common/litellm/config.yaml on first boot, then edited manually -- never re-rendered by rebuild).
+
 ## Access-point gotchas
 
 - The AP bundle is `common/ap/` — hostapd + freeradius, an **open** AP with no
