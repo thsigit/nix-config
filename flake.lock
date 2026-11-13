@@ -24,8 +24,8 @@
     "litellm-cli": {
       "flake": false,
       "locked": {
-        "lastModified": 1791908234,
-        "narHash": "sha256-p7T7JixxSSB3hLqJAr0qtewjSoO1YCzri5d9+vzGE7c=",
+        "lastModified": 1794560046,
+        "narHash": "sha256-cs1SFwHhA+i90+EzDFxbYpTAWbCk5ZmbBZBYM3Yx/VU=",
         "path": "/srv/repo/litellm-cli",
         "type": "path"
       },
@@ -52,11 +52,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1776683584,
-        "narHash": "sha256-NuTLMrr10Tng72hurYG8jYQ4XKK8wnpJmOGcPiis96g=",
+        "lastModified": 1790510107,
+        "narHash": "sha256-EVMNYv7hYDDD9TGVT/hIyTYgpiXA8y3m5xIEIxuGNU0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "9dd5558b06dbdacbf635a3dd36dce1b1a7ee3a89",
+        "rev": "3181085bfd08663b6b9e60bc7a8395c2aaa741bd",
         "type": "github"
       },
       "original": {
@@ -71,15 +71,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1790452598,
-        "narHash": "sha256-iWhl1tSL/4dDm5iT5BE26HsIeMgjy9wKg8B3Z065xrk=",
+        "lastModified": 1793168253,
+        "narHash": "sha256-tmFnVEBsnLZNuBaSIt7rZYuBV4jf/Ccaq2a6AwjyCec=",
         "owner": "anomalyco",
         "repo": "opencode",
-        "rev": "b471c2b4495747353af768fbf2e0790c9d820ce2",
+        "rev": "810c0eba1a7348036f8bdf61e6632d0c36c6876c",
         "type": "github"
       },
       "original": {
         "owner": "anomalyco",
+        "ref": "v1.19.5",
         "repo": "opencode",
         "type": "github"
       }
