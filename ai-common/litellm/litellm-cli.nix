@@ -28,7 +28,12 @@ in
     dataDir = "${appdata}/litellm";
     user = defaults.user.name;
     group = defaults.user.group;
-    providersEnvFile = config.sops.secrets."providers.env".path;
+    # Ordered env files: sops first, runtime override last (later wins). The
+    # runtime file holds ad-hoc provider keys and needs no rebuild to change.
+    providersEnvFiles = [
+      config.sops.secrets."providers.env".path
+      "${appdata}/litellm/providers.env"
+    ];
 
     # No scheduled provider health check. The upstream module defaults
     # doctor.enable to true, which installs an hourly systemd timer

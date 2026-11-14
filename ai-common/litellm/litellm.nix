@@ -25,6 +25,8 @@
 #   Repo owns: ai-common/litellm/config.yaml (model list, aliases, fallbacks)
 #   Admin owns: /srv/appdata/litellm/config.yaml (the live, editable config)
 #   SOPS owns: providers.env (API keys / master key)
+#   Runtime owns: /srv/appdata/litellm/providers.env (ad-hoc provider keys,
+#                 unencrypted, read AFTER sops so it wins per variable)
 #
 # litellm-cli is a purely MANUAL tool that edits /srv/appdata/litellm/config.yaml.
 # It is NOT invoked during nixos-rebuild or by any systemd unit.
@@ -43,6 +45,10 @@ let
   cliDataDir = config.services.litellm-cli.dataDir;
   # Effective runtime config: admin-editable, persistent, in the replacement dir.
   configFile = "${cliDataDir}/config.yaml";
+  # Ordered env files for systemd: sops first, runtime override last (later wins).
+  sopsEnvFile = config.sops.secrets."providers.env".path;
+  runtimeEnvFile = "${cliDataDir}/providers.env";
+  envFiles = [ sopsEnvFile runtimeEnvFile ];
 in
 {
   ##########################################################################
@@ -100,7 +106,9 @@ in
     port = litellmPort;
     host = "127.0.0.1";
     stateDir = stateDir;
-    environmentFile = config.sops.secrets."providers.env".path;
+    # environmentFile is intentionally null: the ordered [sops, runtime] list is
+    # set on systemd.services.litellm.serviceConfig.EnvironmentFile below.
+    environmentFile = null;
 
     # All runtime settings (model_list, router_settings, litellm_settings,
     # general_settings) live in the admin-edited ${configFile}, seeded from the
@@ -139,6 +147,19 @@ in
     chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${configFile} ${cliDataDir}/usage_logger.py ${cliDataDir}/admin_api.py ${cliDataDir}/stats_api.py ${cliDataDir}/stats_writer.py
     chmod 0644 ${configFile} ${cliDataDir}/usage_logger.py ${cliDataDir}/admin_api.py ${cliDataDir}/stats_api.py ${cliDataDir}/stats_writer.py
 
+    # Runtime override env file: ad-hoc provider keys, unencrypted on purpose.
+    # systemd reads it AFTER the sops secret, so any variable defined here wins.
+    # Create only when absent; never rewrite existing content.
+    if [ ! -e ${runtimeEnvFile} ]; then
+      printf '%s\n' \
+        '# Runtime override env file (unencrypted, mode 0640).' \
+        '# Read by litellm/caddy AFTER /run/secrets/providers.env; keys here win per variable.' \
+        '# Add ad-hoc provider keys as KEY=value, then: sudo systemctl restart litellm' \
+        > ${runtimeEnvFile}
+    fi
+    chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${runtimeEnvFile}
+    chmod 0640 ${runtimeEnvFile}
+
     # Drop the obsolete pre-refactor copy (config now lives in cliDataDir).
     rm -f ${stateDir}/config.yaml
   '';
@@ -162,11 +183,11 @@ in
   '';
 
   ##########################################################################
-  # Caddy: expose LITELLM_MASTER_KEY so read-only routes can inject it
+  # Caddy: LITELLM_MASTER_KEY so read-only routes can inject it. The runtime
+  # override file is read after sops, so an overridden key reaches both.
   ##########################################################################
 
-  systemd.services.caddy.serviceConfig.EnvironmentFile =
-    [ config.sops.secrets."providers.env".path ];
+  systemd.services.caddy.serviceConfig.EnvironmentFile = envFiles;
 
   ##########################################################################
   # LiteLLM service ordering + ExecStart
@@ -186,6 +207,9 @@ in
         "${pkgs.litellm}/bin/litellm --host 127.0.0.1 --port ${toString litellmPort} --config ${configFile}";
       DynamicUser = lib.mkForce false;
       PrivateUsers = lib.mkForce false;
+      # sops first, runtime override last: systemd applies EnvironmentFile in
+      # order, so a variable in the runtime file overrides the sops value.
+      EnvironmentFile = envFiles;
     };
   };
 }

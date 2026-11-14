@@ -195,6 +195,13 @@ Note the name overlap: the `system/` directory and the `system` flake output
   `litellm.env` and `opennds.yaml` are documented historically and no longer
   exist (openNDS was dropped 2026-09-03). All secrets are read at runtime from
   sops, never baked into the store. Declared in `common/security/sops.nix`.
+- **LiteLLM/Caddy env precedence:** both read the sops `providers.env` first and
+  `/srv/appdata/litellm/providers.env` last, so a variable defined in the
+  runtime file wins. That file is the ad-hoc provider store (unencrypted, mode
+  `0640 sigit:users`); edit it and `sudo systemctl restart litellm` — no
+  rebuild. To rotate a key via sops, remove or update the runtime override
+  first, or the runtime value keeps shadowing the new sops value. `admin_api.py`
+  and the `litellm-cli` wrapper merge the same two files in the same order.
 
 ## SSH access
 
