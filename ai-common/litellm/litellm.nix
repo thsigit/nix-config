@@ -155,6 +155,7 @@ in
         '# Runtime override env file (unencrypted, mode 0640).' \
         '# Read by litellm/caddy AFTER /run/secrets/providers.env; keys here win per variable.' \
         '# Add ad-hoc provider keys as KEY=value, then: sudo systemctl restart litellm' \
+        '# Keep a trailing newline; appending to an unterminated last line glues the value onto it.' \
         > ${runtimeEnvFile}
     fi
     chown ${config.services.litellm-cli.user}:${config.services.litellm-cli.group} ${runtimeEnvFile}

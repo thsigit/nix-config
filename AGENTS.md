@@ -202,6 +202,17 @@ Note the name overlap: the `system/` directory and the `system` flake output
   rebuild. To rotate a key via sops, remove or update the runtime override
   first, or the runtime value keeps shadowing the new sops value. `admin_api.py`
   and the `litellm-cli` wrapper merge the same two files in the same order.
+  **The file must end with a newline.** A plain `echo 'KEY=value' >>` on a file
+  whose last line is unterminated glues the new value onto the previous key's
+  value — silently corrupting that key (this happened during the 2026-11-14 live
+  test). Safe append:
+
+      [ -n "$(tail -c1 /srv/appdata/litellm/providers.env)" ] && \
+        printf '\n' >> /srv/appdata/litellm/providers.env
+      printf 'KEY=value\n' >> /srv/appdata/litellm/providers.env
+
+  Then `sudo systemctl restart litellm`; readiness takes ~10 s, so `/v1/models`
+  returns 502 during that window.
 
 ## SSH access
 
