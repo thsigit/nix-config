@@ -6,6 +6,7 @@
   environment.systemPackages = with pkgs; [
     deskflow
     google-chrome
+    blueman
     cudatext
   ];
 }
