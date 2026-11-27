@@ -12,6 +12,7 @@ let
 in
 {
   imports = [
+    ./kaggle-proxy.nix
     ./llama-cpp.nix
     ./opencode.nix
     ./open-webui.nix
@@ -43,5 +44,6 @@ in
     ${lanIp} chat.${domain} chat
     ${lanIp} llama.${domain} llama
     ${lanIp} whisper.${domain} whisper
+    ${lanIp} kaggle.${domain} kaggle
   '';
 }
